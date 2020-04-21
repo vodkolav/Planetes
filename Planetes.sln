@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Planetes", "Planetes\Planetes.csproj", "{D85151FF-22EC-4F2A-BE4F-9CCDB6D33E00}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameObjects", "GameObjects\GameObjects.csproj", "{8A3C4F18-E34C-4A34-A8BF-75BBE03CDEFA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IPAddressControlLib", "IPAddressControlLib\IPAddressControlLib.csproj", "{259C297E-A054-4EB4-88A3-8BB1F37506C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networking", "Networking\Networking.csproj", "{50F700F1-1A12-4BE6-9AFB-1D0543A0AF70}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D85151FF-22EC-4F2A-BE4F-9CCDB6D33E00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D85151FF-22EC-4F2A-BE4F-9CCDB6D33E00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D85151FF-22EC-4F2A-BE4F-9CCDB6D33E00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D85151FF-22EC-4F2A-BE4F-9CCDB6D33E00}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A3C4F18-E34C-4A34-A8BF-75BBE03CDEFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A3C4F18-E34C-4A34-A8BF-75BBE03CDEFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A3C4F18-E34C-4A34-A8BF-75BBE03CDEFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A3C4F18-E34C-4A34-A8BF-75BBE03CDEFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{259C297E-A054-4EB4-88A3-8BB1F37506C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{259C297E-A054-4EB4-88A3-8BB1F37506C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{259C297E-A054-4EB4-88A3-8BB1F37506C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{259C297E-A054-4EB4-88A3-8BB1F37506C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50F700F1-1A12-4BE6-9AFB-1D0543A0AF70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50F700F1-1A12-4BE6-9AFB-1D0543A0AF70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50F700F1-1A12-4BE6-9AFB-1D0543A0AF70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50F700F1-1A12-4BE6-9AFB-1D0543A0AF70}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DFEB55F5-70FB-45B2-B74D-498BDF311E19}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
+EndGlobal
