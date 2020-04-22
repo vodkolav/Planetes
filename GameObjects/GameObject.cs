@@ -59,9 +59,9 @@ namespace GameObjects
 
 	public struct Vector
 	{
-		public int x{ get; }
+		public int x { get; }
 
-		public int y{get;}
+		public int y { get; }
 
 		public Vector(Point point)
 		{
@@ -69,7 +69,7 @@ namespace GameObjects
 			y = point.Y;
 		}
 
-		public  Vector(int X, int Y)
+		public Vector(int X, int Y)
 		{
 			x = X;
 			y = Y;
@@ -91,7 +91,7 @@ namespace GameObjects
 				  v1.y * s2
 			   );
 		}
-	
+
 		public static Vector operator *(int s1, Vector v2)
 		{
 			return v2 * s1;
@@ -101,7 +101,7 @@ namespace GameObjects
 		{
 			get
 			{
-				return Math.Sqrt(Math.Pow(x,2) + Math.Pow(y,2));
+				return Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2));
 			}
 		}
 
@@ -109,18 +109,18 @@ namespace GameObjects
 		{
 			double mag = Magnitude;
 
-			return new Vector((int)(x/mag),	(int)(y/mag));
+			return new Vector((int)(x / mag), (int)(y / mag));
 		}
 
 		public static int Dot(Vector v1, Vector v2)
 		{
-			return  v1.x * v2.x + v1.y * v2.y ;
+			return v1.x * v2.x + v1.y * v2.y;
 		}
 
 		public int Dot(Vector other)
 		{
 			return Dot(this, other);
-		}		
+		}
 	}
 
 	public static class RectExtension
@@ -249,7 +249,7 @@ namespace GameObjects
 		public Player2(string name, int health, int ammo, int winSize_x, int winSize_y, ClsGameObjects game)
 			: base(name, health, ammo, winSize_x, winSize_y, game)
 		{
-			Jet = new Jet2(new Point(winSize_x-60, winSize_y / 2), winSize_x, winSize_y);
+			Jet = new Jet2(new Point(winSize_x - 60, winSize_y / 2), winSize_x, winSize_y);
 		}
 
 		public override void Steer(Keys command)
@@ -849,7 +849,7 @@ namespace GameObjects
 			}
 		}
 
-		public int Pos_x{ get; set; }
+		public int Pos_x { get; set; }
 		public int Pos_y { get; set; }
 
 		private int _speed_x;
@@ -859,7 +859,7 @@ namespace GameObjects
 			get { return _speed_x; }
 			set
 			{
-				if (Math.Abs(value)<=10)
+				if (Math.Abs(value) <= 10)
 					_speed_x = value;
 			}
 		}
@@ -918,11 +918,11 @@ namespace GameObjects
 
 		public void Reflect(Wall w)
 		{
-			Rectangle reflectionPlace = Rectangle.Intersect(w.rectangle,Hull);
+			Rectangle reflectionPlace = Rectangle.Intersect(w.rectangle, Hull);
 			Vector velocity = new Vector(Speed_x, Speed_y);
 			Vector normal = new Vector(Hull.Center()) - new Vector(reflectionPlace.Center());
 			normal = normal.Normalize();
-			Vector reflection =  velocity - 2 * velocity.Dot(normal) * normal;
+			Vector reflection = velocity - 2 * velocity.Dot(normal) * normal;
 			Speed_x = reflection.x;
 			Speed_y = reflection.y;
 		}
@@ -944,7 +944,7 @@ namespace GameObjects
 
 	public class Jet1 : Jet
 	{
-		public Jet1(Point start, int wwidth, int wheight) : base( start, Brushes.Blue, wwidth, wheight) { }
+		public Jet1(Point start, int wwidth, int wheight) : base(start, Brushes.Blue, wwidth, wheight) { }
 
 		public override void Steer(Keys dir)
 		{
@@ -969,24 +969,24 @@ namespace GameObjects
 
 
 		public override void Shoot(Player player, int timeElapsed)
-        {
-            if (player.Ammo != 0 && timeElapsed >  LastFired + FireRate )
-            {
+		{
+			if (player.Ammo != 0 && timeElapsed > LastFired + FireRate)
+			{
 				LastFired = timeElapsed;
-                Bullet1 bullet = new Bullet1(Pos_x + Width + Cockpit_size.Width, Pos_y + Height / 2);
+				Bullet1 bullet = new Bullet1(Pos_x + Width + Cockpit_size.Width, Pos_y + Height / 2);
 				lock (player.GameState)
 				{
 					player.Bulletlist.Add(bullet);
 				}
-					player.Ammo--;	
+				player.Ammo--;
 			}
-        }	
+		}
 
-    }
+	}
 
-    public class Jet2 : Jet
-    {
-        public Jet2(Point start, int wwidth, int wheight) : base(start, Brushes.Red, wwidth, wheight) { }
+	public class Jet2 : Jet
+	{
+		public Jet2(Point start, int wwidth, int wheight) : base(start, Brushes.Red, wwidth, wheight) { }
 
 		//public override void Move(Keys dir)
 		//{
@@ -1032,21 +1032,21 @@ namespace GameObjects
 		}
 
 		public override void Shoot(Player player, int timeElapsed)
-        {
-            if (player.Ammo != 0 && timeElapsed > LastFired + FireRate)
-            {
+		{
+			if (player.Ammo != 0 && timeElapsed > LastFired + FireRate)
+			{
 				LastFired = timeElapsed;
-                Bullet2 bullet = new Bullet2(Pos_x-Width-Cockpit_size.Width, Pos_y + Height / 2);
+				Bullet2 bullet = new Bullet2(Pos_x - Width - Cockpit_size.Width, Pos_y + Height / 2);
 
 				lock (player.GameState)
 				{
 					player.Bulletlist.Add(bullet);
 				}
-                player.Ammo--;				
+				player.Ammo--;
 			}
-        }
+		}
 
-        
+
 
 		public override double Dist(Bullet b)
 		{
@@ -1076,7 +1076,7 @@ namespace GameObjects
 		public Wall(Brush color, Point location, Size size)
 		{
 			rectangle = new Rectangle(location, size);
-	
+
 			Color = color;
 		}
 
@@ -1098,46 +1098,47 @@ namespace GameObjects
 		public Pen Pen { get; protected set; }
 
 		public Bullet(int start_x, int start_y)
-        {
-            Pos_x = start_x;
-            Pos_y = start_y;
-            Speed = 10;
-            Size = 5;
-            HasHit = false;
-        }
+		{
+			Pos_x = start_x;
+			Pos_y = start_y;
+			Speed = 10;
+			Size = 5;
+			HasHit = false;
+		}
 
 		public bool Hit(Astroid a)
 		{
-			return	Pos_x < a.Pos_x &&
-					Pos_x > a.Pos_x - a.Size*2 &&
+			return Pos_x < a.Pos_x &&
+					Pos_x > a.Pos_x - a.Size * 2 &&
 					Pos_y > a.Pos_y &&
-					Pos_y < a.Pos_y + a.Size*2;			
+					Pos_y < a.Pos_y + a.Size * 2;
 		}
 
 		public void Draw(Graphics g)
 		{
 			if (!HasHit)
-			{				
+			{
 				g.DrawLine(Pen, Pos_x, Pos_y, Pos_x + Size, Pos_y);
 			}
 		}
 
-		public virtual void Move( ClsGameObjects gameObjects){
-	
-		}
-    }
+		public virtual void Move(ClsGameObjects gameObjects)
+		{
 
-    public class Bullet1 : Bullet
-    {
-        public Bullet1 (int start_x, int start_y) : base(start_x, start_y)
+		}
+	}
+
+	public class Bullet1 : Bullet
+	{
+		public Bullet1(int start_x, int start_y) : base(start_x, start_y)
 		{
 			Pen = new Pen(Color.Yellow, 2);
 		}
 
-        public override void Move(ClsGameObjects gameObjects)
-        {
-            if (!HasHit)
-            {
+		public override void Move(ClsGameObjects gameObjects)
+		{
+			if (!HasHit)
+			{
 				//check for collision with wall
 				if (Pos_x > gameObjects.WinSize_x)
 				{
@@ -1146,61 +1147,18 @@ namespace GameObjects
 				}
 				//check for collision with opponent's Jet
 				if (Pos_x < gameObjects.Player2.Jet.Pos_x &&
-					Pos_x > gameObjects.Player2.Jet.Pos_x - gameObjects.Player2.Jet.Width && 
+					Pos_x > gameObjects.Player2.Jet.Pos_x - gameObjects.Player2.Jet.Width &&
 					Pos_y > gameObjects.Player2.Jet.Pos_y &&
 					Pos_y < gameObjects.Player2.Jet.Pos_y + gameObjects.Player2.Jet.Height)
-                {
-                    HasHit = true;
-                    if (gameObjects.Player2.Health > 0)
-                        gameObjects.Player2.Health--;
-                    else
-                        GameOver.Show(gameObjects.Player1);
-
-                 }
-
-				foreach (Astroid ast in gameObjects.AstroidList)
-				{
-					if (Hit(ast))
-					{
-						HasHit = true;
-						ast.HasHit = true;						
-					}
-				}
-			}
-             Pos_x += Speed;
-
-        }
-    }
-
-    public class Bullet2 : Bullet
-    {
-        public Bullet2(int start_x, int start_y) : base(start_x, start_y)
-		{
-			Pen = new Pen(Color.Cyan, 2);
-		}
-		public override void Move( ClsGameObjects gameObjects)
-        {
-            if (!HasHit)
-            {
-				//check for collision with wall
-				if (Pos_x <0)
 				{
 					HasHit = true;
-					return;
+					if (gameObjects.Player2.Health > 0)
+						gameObjects.Player2.Health--;
+					else
+						GameOver.Show(gameObjects.Player1);
+
 				}
 
-				//check for collision with opponent's Jet
-                if (Pos_x > gameObjects.Player1.Jet.Pos_x &&
-					Pos_x < gameObjects.Player1.Jet.Pos_x + gameObjects.Player1.Jet.Width && 
-					Pos_y > gameObjects.Player1.Jet.Pos_y && 
-					Pos_y < gameObjects.Player1.Jet.Pos_y + gameObjects.Player2.Jet.Height)
-                {
-                    HasHit = true;
-                    if (gameObjects.Player1.Health > 0)
-                        gameObjects.Player1.Health--;
-                    else
-                            GameOver.Show(gameObjects.Player2);
-                }
 				foreach (Astroid ast in gameObjects.AstroidList)
 				{
 					if (Hit(ast))
@@ -1209,11 +1167,54 @@ namespace GameObjects
 						ast.HasHit = true;
 					}
 				}
-			}     
-            Pos_x -= Speed;
- 
-        }
-    }
+			}
+			Pos_x += Speed;
+
+		}
+	}
+
+	public class Bullet2 : Bullet
+	{
+		public Bullet2(int start_x, int start_y) : base(start_x, start_y)
+		{
+			Pen = new Pen(Color.Cyan, 2);
+		}
+		public override void Move(ClsGameObjects gameObjects)
+		{
+			if (!HasHit)
+			{
+				//check for collision with wall
+				if (Pos_x < 0)
+				{
+					HasHit = true;
+					return;
+				}
+
+				//check for collision with opponent's Jet
+				if (Pos_x > gameObjects.Player1.Jet.Pos_x &&
+					Pos_x < gameObjects.Player1.Jet.Pos_x + gameObjects.Player1.Jet.Width &&
+					Pos_y > gameObjects.Player1.Jet.Pos_y &&
+					Pos_y < gameObjects.Player1.Jet.Pos_y + gameObjects.Player2.Jet.Height)
+				{
+					HasHit = true;
+					if (gameObjects.Player1.Health > 0)
+						gameObjects.Player1.Health--;
+					else
+						GameOver.Show(gameObjects.Player2);
+				}
+				foreach (Astroid ast in gameObjects.AstroidList)
+				{
+					if (Hit(ast))
+					{
+						HasHit = true;
+						ast.HasHit = true;
+					}
+				}
+			}
+			Pos_x -= Speed;
+
+		}
+	}
 
 	public class Astroid : MarshalByRefObject
 	{
@@ -1246,7 +1247,8 @@ namespace GameObjects
 
 		public Brush Color
 		{
-			get {
+			get
+			{
 				switch (Type)
 				{
 					case AstType.Ammo:
@@ -1257,19 +1259,19 @@ namespace GameObjects
 						return Brushes.Brown;
 				}
 			}
-		}		
+		}
 
 		public Astroid(int winSize_x, int winSize_y)
-        {
-            Random random = new Random();
-            Size = random.Next(20)+5;
-            Speed = random.Next(1,5)+1;
-            Pos_x = random.Next(winSize_x);
-            Pos_y = random.Next(winSize_y);
-            Angle = random.Next(360);
+		{
+			Random random = new Random();
+			Size = random.Next(20) + 5;
+			Speed = random.Next(1, 5) + 1;
+			Pos_x = random.Next(winSize_x);
+			Pos_y = random.Next(winSize_y);
+			Angle = random.Next(360);
 			TossType(random);
-            HasHit = false;
-        }
+			HasHit = false;
+		}
 
 		public void SayHello(Graphics g)
 		{
@@ -1279,19 +1281,19 @@ namespace GameObjects
 		public void Draw(Graphics g)
 		{
 			if (!HasHit)
-				g.FillEllipse(Color, Pos_x, Pos_y, Size, Size);				
+				g.FillEllipse(Color, Pos_x, Pos_y, Size, Size);
 		}
 
 		public void Update(ClsGameObjects gameObjects)
-        {
-            if (!HasHit)
-            {
-                if (Pos_x + Size > gameObjects.Player1.Jet.Pos_x
-                    && Pos_x - Size < gameObjects.Player1.Jet.Pos_x + gameObjects.Player1.Jet.Width
-                    && Pos_y - Size < gameObjects.Player1.Jet.Pos_y + gameObjects.Player1.Jet.Height
-                    && Pos_y + Size > gameObjects.Player1.Jet.Pos_y )
-                {
-                    HasHit = true;
+		{
+			if (!HasHit)
+			{
+				if (Pos_x + Size > gameObjects.Player1.Jet.Pos_x
+					&& Pos_x - Size < gameObjects.Player1.Jet.Pos_x + gameObjects.Player1.Jet.Width
+					&& Pos_y - Size < gameObjects.Player1.Jet.Pos_y + gameObjects.Player1.Jet.Height
+					&& Pos_y + Size > gameObjects.Player1.Jet.Pos_y)
+				{
+					HasHit = true;
 					if (Type == AstType.Ammo)
 					{
 						gameObjects.Player1.Recharge(Size);
@@ -1301,58 +1303,58 @@ namespace GameObjects
 						gameObjects.Player1.Heal(1);
 					}
 					else if (gameObjects.Player1.Health > 0)
-                        gameObjects.Player1.Health--;
-                    else
-                        GameOver.Show(gameObjects.Player2);
-                }
-                if (Pos_x + Size > gameObjects.Player2.Jet.Pos_x - gameObjects.Player2.Jet.Width - gameObjects.Player2.Jet.Cockpit_size.Width
-                    && Pos_x - Size < gameObjects.Player2.Jet.Pos_x + gameObjects.Player2.Jet.Width
-                    && Pos_y - Size < gameObjects.Player2.Jet.Pos_y + gameObjects.Player2.Jet.Height
-                    && Pos_y + Size > gameObjects.Player2.Jet.Pos_y)
-                {
-                    HasHit = true;
-					if(Type== AstType.Ammo)
+						gameObjects.Player1.Health--;
+					else
+						GameOver.Show(gameObjects.Player2);
+				}
+				if (Pos_x + Size > gameObjects.Player2.Jet.Pos_x - gameObjects.Player2.Jet.Width - gameObjects.Player2.Jet.Cockpit_size.Width
+					&& Pos_x - Size < gameObjects.Player2.Jet.Pos_x + gameObjects.Player2.Jet.Width
+					&& Pos_y - Size < gameObjects.Player2.Jet.Pos_y + gameObjects.Player2.Jet.Height
+					&& Pos_y + Size > gameObjects.Player2.Jet.Pos_y)
+				{
+					HasHit = true;
+					if (Type == AstType.Ammo)
 					{
-						gameObjects.Player2.Recharge(Size) ;
+						gameObjects.Player2.Recharge(Size);
 					}
 					else if (Type == AstType.Health)
 					{
 						gameObjects.Player2.Heal(1);
 					}
 					else if (gameObjects.Player2.Health > 0)
-                        gameObjects.Player2.Health--;
-                    else
-                        GameOver.Show(gameObjects.Player1);
-                }
-				if(Pos_x +Size > gameObjects.WinSize_x || Pos_x < 0 || Pos_y > gameObjects.WinSize_y || Pos_y <0)
+						gameObjects.Player2.Health--;
+					else
+						GameOver.Show(gameObjects.Player1);
+				}
+				if (Pos_x + Size > gameObjects.WinSize_x || Pos_x < 0 || Pos_y > gameObjects.WinSize_y || Pos_y < 0)
 				{
 					HasHit = true;
 				}
-            }       
-            
-            Pos_x += (int)(Math.Cos(2*Math.PI/360* Angle) * Speed);
-            Pos_y += (int)(Math.Sin(2 * Math.PI / 360 * Angle) * Speed);
-        }
+			}
 
-		
+			Pos_x += (int)(Math.Cos(2 * Math.PI / 360 * Angle) * Speed);
+			Pos_y += (int)(Math.Sin(2 * Math.PI / 360 * Angle) * Speed);
+		}
+
+
 	}
 
-    static public class GameOver
-    {
-        static bool end = false;
+	static public class GameOver
+	{
+		static bool end = false;
 
-        public static bool End
-        {
-            get { return GameOver.end; }
-            set { GameOver.end = value; }
-        }
-        static public void Show(Player winner)
-        {
-            if (end == false)
-            {
-                end = true;				
-                MessageBox.Show( winner.Name + " wins!",@"Game Over! ");
-            }
-        }
-    }
+		public static bool End
+		{
+			get { return GameOver.end; }
+			set { GameOver.end = value; }
+		}
+		static public void Show(Player winner)
+		{
+			if (end == false)
+			{
+				end = true;
+				MessageBox.Show(winner.Name + " wins!", @"Game Over! ");
+			}
+		}
+	}
 }

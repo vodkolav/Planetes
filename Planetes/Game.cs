@@ -27,7 +27,7 @@ namespace Planetes
 		private int timeElapsed;
 		private bool localGame;
 		private bool localPlayerIsHost;
-			
+
 
 
 		// network
@@ -76,10 +76,10 @@ namespace Planetes
 				//p2 = new Pen(Color.Yellow, 2);
 				g.FillRectangle(Brushes.Black, new Rectangle(0, 0, pictureBox1.Width, pictureBox1.Height));
 				//g.DrawLine(p1, this.Width / 2, 0, this.Width / 2, this.Height);
-							
 
 
-				foreach (Wall w in gameObjects.Walls )
+
+				foreach (Wall w in gameObjects.Walls)
 				{
 					w.Draw(g);
 				}
@@ -138,7 +138,7 @@ namespace Planetes
 
 
 		private void Form1_KeyUp(object sender, KeyEventArgs e)
-		{					
+		{
 			gameObjects.Player1.Release(e.KeyData);
 			gameObjects.Player2.Release(e.KeyData);
 		}
@@ -193,21 +193,21 @@ namespace Planetes
 						if (e.KeyData == Keys.Space)
 						{
 							gameObjects.Player1.Shoot(timeElapsed);
-						}						
-						else if (e.KeyData == Keys.A || e.KeyData == Keys.D )
+						}
+						else if (e.KeyData == Keys.A || e.KeyData == Keys.D)
 						{
 							//then it's a horizontal move
-							gameObjects.Player1.Steer(e.KeyData);							
+							gameObjects.Player1.Steer(e.KeyData);
 						}
-						else if (e.KeyData == Keys.W || e.KeyData == Keys.S )
+						else if (e.KeyData == Keys.W || e.KeyData == Keys.S)
 						{
 							//then it's a vertical move
-							gameObjects.Player1.Steer(e.KeyData);							
+							gameObjects.Player1.Steer(e.KeyData);
 						}
 					}
 					else
 					{
-						
+
 						if (e.KeyData == Keys.Return)
 						{
 							gameObjects.Player2.Shoot(timeElapsed);
@@ -215,19 +215,19 @@ namespace Planetes
 						else if (e.KeyData == Keys.Left || e.KeyData == Keys.Right)
 						{
 							//then it's a horizontal move
-							gameObjects.Player2.Steer(e.KeyData);							
+							gameObjects.Player2.Steer(e.KeyData);
 						}
 						else if (e.KeyData == Keys.Up || e.KeyData == Keys.Down)
 						{
 							//then it's a vertical move
 							gameObjects.Player2.Steer(e.KeyData);
-							
+
 						}
 					}
-				}				
+				}
 			}
 		}
-			
+
 		//else  // network game
 		//		{
 		//			if (localPlayerIsHost)
@@ -355,8 +355,8 @@ namespace Planetes
 					//gameObjects.Player2.Bulletlist.RemoveAll(b => b.HasHit);
 					//for (int i = 0; i < gameObjects.AstroidList.Count; i++)
 
-					lock(gameObjects)
-						gameObjects.AstroidList.ForEach(b=>b.Update( gameObjects));
+					lock (gameObjects)
+						gameObjects.AstroidList.ForEach(b => b.Update(gameObjects));
 
 					if (timeElapsed % Astroid.Timeout == 0)
 					{
@@ -398,10 +398,10 @@ namespace Planetes
 		{
 			Text = "World of Starcraft (Server)";
 			serverChan = new TcpChannel(8085);
-			ChannelServices.RegisterChannel(serverChan, false);		
+			ChannelServices.RegisterChannel(serverChan, false);
 			gameObjects = new ClsGameObjects(pictureBox1.Width, pictureBox1.Height);
 			//RemotingConfiguration.RegisterWellKnownServiceType(typeof(ClsGameObjects), "GameObjects", WellKnownObjectMode.Singleton);
-			
+
 			ObjRef or = RemotingServices.Marshal(gameObjects, "GameObjects");
 			//or.GetObjectData( ;
 			localGame = false;
@@ -475,20 +475,14 @@ namespace Planetes
 					else
 						joinNetworkGame(vd.Controls[3].Text);
 				}
-				catch (Exception ex) { MessageBox.Show("Could not connect to server!\n" +  ex.Message); }
+				catch (Exception ex) { MessageBox.Show("Could not connect to server!\n" + ex.Message); }
 		}
 
 		private void LocalGameToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 
 		}
-
-
-
 	}
-
-
 }
-
 
 
