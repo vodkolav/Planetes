@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
@@ -11,9 +12,9 @@ namespace GameObjects
 	public enum AstType { Rubble, Ammo, Health };
 
 	public class ClsGameObjects : MarshalByRefObject
-    {
+	{
 		public static int FrameRate = 10;
-        public static ClsGameObjects theObject;
+		public static ClsGameObjects theObject;
 		public bool Connected { get; set; }
 		public bool ServerClosed { get; set; }
 		public Player1 Player1 { get; set; }
@@ -21,24 +22,112 @@ namespace GameObjects
 		public int WinSize_x { get; set; }
 		public int WinSize_y { get; set; }
 		public List<Astroid> AstroidList { get; set; }
+		public List<Wall> Walls { get; set; }
 		public bool Paused { get; set; }
 
+
 		public ClsGameObjects(int winSize_x, int winSize_y)
-        {
-			
-            WinSize_x = winSize_x;
-            WinSize_y = winSize_y;
-            Player1 = new Player1("Player1", 20, 300, winSize_x, winSize_y,this);
-            Player2 = new Player2("Player2", 20, 300, winSize_x, winSize_y,this);
-            AstroidList = new List<Astroid>();
-            theObject = this;
-            Connected = false;
-            ServerClosed = false;
-        }
+		{
+
+			WinSize_x = winSize_x;
+			WinSize_y = winSize_y;
+
+			Walls = new List<Wall>();
+			Brush wallBrush = Brushes.Magenta;
+			Walls.Add(new Wall(wallBrush, new Point(0, 0), new Size(winSize_x, 5)));
+			Walls.Add(new Wall(wallBrush, new Point(0, 0), new Size(5, winSize_y)));
+			Walls.Add(new Wall(wallBrush, new Point(0, winSize_y - 5), new Size(winSize_x, 5)));
+			Walls.Add(new Wall(wallBrush, new Point(winSize_x - 5, 0), new Size(5, winSize_y)));
+
+			Walls.Add(new Wall(wallBrush, new Point(winSize_x - 50, 500), new Size(5, 100)));
+
+
+
+			Player1 = new Player1("Player1", 20, 300, winSize_x, winSize_y, this);
+			Player2 = new Player2("Player2", 20, 300, winSize_x, winSize_y, this);
+			AstroidList = new List<Astroid>();
+			theObject = this;
+			Connected = false;
+			ServerClosed = false;
+		}
 
 		public override object InitializeLifetimeService()
 		{
 			return null;
+		}
+	}
+
+	public struct Vector
+	{
+		public int x{ get; }
+
+		public int y{get;}
+
+		public Vector(Point point)
+		{
+			x = point.X;
+			y = point.Y;
+		}
+
+		public  Vector(int X, int Y)
+		{
+			x = X;
+			y = Y;
+		}
+
+		public static Vector operator -(Vector v1, Vector v2)
+		{
+			return new Vector(
+			   v1.x - v2.x,
+			   v1.y - v2.y);
+		}
+
+		public static Vector operator *(Vector v1, int s2)
+		{
+			return
+			   new Vector
+			   (
+				  v1.x * s2,
+				  v1.y * s2
+			   );
+		}
+	
+		public static Vector operator *(int s1, Vector v2)
+		{
+			return v2 * s1;
+		}
+
+		public double Magnitude
+		{
+			get
+			{
+				return Math.Sqrt(Math.Pow(x,2) + Math.Pow(y,2));
+			}
+		}
+
+		public Vector Normalize()
+		{
+			double mag = Magnitude;
+
+			return new Vector((int)(x/mag),	(int)(y/mag));
+		}
+
+		public static int Dot(Vector v1, Vector v2)
+		{
+			return  v1.x * v2.x + v1.y * v2.y ;
+		}
+
+		public int Dot(Vector other)
+		{
+			return Dot(this, other);
+		}		
+	}
+
+	public static class RectExtension
+	{
+		public static Point Center(this Rectangle rect)
+		{
+			return new Point(rect.Size.Width - rect.Location.X, rect.Size.Height - rect.Location.Y);
 		}
 	}
 
@@ -60,28 +149,28 @@ namespace GameObjects
 		public Keys? KeyHorz { get; set; }
 		public Keys? KeyShoot { get; set; }
 		public ClsGameObjects GameState { get; set; }
-		
+
 		public Player(string name, int health, int ammo, int winSize_x, int winSize_y, ClsGameObjects game)
-        {
-            Name = name;
-            Health = health;
+		{
+			Name = name;
+			Health = health;
 			MaxHealth = health;
-            Ammo = ammo;
+			Ammo = ammo;
 			MaxAmmo = ammo;
 			WinSize_x = winSize_x;
-            WinSize_y = winSize_y;
-            Bulletlist = new List<Bullet>();
-            Fired = false;
+			WinSize_y = winSize_y;
+			Bulletlist = new List<Bullet>();
+			Fired = false;
 			GameState = game;
-        }
+		}
 
 		public void Recharge(int amount)
-		{			
+		{
 			Ammo = Math.Min(Ammo + amount, MaxAmmo);
 		}
 
 		public void Heal(int amount)
-		{			
+		{
 			Health = Math.Min(Health + amount, MaxHealth);
 		}
 
@@ -91,42 +180,44 @@ namespace GameObjects
 
 		public void Move()
 		{
-			if (KeyVert != null)
-			{
-				Jet.Move(KeyVert.Value);
-			}
-			if (KeyHorz != null)
-			{
-				Jet.Move(KeyHorz.Value);
-			}
+			Jet.Move(GameState);
+			//if (KeyVert != null)
+			//{
+			//	Jet.Move(KeyVert.Value);
+			//}
+			//if (KeyHorz != null)
+			//{
+			//	Jet.Move(KeyHorz.Value);
+			//}
 		}
 
 		public virtual void Shoot(int timeElapsed)
 		{
 			if (KeyShoot != null)
 				Jet.Shoot(this, timeElapsed);
-		}	
-    }
+		}
+	}
 
 	public class Player1 : Player
 	{
 		public Player1(string name, int health, int ammo, int winSize_x, int winSize_y, ClsGameObjects game)
 			: base(name, health, ammo, winSize_x, winSize_y, game)
 		{
-			Jet = new Jet1(0, winSize_y / 2, winSize_x, winSize_y);
+			Jet = new Jet1(new Point(10, winSize_y / 2), winSize_x, winSize_y);
 		}
 
 		public override void Steer(Keys command)
 		{
-			if (command == Keys.A || command == Keys.D )
+			if (command == Keys.A || command == Keys.D)
 			{
 				//then it's a horizontal move
-				KeyHorz = command;
+				//KeyHorz = command;
+				Jet.Steer(command);
 			}
 			else if (command == Keys.W || command == Keys.S)
 			{
 				//then it's a vertical move
-				KeyVert = command;
+				Jet.Steer(command);
 			}
 			else if (command == Keys.Space)
 			{
@@ -158,7 +249,7 @@ namespace GameObjects
 		public Player2(string name, int health, int ammo, int winSize_x, int winSize_y, ClsGameObjects game)
 			: base(name, health, ammo, winSize_x, winSize_y, game)
 		{
-			Jet = new Jet2(winSize_x, winSize_y / 2, winSize_x, winSize_y);
+			Jet = new Jet2(new Point(winSize_x-60, winSize_y / 2), winSize_x, winSize_y);
 		}
 
 		public override void Steer(Keys command)
@@ -183,33 +274,34 @@ namespace GameObjects
 		{
 			if (command == Keys.Left || command == Keys.Right)
 			{
-				KeyHorz = null;				
+				KeyHorz = null;
 			}
 			else if (command == Keys.Up || command == Keys.Down)
-			{				
+			{
 				KeyVert = null;
 			}
 			else if (command == Keys.Return)
 			{
 				KeyShoot = null;
 			}
-		}		
+		}
 	}
 
+	#region Bots
 	/// <summary>
 	/// Most basic bot
 	/// </summary>
 	public class Bot : Player2
 	{
 		protected List<Keys> directions = new List<Keys> { Keys.Up, Keys.Down };
-		
+
 
 		public Bot(string name, int health, int ammo, int winSize_x, int winSize_y, ClsGameObjects game)
 			: base(name, health, ammo, winSize_x, winSize_y, game)
 		{
-			
+
 			//Jet = new Jet2(winSize_x, winSize_y / 2);
-			
+
 			Thread t = new Thread(Play);
 			t.Name = "BotThread";
 			t.IsBackground = true;
@@ -228,7 +320,7 @@ namespace GameObjects
 		/// <param name="game"></param>
 		/// <param name="timer"></param>
 		public Bot(string name, int health, int ammo, int winSize_x, int winSize_y, ClsGameObjects game, System.Windows.Forms.Timer timer)
-			: base(name, health, ammo, winSize_x, winSize_y,game)
+			: base(name, health, ammo, winSize_x, winSize_y, game)
 		{
 
 			//Jet = new Jet2(winSize_x, winSize_y / 2);
@@ -281,7 +373,7 @@ namespace GameObjects
 		/// <param name="e"></param>
 		protected virtual void Play(object sender, EventArgs e)
 		{
-			Play();	
+			Play();
 		}
 
 		/// <summary>
@@ -388,19 +480,19 @@ namespace GameObjects
 						BotRelease(Keys.Up);
 					}
 				}
-				catch(Exception e)
+				catch (Exception e)
 				{
-					Console.WriteLine( messagenum++ + e.Message);
+					Console.WriteLine(messagenum++ + e.Message);
 				}
 
 
 				//aiming at opponent tactic
-				if (Jet.Pos_y  < GameState.Player1.Jet.Pos_y -30)
+				if (Jet.Pos_y < GameState.Player1.Jet.Pos_y - 30)
 				{
 					//Jet.Move(Keys.Down);
 					BotSteer(Keys.Down);
 				}
-				else if (Jet.Pos_y  > GameState.Player1.Jet.Pos_y + 30)
+				else if (Jet.Pos_y > GameState.Player1.Jet.Pos_y + 30)
 				{
 					BotSteer(Keys.Up);
 				}
@@ -454,7 +546,7 @@ namespace GameObjects
 
 			while (true)
 			{
-				
+
 				//double astavg = gamenow.AstroidList.Where(a => a.Pos_y + 50 < Jet.Pos_y && a.Pos_y - 50 > Jet.Pos_y).Select(c => c.Pos_x).Average();
 				//int astClosest = gamenow.AstroidList.Min(a => Jet.Dist(a));
 
@@ -462,8 +554,8 @@ namespace GameObjects
 				{
 					//asteroid evasion tactic
 					Astroid astClosest = GameState.AstroidList.Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
-					
-					if (astClosest.Pos_x - astClosest.Size * 10 < Jet.Pos_x && Jet.Pos_x < astClosest.Pos_x && astClosest.Type== AstType.Rubble)
+
+					if (astClosest.Pos_x - astClosest.Size * 10 < Jet.Pos_x && Jet.Pos_x < astClosest.Pos_x && astClosest.Type == AstType.Rubble)
 					{
 						//Jet.Move(Keys.Left);
 						BotSteer(Keys.Left);
@@ -541,11 +633,10 @@ namespace GameObjects
 				}
 				int step = 5;
 				timeElapsed += ClsGameObjects.FrameRate;
-				Thread.Sleep(ClsGameObjects.FrameRate*10);
+				Thread.Sleep(ClsGameObjects.FrameRate * 10);
 			}
 		}
 	}
-
 
 	//public class AI: MarshalByRefObject
 	//{
@@ -659,28 +750,28 @@ namespace GameObjects
 
 	public class Bot2 : Bot
 	{
-		
+
 		public Bot2(string name, int health, int ammo, int winSize_x, int winSize_y, ref ClsGameObjects game)
 			: base(name, health, ammo, winSize_x, winSize_y, game)
-		{}
-			
+		{ }
+
 
 		protected override void Play()
 		{
 			int timeElapsed = 0;
-			
+
 			Keys direction = directions[0];
 			while (true)
 			{
-				
+
 				//Console.WriteLine(gamenow.GetHashCode());
 				if (Jet.Pos_y < GameState.Player1.Jet.Pos_y)
 				{
-					Jet.Move(Keys.Down);									
+					Jet.Move(GameState);// (Keys.Down);									
 				}
 				else
 				{
-					Jet.Move(Keys.Up);					
+					Jet.Move(GameState);// Keys.Up);					
 				}
 
 				if (Jet.Pos_y - GameState.Player1.Jet.Pos_y < 50)
@@ -700,8 +791,8 @@ namespace GameObjects
 	{
 		public Bot1(string name, int health, int ammo, int winSize_x, int winSize_y, ClsGameObjects game)
 			: base(name, health, ammo, winSize_x, winSize_y, game)
-		{}		
-	
+		{ }
+
 
 		protected override void Play()
 		{
@@ -713,7 +804,7 @@ namespace GameObjects
 				Thread.Sleep(50);
 				if (count < 5)
 				{
-					Jet.Move(direction);
+					Jet.Move(GameState);// direction);
 					Jet.Shoot(this, timeElapsed);
 					count++;
 				}
@@ -728,37 +819,85 @@ namespace GameObjects
 		}
 	}
 
+	#endregion
+
 
 	public abstract class Jet : MarshalByRefObject
 	{
 		public int LastFired { get; set; }
 		public int FireRate { get; set; }
-		protected int WWidth{ get;set; }
+		protected int WWidth { get; set; }
 		protected int WHeight { get; set; }
 		public int Height { get; set; }
 		public int Width { get; set; }
-		public int Cockpit_size { get; set; }
-		public int Speed { get; set; }
-		public int Pos_x { get; set; }
+		public Size Cockpit_size { get; set; }
+		public Brush Color { get; set; }
+
+		public Rectangle Hull
+		{
+			get
+			{
+				return new Rectangle(new Point(Pos_x, Pos_y), new Size(30, 24));
+			}
+		}
+
+		public Rectangle Cockpit
+		{
+			get
+			{
+				return new Rectangle(new Point(Pos_x, Pos_y) + new Size(30, 6), Cockpit_size);
+			}
+		}
+
+		public int Pos_x{ get; set; }
 		public int Pos_y { get; set; }
+
+		private int _speed_x;
+
+		public int Speed_x
+		{
+			get { return _speed_x; }
+			set
+			{
+				if (Math.Abs(value)<=10)
+					_speed_x = value;
+			}
+		}
+		private int _speed_y;
+
+		public int Speed_y
+		{
+			get { return _speed_y; }
+			set
+			{
+				if (Math.Abs(value) <= 10)
+					_speed_y = value;
+			}
+		}
+		public int Acceleration { get; set; }
+
 		//public Point Pos { get; set; }
-		public Jet(int start_x, int start_y, int wwidth, int wheight)
-        {
+		public Jet(Point start, Brush color, int wwidth, int wheight)
+		{
 			WWidth = wwidth;
 			WHeight = wheight;
-			Pos_x = start_x;
-            Pos_y = start_y;
-            Width = 30;
-            Height = 25;
-            Cockpit_size = 12;
-            Speed = 5;
-			FireRate = 10;			
-        }
+			Pos_x = start.X;
+			Pos_y = start.Y;
+			Color = color;
+			Cockpit_size = new Size(12, 12);
+			Acceleration = 1;
+			FireRate = 10;
+		}
 
-	
+
 		public double Dist(Astroid a)
 		{
 			return Math.Sqrt((a.Pos_x - Pos_x) ^ 2 + (a.Pos_y - Pos_y) ^ 2);
+		}
+
+		public bool Hit(Wall w)
+		{
+			return false;
 		}
 
 		public virtual double Dist(Bullet b)
@@ -766,97 +905,138 @@ namespace GameObjects
 			return Math.Sqrt((b.Pos_x - Pos_x) ^ 2 + (b.Pos_y - Pos_y) ^ 2);
 		}
 
-		public abstract void Move(Keys dir);
+		public void Move(ClsGameObjects gO)
+		{
+			Wall coll = gO.Walls.FirstOrDefault(w => w.rectangle.IntersectsWith(Hull));
+			if (coll != null)
+			{
+				Reflect(coll);
+			}
+			Pos_x += Speed_x;
+			Pos_y += Speed_y;
+		}
 
-        public abstract void Shoot(Player player, int timeElapsed);
+		public void Reflect(Wall w)
+		{
+			Rectangle reflectionPlace = Rectangle.Intersect(w.rectangle,Hull);
+			Vector velocity = new Vector(Speed_x, Speed_y);
+			Vector normal = new Vector(Hull.Center()) - new Vector(reflectionPlace.Center());
+			normal = normal.Normalize();
+			Vector reflection =  velocity - 2 * velocity.Dot(normal) * normal;
+			Speed_x = reflection.x;
+			Speed_y = reflection.y;
+		}
 
-        public abstract void Draw(Graphics g);
 
-    }
 
-    public class Jet1 : Jet
-    {
-        public Jet1(int start_x, int start_y, int wwidth, int wheight) : base( start_x,  start_y,  wwidth,  wheight) { }
-			   
-		public override void Move(Keys dir)
+
+		public abstract void Steer(Keys dir);
+
+		public abstract void Shoot(Player player, int timeElapsed);
+
+		public void Draw(Graphics g)
+		{
+			g.FillRectangle(Color, Hull);
+			g.FillRectangle(Brushes.Gray, Cockpit);
+		}
+
+	}
+
+	public class Jet1 : Jet
+	{
+		public Jet1(Point start, int wwidth, int wheight) : base( start, Brushes.Blue, wwidth, wheight) { }
+
+		public override void Steer(Keys dir)
 		{
 			switch (dir)
 			{
 				case Keys.D:
-					if (Pos_x < WWidth / 2 - Width - Cockpit_size)
-						Pos_x += Speed;
+					Speed_x += Acceleration;
 					break;
 				case Keys.S:
-					if (Pos_y < WHeight - Height)
-						Pos_y += Speed;
+					Speed_y += Acceleration;
 					break;
 				case Keys.A:
-					if (Pos_x > 0)
-						Pos_x -= Speed;
+					Speed_x -= Acceleration;
 					break;
 				case Keys.W:
-					if (Pos_y > 0)
-						Pos_y -= Speed;
+					Speed_y -= Acceleration;
 					break;
 			}
-
 		}
 
-        public override void Shoot(Player player, int timeElapsed)
+
+
+
+		public override void Shoot(Player player, int timeElapsed)
         {
             if (player.Ammo != 0 && timeElapsed >  LastFired + FireRate )
             {
 				LastFired = timeElapsed;
-                Bullet1 bullet = new Bullet1(Pos_x + Width + Cockpit_size, Pos_y + Height / 2);
+                Bullet1 bullet = new Bullet1(Pos_x + Width + Cockpit_size.Width, Pos_y + Height / 2);
 				lock (player.GameState)
 				{
 					player.Bulletlist.Add(bullet);
 				}
 					player.Ammo--;	
 			}
-        }
-		
-        public override void Draw(Graphics g)
-        {
-            g.FillRectangle(Brushes.Blue, Pos_x, Pos_y, Width, Height);
-            g.FillRectangle(Brushes.Gray, Pos_x + Width, Pos_y + Height / 2 - Cockpit_size / 2, Cockpit_size, Cockpit_size);
-        }
+        }	
+
     }
 
     public class Jet2 : Jet
     {
-        public Jet2(int start_x, int start_y, int wwidth, int wheight) : base( start_x,  start_y,  wwidth,  wheight) { }
+        public Jet2(Point start, int wwidth, int wheight) : base(start, Brushes.Red, wwidth, wheight) { }
 
-        public override void Move(Keys dir)
-        {
-            switch (dir)
-            {
-                case Keys.Right:
-                    if (Pos_x < WWidth)// - Width - Cockpit_size)
-                        Pos_x += Speed;
-                    break;
-                case Keys.Down:
-                    if (Pos_y < WHeight - Height)
-                        Pos_y += Speed;
-                    break;
-                case Keys.Left:
-                    if (Pos_x > WWidth/2 + Width + Cockpit_size)
-                        Pos_x -= Speed;
-                    break;
-                case Keys.Up:
-                    if (Pos_y > 0)
-                        Pos_y -= Speed;
-                    break;
-            }
+		//public override void Move(Keys dir)
+		//{
+		//    switch (dir)
+		//    {
+		//        case Keys.Right:
+		//            if (Pos_x < WWidth)// - Width - Cockpit_size)
+		//                Pos_x += Acceleration;
+		//            break;
+		//        case Keys.Down:
+		//            if (Pos_y < WHeight - Height)
+		//                Pos_y += Acceleration;
+		//            break;
+		//        case Keys.Left:
+		//            if (Pos_x > WWidth/2 + Width + Cockpit_size)
+		//                Pos_x -= Acceleration;
+		//            break;
+		//        case Keys.Up:
+		//            if (Pos_y > 0)
+		//                Pos_y -= Acceleration;
+		//            break;
+		//    }
 
-        }
+		//}
 
-        public override void Shoot(Player player, int timeElapsed)
+		public override void Steer(Keys dir)
+		{
+			switch (dir)
+			{
+				case Keys.D:
+					Speed_x += Acceleration;
+					break;
+				case Keys.S:
+					Speed_y += Acceleration;
+					break;
+				case Keys.A:
+					Speed_x -= Acceleration;
+					break;
+				case Keys.W:
+					Speed_y -= Acceleration;
+					break;
+			}
+		}
+
+		public override void Shoot(Player player, int timeElapsed)
         {
             if (player.Ammo != 0 && timeElapsed > LastFired + FireRate)
             {
 				LastFired = timeElapsed;
-                Bullet2 bullet = new Bullet2(Pos_x-Width-Cockpit_size, Pos_y + Height / 2);
+                Bullet2 bullet = new Bullet2(Pos_x-Width-Cockpit_size.Width, Pos_y + Height / 2);
 
 				lock (player.GameState)
 				{
@@ -866,11 +1046,7 @@ namespace GameObjects
 			}
         }
 
-        public override void Draw(Graphics g)
-        {
-            g.FillRectangle(Brushes.Blue, Pos_x - Width, Pos_y, Width, Height);
-            g.FillRectangle(Brushes.Gray, Pos_x - Width - Cockpit_size, Pos_y + Height / 2 - Cockpit_size / 2, Cockpit_size, Cockpit_size);
-        }
+        
 
 		public override double Dist(Bullet b)
 		{
@@ -884,6 +1060,32 @@ namespace GameObjects
 				return 1000.0;
 			}
 		}
+	}
+
+
+
+
+
+	public class Wall : MarshalByRefObject
+	{
+		public Rectangle rectangle { get; set; }
+		public Brush Color { get; set; }
+
+
+
+		public Wall(Brush color, Point location, Size size)
+		{
+			rectangle = new Rectangle(location, size);
+	
+			Color = color;
+		}
+
+		public void Draw(Graphics g)
+		{
+			g.FillRectangle(Color, rectangle);
+		}
+
+
 	}
 
 	public class Bullet : MarshalByRefObject
@@ -920,7 +1122,7 @@ namespace GameObjects
 			}
 		}
 
-		public virtual void Update( ClsGameObjects gameObjects){
+		public virtual void Move( ClsGameObjects gameObjects){
 	
 		}
     }
@@ -932,7 +1134,7 @@ namespace GameObjects
 			Pen = new Pen(Color.Yellow, 2);
 		}
 
-        public override void Update(ClsGameObjects gameObjects)
+        public override void Move(ClsGameObjects gameObjects)
         {
             if (!HasHit)
             {
@@ -976,7 +1178,7 @@ namespace GameObjects
 		{
 			Pen = new Pen(Color.Cyan, 2);
 		}
-		public override void Update( ClsGameObjects gameObjects)
+		public override void Move( ClsGameObjects gameObjects)
         {
             if (!HasHit)
             {
@@ -1103,7 +1305,7 @@ namespace GameObjects
                     else
                         GameOver.Show(gameObjects.Player2);
                 }
-                if (Pos_x + Size > gameObjects.Player2.Jet.Pos_x - gameObjects.Player2.Jet.Width - gameObjects.Player2.Jet.Cockpit_size
+                if (Pos_x + Size > gameObjects.Player2.Jet.Pos_x - gameObjects.Player2.Jet.Width - gameObjects.Player2.Jet.Cockpit_size.Width
                     && Pos_x - Size < gameObjects.Player2.Jet.Pos_x + gameObjects.Player2.Jet.Width
                     && Pos_y - Size < gameObjects.Player2.Jet.Pos_y + gameObjects.Player2.Jet.Height
                     && Pos_y + Size > gameObjects.Player2.Jet.Pos_y)

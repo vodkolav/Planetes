@@ -75,51 +75,61 @@ namespace Planetes
 				p1 = new Pen(Color.White, 5);
 				//p2 = new Pen(Color.Yellow, 2);
 				g.FillRectangle(Brushes.Black, new Rectangle(0, 0, pictureBox1.Width, pictureBox1.Height));
-				g.DrawLine(p1, this.Width / 2, 0, this.Width / 2, this.Height);
+				//g.DrawLine(p1, this.Width / 2, 0, this.Width / 2, this.Height);
+							
 
-				g.FillRectangle(Brushes.Blue, gameObjects.Player1.Jet.Pos_x, gameObjects.Player1.Jet.Pos_y, gameObjects.Player1.Jet.Width, gameObjects.Player1.Jet.Height);
-				g.FillRectangle(Brushes.Gray, gameObjects.Player1.Jet.Pos_x + gameObjects.Player1.Jet.Width, gameObjects.Player1.Jet.Pos_y + gameObjects.Player1.Jet.Height / 2 - gameObjects.Player1.Jet.Cockpit_size / 2, gameObjects.Player1.Jet.Cockpit_size, gameObjects.Player1.Jet.Cockpit_size);
-				g.FillRectangle(Brushes.Blue, gameObjects.Player2.Jet.Pos_x - gameObjects.Player2.Jet.Width, gameObjects.Player2.Jet.Pos_y, gameObjects.Player2.Jet.Width, gameObjects.Player2.Jet.Height);
-				g.FillRectangle(Brushes.Gray, gameObjects.Player2.Jet.Pos_x - gameObjects.Player2.Jet.Width - gameObjects.Player2.Jet.Cockpit_size, gameObjects.Player2.Jet.Pos_y + gameObjects.Player2.Jet.Height / 2 - gameObjects.Player2.Jet.Cockpit_size / 2, gameObjects.Player2.Jet.Cockpit_size, gameObjects.Player2.Jet.Cockpit_size);
-				lock (gameObjects)
+
+				foreach (Wall w in gameObjects.Walls )
 				{
-					foreach (Bullet b  in gameObjects.Player1.Bulletlist)
-					{
-						if (!b.HasHit)
-						{
-							g.DrawLine(b.Pen, b.Pos_x, b.Pos_y, b.Pos_x + b.Size, b.Pos_y);
-						}
-					}
-					foreach (Bullet b in gameObjects.Player2.Bulletlist)
-					{						
-						//b.Draw(g);
-						if (!b.HasHit)
-						{
-							g.DrawLine(b.Pen, b.Pos_x, b.Pos_y, b.Pos_x + b.Size, b.Pos_y);
-						}
-					}
-					foreach (Astroid a in gameObjects.AstroidList)
-					{
-						//ast.Draw(g);
-						if (!a.HasHit)
-							g.FillEllipse(a.Color, a.Pos_x, a.Pos_y, a.Size, a.Size);
-					}
-
-					//debug
-					//try
-					//{
-					//	if (P1keyVert != null || P1keyHorz != null)
-					//	{
-					//		Console.WriteLine(gameObjects.Player1.Jet.Pos_x.ToString() + ", " + gameObjects.Player1.Jet.Pos_y.ToString());
-					//		lastx = gameObjects.Player1.Jet.Pos_x;
-					//		lasty = gameObjects.Player1.Jet.Pos_y;
-					//	}
-					//}
-					//catch
-					//{
-					//	Console.WriteLine("oops");
-					//}
+					w.Draw(g);
 				}
+
+				gameObjects.Player1.Jet.Draw(g);
+				gameObjects.Player2.Jet.Draw(g);
+				//g.FillRectangle(Brushes.Blue, gameObjects.Player1.Jet.Pos_x, gameObjects.Player1.Jet.Pos_y, gameObjects.Player1.Jet.Width, gameObjects.Player1.Jet.Height);
+				//g.FillRectangle(Brushes.Gray, gameObjects.Player1.Jet.Pos_x + gameObjects.Player1.Jet.Width, gameObjects.Player1.Jet.Pos_y + gameObjects.Player1.Jet.Height / 2 - gameObjects.Player1.Jet.Cockpit_size / 2, gameObjects.Player1.Jet.Cockpit_size, gameObjects.Player1.Jet.Cockpit_size);
+				//g.FillRectangle(Brushes.Blue, gameObjects.Player2.Jet.Pos_x - gameObjects.Player2.Jet.Width, gameObjects.Player2.Jet.Pos_y, gameObjects.Player2.Jet.Width, gameObjects.Player2.Jet.Height);
+				//g.FillRectangle(Brushes.Gray, gameObjects.Player2.Jet.Pos_x - gameObjects.Player2.Jet.Width - gameObjects.Player2.Jet.Cockpit_size, gameObjects.Player2.Jet.Pos_y + gameObjects.Player2.Jet.Height / 2 - gameObjects.Player2.Jet.Cockpit_size / 2, gameObjects.Player2.Jet.Cockpit_size, gameObjects.Player2.Jet.Cockpit_size);
+				//lock (gameObjects)
+				//{
+				//	foreach (Bullet b  in gameObjects.Player1.Bulletlist)
+				//	{
+				//		if (!b.HasHit)
+				//		{
+				//			g.DrawLine(b.Pen, b.Pos_x, b.Pos_y, b.Pos_x + b.Size, b.Pos_y);
+				//		}
+				//	}
+				//	foreach (Bullet b in gameObjects.Player2.Bulletlist)
+				//	{						
+				//		//b.Draw(g);
+				//		if (!b.HasHit)
+				//		{
+				//			g.DrawLine(b.Pen, b.Pos_x, b.Pos_y, b.Pos_x + b.Size, b.Pos_y);
+				//		}
+				//	}
+				//	foreach (Astroid a in gameObjects.AstroidList)
+				//	{
+				//		//ast.Draw(g);
+				//		if (!a.HasHit)
+				//			g.FillEllipse(a.Color, a.Pos_x, a.Pos_y, a.Size, a.Size);
+				//	}
+
+
+				//	//debug
+				//	//try
+				//	//{
+				//	//	if (P1keyVert != null || P1keyHorz != null)
+				//	//	{
+				//	//		Console.WriteLine(gameObjects.Player1.Jet.Pos_x.ToString() + ", " + gameObjects.Player1.Jet.Pos_y.ToString());
+				//	//		lastx = gameObjects.Player1.Jet.Pos_x;
+				//	//		lasty = gameObjects.Player1.Jet.Pos_y;
+				//	//	}
+				//	//}
+				//	//catch
+				//	//{
+				//	//	Console.WriteLine("oops");
+				//	//}
+				//}
 				pictureBox1.Image = bmp;
 				if (pictureBox1 != null)
 					pictureBox1.Invoke(new RefreshBitmapDelegate(pictureBox1.Refresh));
@@ -326,13 +336,13 @@ namespace Planetes
 					//{
 					lock (gameObjects)
 					{
-						gameObjects.Player1.Bulletlist.ForEach(b => b.Update(gameObjects));
+						gameObjects.Player1.Bulletlist.ForEach(b => b.Move(gameObjects));
 						gameObjects.Player1.Bulletlist.RemoveAll(b => b.HasHit);
 					}
 
 					lock (gameObjects)
 					{
-						gameObjects.Player2.Bulletlist.ForEach(b => b.Update(gameObjects));
+						gameObjects.Player2.Bulletlist.ForEach(b => b.Move(gameObjects));
 						gameObjects.Player2.Bulletlist.RemoveAll(b => b.HasHit);
 					}
 
@@ -359,7 +369,7 @@ namespace Planetes
 					}
 					if (gameObjects.Player2.Fired == true)
 					{
-						Bullet2 bullet = new Bullet2(gameObjects.Player2.Jet.Pos_x - gameObjects.Player2.Jet.Width - gameObjects.Player2.Jet.Cockpit_size, gameObjects.Player2.Jet.Pos_y + gameObjects.Player2.Jet.Height / 2);
+						Bullet2 bullet = new Bullet2(gameObjects.Player2.Jet.Pos_x - gameObjects.Player2.Jet.Width - gameObjects.Player2.Jet.Cockpit_size.Width, gameObjects.Player2.Jet.Pos_y + gameObjects.Player2.Jet.Height / 2);
 						gameObjects.Player2.Bulletlist.Add(bullet);
 						gameObjects.Player2.Fired = false;
 					}
@@ -367,6 +377,7 @@ namespace Planetes
 				}
 				else { stillOpen = false; timer1.Enabled = false; }
 			}
+			Thread.Sleep(20);
 		}
 
 		private void Form1_Load(object sender, EventArgs e)
