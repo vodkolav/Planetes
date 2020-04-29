@@ -13,6 +13,7 @@ using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using Services;
 using Service.Internal;
+using System.Drawing.Drawing2D;
 
 namespace Planetes
 {
@@ -78,12 +79,14 @@ namespace Planetes
 				//g.DrawLine(p1, this.Width / 2, 0, this.Width / 2, this.Height);
 
 
-
-				foreach (Wall w in gameObjects.Walls)
+				lock (gameObjects)
 				{
-					w.Draw(g);
+					foreach (Wall w in gameObjects.Walls)
+					{
+						w.Draw(g);
+					}
 				}
-
+				
 				gameObjects.Player1.Jet.Draw(g);
 				gameObjects.Player2.Jet.Draw(g);
 				//g.FillRectangle(Brushes.Blue, gameObjects.Player1.Jet.Pos_x, gameObjects.Player1.Jet.Pos_y, gameObjects.Player1.Jet.Width, gameObjects.Player1.Jet.Height);
@@ -136,6 +139,11 @@ namespace Planetes
 			}
 		}
 
+		private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
+		{
+			if (stillOpen)
+				gameObjects.Player1.Turn(e.Location); 
+		}
 
 		private void Form1_KeyUp(object sender, KeyEventArgs e)
 		{
@@ -310,8 +318,11 @@ namespace Planetes
 			//	gameObjects.Player2.Move(P2keyVert.Value);
 			//}
 			if (gameObjects.Paused) return;
-			gameObjects.Player1.Move();
-			gameObjects.Player2.Move();
+			lock (gameObjects)
+			{
+				gameObjects.Player1.Move();
+				gameObjects.Player2.Move();
+			}
 
 			gameObjects.Player1.Shoot(timeElapsed);
 			gameObjects.Player2.Shoot(timeElapsed);
@@ -377,7 +388,7 @@ namespace Planetes
 				}
 				else { stillOpen = false; timer1.Enabled = false; }
 			}
-			Thread.Sleep(20);
+			//Thread.Sleep(20);
 		}
 
 		private void Form1_Load(object sender, EventArgs e)
@@ -477,6 +488,8 @@ namespace Planetes
 				}
 				catch (Exception ex) { MessageBox.Show("Could not connect to server!\n" + ex.Message); }
 		}
+
+
 
 		private void LocalGameToolStripMenuItem_Click(object sender, EventArgs e)
 		{

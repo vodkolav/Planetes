@@ -4,6 +4,7 @@ using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
+using System.Numerics;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -41,6 +42,7 @@ namespace GameObjects
 
 			Walls.Add(new Wall(wallBrush, new Point(winSize_x - 50, 500), new Size(5, 100)));
 
+			Walls.Add(new Wall(wallBrush, new Point(100,100), new Point (200,200)));
 
 
 			Player1 = new Player1("Player1", 20, 300, winSize_x, winSize_y, this);
@@ -59,9 +61,9 @@ namespace GameObjects
 
 	public struct Vector
 	{
-		public int x { get; }
+		public double x { get; }
 
-		public int y { get; }
+		public double y { get; }
 
 		public Vector(Point point)
 		{
@@ -69,10 +71,26 @@ namespace GameObjects
 			y = point.Y;
 		}
 
-		public Vector(int X, int Y)
+		public Vector(double X, double Y)
 		{
 			x = X;
 			y = Y;
+		}
+
+		public Vector(Vector2 v)
+		{
+			x = v.X ;
+			y = v.Y;
+		}
+
+		public Vector2 asVector2()
+		{
+			return new Vector2((float)x, (float)y);
+		}
+
+		public Point asPoint
+		{
+			get { return new Point((int)x, (int)y); }
 		}
 
 		public static Vector operator -(Vector v1, Vector v2)
@@ -82,7 +100,14 @@ namespace GameObjects
 			   v1.y - v2.y);
 		}
 
-		public static Vector operator *(Vector v1, int s2)
+		public static Vector operator +(Vector v1, Vector v2)
+		{
+			return new Vector(
+			   v1.x + v2.x,
+			   v1.y + v2.y);
+		}
+
+		public static Vector operator *(Vector v1, double s2)
 		{
 			return
 			   new Vector
@@ -92,7 +117,7 @@ namespace GameObjects
 			   );
 		}
 
-		public static Vector operator *(int s1, Vector v2)
+		public static Vector operator *(double s1, Vector v2)
 		{
 			return v2 * s1;
 		}
@@ -107,27 +132,51 @@ namespace GameObjects
 
 		public Vector Normalize()
 		{
-			double mag = Magnitude;
-
-			return new Vector((int)(x / mag), (int)(y / mag));
+			Vector2 v2 = asVector2();
+			return new Vector( Vector2.Normalize(v2));
 		}
 
-		public static int Dot(Vector v1, Vector v2)
+		public static double angle(Vector v1, Vector v2)
+		{			
+			double dot = Dot(v1, v2);      // dot product between [x1, y1] and [x2, y2]
+			double det = v1.x * v2.y - v1.y * v2.x;      // determinant
+			double angle = - Math.Atan2(det, dot) * 57.2958;
+			//Console.WriteLine("X:{0}| Y:{1} | Angle:{2})", v2.x, v2.y, angle);
+			return angle;
+		}
+
+
+		internal double Angle
+		{
+			get
+			{
+				return (double)angle(this, new Vector(1, 0));
+			}
+		}
+
+		public static double Dot(Vector v1, Vector v2)
 		{
 			return v1.x * v2.x + v1.y * v2.y;
 		}
 
-		public int Dot(Vector other)
+		public double Dot(Vector other)
 		{
 			return Dot(this, other);
 		}
+
+
 	}
 
 	public static class RectExtension
 	{
 		public static Point Center(this Rectangle rect)
 		{
-			return new Point(rect.Size.Width - rect.Location.X, rect.Size.Height - rect.Location.Y);
+			return new Point(rect.Location.X + rect.Size.Width/2 ,  rect.Location.Y + rect.Size.Height/2);
+		}
+
+		public static Point Center(this RectangleF rect)
+		{
+			return new Point((int)(rect.Location.X + rect.Size.Width / 2), (int)(rect.Location.Y + rect.Size.Height / 2));
 		}
 	}
 
@@ -149,6 +198,8 @@ namespace GameObjects
 		public Keys? KeyHorz { get; set; }
 		public Keys? KeyShoot { get; set; }
 		public ClsGameObjects GameState { get; set; }
+		protected List<Keys> SteerKeysBindings;
+		protected Keys ShootKeyBindings;
 
 		public Player(string name, int health, int ammo, int winSize_x, int winSize_y, ClsGameObjects game)
 		{
@@ -174,21 +225,28 @@ namespace GameObjects
 			Health = Math.Min(Health + amount, MaxHealth);
 		}
 
-		public abstract void Steer(Keys command);
+		public virtual void Steer(Keys command)
+		{
+			if (SteerKeysBindings.Contains(command))
+			{
+				Jet.Steer(command);
+			}
+			else if (command == ShootKeyBindings)
+			{
+				KeyShoot = command;
+			}
+		}
 
 		public abstract void Release(Keys command);
 
 		public void Move()
 		{
 			Jet.Move(GameState);
-			//if (KeyVert != null)
-			//{
-			//	Jet.Move(KeyVert.Value);
-			//}
-			//if (KeyHorz != null)
-			//{
-			//	Jet.Move(KeyHorz.Value);
-			//}
+		}
+
+		public void Turn(Point location)
+		{
+			Jet.Turn(location);
 		}
 
 		public virtual void Shoot(int timeElapsed)
@@ -204,26 +262,10 @@ namespace GameObjects
 			: base(name, health, ammo, winSize_x, winSize_y, game)
 		{
 			Jet = new Jet1(new Point(10, winSize_y / 2), winSize_x, winSize_y);
+			SteerKeysBindings = new List<Keys>{ Keys.A, Keys.D, Keys.W, Keys.S };
+			ShootKeyBindings = Keys.Space;
 		}
 
-		public override void Steer(Keys command)
-		{
-			if (command == Keys.A || command == Keys.D)
-			{
-				//then it's a horizontal move
-				//KeyHorz = command;
-				Jet.Steer(command);
-			}
-			else if (command == Keys.W || command == Keys.S)
-			{
-				//then it's a vertical move
-				Jet.Steer(command);
-			}
-			else if (command == Keys.Space)
-			{
-				KeyShoot = command;
-			}
-		}
 
 		public override void Release(Keys command)
 		{
@@ -250,25 +292,10 @@ namespace GameObjects
 			: base(name, health, ammo, winSize_x, winSize_y, game)
 		{
 			Jet = new Jet2(new Point(winSize_x - 60, winSize_y / 2), winSize_x, winSize_y);
+			SteerKeysBindings = new List<Keys> { Keys.Up, Keys.Down, Keys.Left, Keys.Right };
+			ShootKeyBindings = Keys.Enter;
 		}
 
-		public override void Steer(Keys command)
-		{
-			if (command == Keys.Left || command == Keys.Right)
-			{
-				//then it's a horizontal move
-				KeyHorz = command;
-			}
-			else if (command == Keys.Up || command == Keys.Down)
-			{
-				//then it's a vertical move
-				KeyVert = command;
-			}
-			else if (command == Keys.Return)
-			{
-				KeyShoot = command;
-			}
-		}
 
 		public override void Release(Keys command)
 		{
@@ -826,10 +853,15 @@ namespace GameObjects
 	{
 		public int LastFired { get; set; }
 		public int FireRate { get; set; }
+		public int Acceleration { get; set; }
 		protected int WWidth { get; set; }
 		protected int WHeight { get; set; }
 		public int Height { get; set; }
 		public int Width { get; set; }
+		public int Pos_x { get; set; }
+		public int Pos_y { get; set; }
+		public double Bearing { get; set; }
+		public Point Aim { get; set; }
 		public Size Cockpit_size { get; set; }
 		public Brush Color { get; set; }
 
@@ -849,9 +881,6 @@ namespace GameObjects
 			}
 		}
 
-		public int Pos_x { get; set; }
-		public int Pos_y { get; set; }
-
 		private int _speed_x;
 
 		public int Speed_x
@@ -859,10 +888,11 @@ namespace GameObjects
 			get { return _speed_x; }
 			set
 			{
-				if (Math.Abs(value) <= 10)
+				if (Math.Abs(value) <= 20)
 					_speed_x = value;
 			}
 		}
+
 		private int _speed_y;
 
 		public int Speed_y
@@ -874,7 +904,7 @@ namespace GameObjects
 					_speed_y = value;
 			}
 		}
-		public int Acceleration { get; set; }
+
 
 		//public Point Pos { get; set; }
 		public Jet(Point start, Brush color, int wwidth, int wheight)
@@ -888,47 +918,52 @@ namespace GameObjects
 			Acceleration = 1;
 			FireRate = 10;
 		}
-
+			   		 
 
 		public double Dist(Astroid a)
 		{
 			return Math.Sqrt((a.Pos_x - Pos_x) ^ 2 + (a.Pos_y - Pos_y) ^ 2);
 		}
 
+
 		public bool Hit(Wall w)
 		{
 			return false;
 		}
+
 
 		public virtual double Dist(Bullet b)
 		{
 			return Math.Sqrt((b.Pos_x - Pos_x) ^ 2 + (b.Pos_y - Pos_y) ^ 2);
 		}
 
+
 		public void Move(ClsGameObjects gO)
 		{
-			Wall coll = gO.Walls.FirstOrDefault(w => w.rectangle.IntersectsWith(Hull));
+			Wall coll = gO.Walls.FirstOrDefault(w => w.IntersectsWith(Hull));
 			if (coll != null)
 			{
-				Reflect(coll);
+				Bounce(coll);
 			}
 			Pos_x += Speed_x;
 			Pos_y += Speed_y;
+
+			//Rotate
+			Vector diff = new Vector(Aim) - new Vector(Hull.Center());
+			Bearing = diff.Angle;
+			Console.WriteLine("X:{0}| Y:{1} | Angle:{2})", diff.x, diff.y, Bearing);
+
 		}
 
-		public void Reflect(Wall w)
+		public void Bounce(Wall w)
 		{
-			Rectangle reflectionPlace = Rectangle.Intersect(w.rectangle, Hull);
 			Vector velocity = new Vector(Speed_x, Speed_y);
-			Vector normal = new Vector(Hull.Center()) - new Vector(reflectionPlace.Center());
+			Vector normal = new Vector(Hull.Center()) - w.Reflect(Hull);
 			normal = normal.Normalize();
 			Vector reflection = velocity - 2 * velocity.Dot(normal) * normal;
-			Speed_x = reflection.x;
-			Speed_y = reflection.y;
+			Speed_x = (int)reflection.x;
+			Speed_y = (int)reflection.y;
 		}
-
-
-
 
 		public abstract void Steer(Keys dir);
 
@@ -936,9 +971,53 @@ namespace GameObjects
 
 		public void Draw(Graphics g)
 		{
-			g.FillRectangle(Color, Hull);
-			g.FillRectangle(Brushes.Gray, Cockpit);
+			using (Matrix m = new Matrix())
+			{
+				m.RotateAt((float)Bearing, Hull.Center());
+				g.Transform = m;
+				g.FillRectangle(Color, Hull);
+				g.FillRectangle(Brushes.Gray, Cockpit);
+				g.ResetTransform();
+			}
 		}
+
+		internal void Turn(Point aim)
+		{
+			Aim = aim;		
+		}
+
+		//public void DoSomeShit()
+		//{
+		//	Point point = new Point(60, 10);
+
+		//	// Assume that the variable "point" contains the location of the
+		//	// most recent mouse click.
+		//	// To simulate a hit, assign (60, 10) to point.
+		//	// To simulate a miss, assign (0, 0) to point.
+
+		//	SolidBrush solidBrush = new SolidBrush(System.Drawing.Color.Black);
+		//	Region region1 = new Region(new Rectangle(50, 0, 50, 150));
+		//	Region region2 = new Region(new Rectangle(0, 50, 150, 50));
+		//	//region1.IsVisible(,)
+		//	// Create a plus-shaped region by forming the union of region1 and
+		//	// region2.
+		//	// The union replaces region1.
+		//	region1.Union(region2);
+
+		//	if (region1.IsVisible(point, e.Graphics))
+		//	{
+		//		// The point is in the region. Use an opaque brush.
+		//		solidBrush.Color = Color.FromArgb(255, 255, 0, 0);
+		//	}
+		//	else
+		//	{
+		//		// The point is not in the region. Use a semitransparent brush.
+		//		solidBrush.Color = Color.FromArgb(64, 255, 0, 0);
+		//	}
+
+		//	e.Graphics.FillRegion(solidBrush, region1);
+
+		//}
 
 	}
 
@@ -964,9 +1043,6 @@ namespace GameObjects
 					break;
 			}
 		}
-
-
-
 
 		public override void Shoot(Player player, int timeElapsed)
 		{
@@ -1016,16 +1092,16 @@ namespace GameObjects
 		{
 			switch (dir)
 			{
-				case Keys.D:
+				case Keys.Right:
 					Speed_x += Acceleration;
 					break;
-				case Keys.S:
+				case Keys.Down:
 					Speed_y += Acceleration;
 					break;
-				case Keys.A:
+				case Keys.Left:
 					Speed_x -= Acceleration;
 					break;
-				case Keys.W:
+				case Keys.Up:
 					Speed_y -= Acceleration;
 					break;
 			}
@@ -1046,12 +1122,10 @@ namespace GameObjects
 			}
 		}
 
-
-
 		public override double Dist(Bullet b)
 		{
-			Bullet1 b1 = (Bullet1)b;
-			if (b1.Pos_x < Pos_x)
+			//Bullet1 b1 = (Bullet1)b;
+			if (b.Pos_x < Pos_x)
 			{
 				return Math.Sqrt((b.Pos_x - Pos_x) ^ 2 + (b.Pos_y - Pos_y) ^ 2);
 			}
@@ -1063,29 +1137,78 @@ namespace GameObjects
 	}
 
 
-
-
-
 	public class Wall : MarshalByRefObject
 	{
-		public Rectangle rectangle { get; set; }
 		public Brush Color { get; set; }
 
+		public Region region { get; set; }
 
 
 		public Wall(Brush color, Point location, Size size)
 		{
-			rectangle = new Rectangle(location, size);
+			Rectangle rectangle = new Rectangle(location, size);
+			region = new Region(rectangle);
+			Color = color;
+		}
+
+		public Wall(Brush color, Point from, Point to)
+		{
+			region = Calculate(from, to);
 
 			Color = color;
 		}
 
-		public void Draw(Graphics g)
+		private Region Calculate(Point from, Point to, int w = 5)
 		{
-			g.FillRectangle(Color, rectangle);
+			Vector A = new Vector(from);
+			Vector B = new Vector(to);
+
+			double alp = (B - A).Angle;
+
+			Vector shift = w / 2 * new Vector(Math.Cos(Math.PI / 2 - alp), - Math.Sin(Math.PI / 2 - alp));
+
+			GraphicsPath path = new GraphicsPath();
+			path.StartFigure();
+			path.AddLine((A + shift).asPoint, (B + shift).asPoint);
+			path.AddLine((B + shift).asPoint, (B - shift).asPoint);
+			path.AddLine((B - shift).asPoint, (A - shift).asPoint);
+			path.AddLine((A - shift).asPoint, (A + shift).asPoint);
+			path.CloseFigure();
+			Region reg = new Region(path);
+			return reg;
+
+			//Point[] pts = new Point[] { (A + shift).asPoint, (B + shift).asPoint, (B - shift).asPoint, (A - shift).asPoint, };
+			//byte[] types = new byte[] { (byte)PathPointType.Start, (byte)PathPointType.Line, (byte)PathPointType.CloseSubpath };
+			//return new Region(new GraphicsPath(pts, types));
+
+			//g.FillRegion(Brushes.AliceBlue, r);
+
+
 		}
 
+		public void Draw(Graphics g)
+		{
+			//g.FillRectangle(Color, rectangle);
+			g.FillRegion(Color, region);
+			
+		}
 
+		internal bool IntersectsWith(Rectangle hull)
+		{
+			bool vis = region.IsVisible(hull);
+			return vis; //  false;// 
+		}
+
+		public Vector Reflect(Rectangle r)
+		{
+			Region reflectionPlace = region.Clone();
+			reflectionPlace.Intersect(r);
+
+			RegionData rd = reflectionPlace.GetRegionData();
+
+			Vector reflectionPoint = new Vector(-10,5);
+			return reflectionPoint;
+		}
 	}
 
 	public class Bullet : MarshalByRefObject

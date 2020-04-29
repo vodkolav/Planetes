@@ -57,12 +57,14 @@
 			this.pictureBox1.BackColor = System.Drawing.SystemColors.Window;
 			this.pictureBox1.Location = new System.Drawing.Point(0, 28);
 			this.pictureBox1.Name = "pictureBox1";
-			this.pictureBox1.Size = new System.Drawing.Size(1000, 800);
+			this.pictureBox1.Size = new System.Drawing.Size(1400, 800);
 			this.pictureBox1.TabIndex = 0;
 			this.pictureBox1.TabStop = false;
+			this.pictureBox1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseMove);
 			// 
 			// timer1
 			// 
+			this.timer1.Interval = 10;
 			this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
 			// 
 			// pbPl1Ammo
@@ -113,7 +115,7 @@
             this.toolStripDropDownButton1});
 			this.toolStrip1.Location = new System.Drawing.Point(0, 0);
 			this.toolStrip1.Name = "toolStrip1";
-			this.toolStrip1.Size = new System.Drawing.Size(1000, 25);
+			this.toolStrip1.Size = new System.Drawing.Size(1378, 25);
 			this.toolStrip1.TabIndex = 5;
 			this.toolStrip1.Text = "toolStrip1";
 			// 
@@ -216,12 +218,12 @@
 			this.label4.TabIndex = 9;
 			this.label4.Text = "Health";
 			// 
-			// Form1
+			// Game
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.Color.White;
-			this.ClientSize = new System.Drawing.Size(1000, 901);
+			this.ClientSize = new System.Drawing.Size(1400, 901);
 			this.Controls.Add(this.pbPl2Hlth);
 			this.Controls.Add(this.label4);
 			this.Controls.Add(this.pbPl1Ammo);
@@ -235,7 +237,7 @@
 			this.DoubleBuffered = true;
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-			this.Name = "Form1";
+			this.Name = "Game";
 			this.Text = "World of Starcraft";
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
 			this.Load += new System.EventHandler(this.Form1_Load);
