@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
 
-namespace GameObjects
+namespace PolygonCollision
 {
 
 	public struct Vector {
@@ -69,7 +69,7 @@ namespace GameObjects
 			return (float)Math.Sqrt(Math.Pow(vector.X - this.X, 2) + Math.Pow(vector.Y - this.Y, 2));
 		}
 
-		public static float angle(Vector v1, Vector v2)
+		static float angle(Vector v1, Vector v2)
 		{
 			float dot = v1.Dot(v2);      // dot product between [x1, y1] and [x2, y2]
 			float det = v1.X * v2.Y - v1.Y * v2.X;      // determinant
@@ -79,11 +79,11 @@ namespace GameObjects
 		}
 
 
-		internal float Angle
+		public float Angle
 		{
 			get
 			{
-				return (float)angle(this, new Vector(1, 0));
+				return angle(this, new Vector(1, 0));
 			}
 		}
 

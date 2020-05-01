@@ -4,7 +4,7 @@ using System.Text;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
-namespace GameObjects
+namespace PolygonCollision
 {
 
 	// Structure that stores the results of the PolygonCollision function

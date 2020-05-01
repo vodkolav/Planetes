@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IPAddressControlLib", "IPAd
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Networking", "Networking\Networking.csproj", "{50F700F1-1A12-4BE6-9AFB-1D0543A0AF70}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolygonCollision", "PolygonCollision\PolygonCollision.csproj", "{4AF31DBD-DEA0-426B-BB0C-545051127F6E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{50F700F1-1A12-4BE6-9AFB-1D0543A0AF70}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50F700F1-1A12-4BE6-9AFB-1D0543A0AF70}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50F700F1-1A12-4BE6-9AFB-1D0543A0AF70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4AF31DBD-DEA0-426B-BB0C-545051127F6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4AF31DBD-DEA0-426B-BB0C-545051127F6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4AF31DBD-DEA0-426B-BB0C-545051127F6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4AF31DBD-DEA0-426B-BB0C-545051127F6E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -229,9 +229,6 @@ namespace GameObjects
 					BotRelease(Keys.Return);
 				}
 
-
-
-				int step = 5;
 				timeElapsed += ClsGameObjects.FrameRate;
 				Thread.Sleep(ClsGameObjects.FrameRate * 10);
 			}
@@ -348,7 +345,6 @@ namespace GameObjects
 				{
 					BotRelease(Keys.Return);
 				}
-				int step = 5;
 				timeElapsed += ClsGameObjects.FrameRate;
 				Thread.Sleep(ClsGameObjects.FrameRate * 10);
 			}
