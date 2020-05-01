@@ -48,6 +48,7 @@ namespace Planetes
 			stillOpen = true;
 			bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
 			g = Graphics.FromImage(bmp);
+			g.SmoothingMode = SmoothingMode.AntiAlias;
 			pbPl1Ammo.Visible = true;
 			pbPl1Ammo.Maximum = gameObjects.Player1.MaxAmmo;
 			pbPl1Hlth.Visible = true;
@@ -89,6 +90,7 @@ namespace Planetes
 				
 				gameObjects.Player1.Jet.Draw(g);
 				gameObjects.Player2.Jet.Draw(g);
+
 				//g.FillRectangle(Brushes.Blue, gameObjects.Player1.Jet.Pos_x, gameObjects.Player1.Jet.Pos_y, gameObjects.Player1.Jet.Width, gameObjects.Player1.Jet.Height);
 				//g.FillRectangle(Brushes.Gray, gameObjects.Player1.Jet.Pos_x + gameObjects.Player1.Jet.Width, gameObjects.Player1.Jet.Pos_y + gameObjects.Player1.Jet.Height / 2 - gameObjects.Player1.Jet.Cockpit_size / 2, gameObjects.Player1.Jet.Cockpit_size, gameObjects.Player1.Jet.Cockpit_size);
 				//g.FillRectangle(Brushes.Blue, gameObjects.Player2.Jet.Pos_x - gameObjects.Player2.Jet.Width, gameObjects.Player2.Jet.Pos_y, gameObjects.Player2.Jet.Width, gameObjects.Player2.Jet.Height);

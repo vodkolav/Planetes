@@ -4,7 +4,6 @@ using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
-using System.Numerics;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -42,7 +41,7 @@ namespace GameObjects
 
 			Walls.Add(new Wall(wallBrush, new Point(winSize_x - 50, 500), new Size(5, 100)));
 
-			Walls.Add(new Wall(wallBrush, new Point(100,100), new Point (200,200)));
+			Walls.Add(new Wall(wallBrush, new Point(100, 100), new Point(200, 200)));
 
 
 			Player1 = new Player1("Player1", 20, 300, winSize_x, winSize_y, this);
@@ -59,119 +58,11 @@ namespace GameObjects
 		}
 	}
 
-	public struct Vector
-	{
-		public double x { get; }
-
-		public double y { get; }
-
-		public Vector(Point point)
-		{
-			x = point.X;
-			y = point.Y;
-		}
-
-		public Vector(double X, double Y)
-		{
-			x = X;
-			y = Y;
-		}
-
-		public Vector(Vector2 v)
-		{
-			x = v.X ;
-			y = v.Y;
-		}
-
-		public Vector2 asVector2()
-		{
-			return new Vector2((float)x, (float)y);
-		}
-
-		public Point asPoint
-		{
-			get { return new Point((int)x, (int)y); }
-		}
-
-		public static Vector operator -(Vector v1, Vector v2)
-		{
-			return new Vector(
-			   v1.x - v2.x,
-			   v1.y - v2.y);
-		}
-
-		public static Vector operator +(Vector v1, Vector v2)
-		{
-			return new Vector(
-			   v1.x + v2.x,
-			   v1.y + v2.y);
-		}
-
-		public static Vector operator *(Vector v1, double s2)
-		{
-			return
-			   new Vector
-			   (
-				  v1.x * s2,
-				  v1.y * s2
-			   );
-		}
-
-		public static Vector operator *(double s1, Vector v2)
-		{
-			return v2 * s1;
-		}
-
-		public double Magnitude
-		{
-			get
-			{
-				return Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2));
-			}
-		}
-
-		public Vector Normalize()
-		{
-			Vector2 v2 = asVector2();
-			return new Vector( Vector2.Normalize(v2));
-		}
-
-		public static double angle(Vector v1, Vector v2)
-		{			
-			double dot = Dot(v1, v2);      // dot product between [x1, y1] and [x2, y2]
-			double det = v1.x * v2.y - v1.y * v2.x;      // determinant
-			double angle = - Math.Atan2(det, dot) * 57.2958;
-			//Console.WriteLine("X:{0}| Y:{1} | Angle:{2})", v2.x, v2.y, angle);
-			return angle;
-		}
-
-
-		internal double Angle
-		{
-			get
-			{
-				return (double)angle(this, new Vector(1, 0));
-			}
-		}
-
-		public static double Dot(Vector v1, Vector v2)
-		{
-			return v1.x * v2.x + v1.y * v2.y;
-		}
-
-		public double Dot(Vector other)
-		{
-			return Dot(this, other);
-		}
-
-
-	}
-
 	public static class RectExtension
 	{
 		public static Point Center(this Rectangle rect)
 		{
-			return new Point(rect.Location.X + rect.Size.Width/2 ,  rect.Location.Y + rect.Size.Height/2);
+			return new Point(rect.Location.X + rect.Size.Width / 2, rect.Location.Y + rect.Size.Height / 2);
 		}
 
 		public static Point Center(this RectangleF rect)
@@ -262,7 +153,7 @@ namespace GameObjects
 			: base(name, health, ammo, winSize_x, winSize_y, game)
 		{
 			Jet = new Jet1(new Point(10, winSize_y / 2), winSize_x, winSize_y);
-			SteerKeysBindings = new List<Keys>{ Keys.A, Keys.D, Keys.W, Keys.S };
+			SteerKeysBindings = new List<Keys> { Keys.A, Keys.D, Keys.W, Keys.S };
 			ShootKeyBindings = Keys.Space;
 		}
 
@@ -918,7 +809,7 @@ namespace GameObjects
 			Acceleration = 1;
 			FireRate = 10;
 		}
-			   		 
+
 
 		public double Dist(Astroid a)
 		{
@@ -951,7 +842,7 @@ namespace GameObjects
 			//Rotate
 			Vector diff = new Vector(Aim) - new Vector(Hull.Center());
 			Bearing = diff.Angle;
-			Console.WriteLine("X:{0}| Y:{1} | Angle:{2})", diff.x, diff.y, Bearing);
+			Console.WriteLine("X:{0}| Y:{1} | Angle:{2})", diff.X, diff.X, Bearing);
 
 		}
 
@@ -959,10 +850,10 @@ namespace GameObjects
 		{
 			Vector velocity = new Vector(Speed_x, Speed_y);
 			Vector normal = new Vector(Hull.Center()) - w.Reflect(Hull);
-			normal = normal.Normalize();
+			normal.Normalize();
 			Vector reflection = velocity - 2 * velocity.Dot(normal) * normal;
-			Speed_x = (int)reflection.x;
-			Speed_y = (int)reflection.y;
+			Speed_x = (int)reflection.X;
+			Speed_y = (int)reflection.Y;
 		}
 
 		public abstract void Steer(Keys dir);
@@ -978,12 +869,13 @@ namespace GameObjects
 				g.FillRectangle(Color, Hull);
 				g.FillRectangle(Brushes.Gray, Cockpit);
 				g.ResetTransform();
+
 			}
 		}
 
 		internal void Turn(Point aim)
 		{
-			Aim = aim;		
+			Aim = aim;
 		}
 
 		//public void DoSomeShit()
@@ -1165,7 +1057,7 @@ namespace GameObjects
 
 			double alp = (B - A).Angle;
 
-			Vector shift = w / 2 * new Vector(Math.Cos(Math.PI / 2 - alp), - Math.Sin(Math.PI / 2 - alp));
+			Vector shift = w / 2 * new Vector((float)(Math.Cos(Math.PI / 2.0 - alp)), (float)(-Math.Sin(Math.PI / 2.0 - alp)));
 
 			GraphicsPath path = new GraphicsPath();
 			path.StartFigure();
@@ -1190,7 +1082,7 @@ namespace GameObjects
 		{
 			//g.FillRectangle(Color, rectangle);
 			g.FillRegion(Color, region);
-			
+
 		}
 
 		internal bool IntersectsWith(Rectangle hull)
@@ -1206,7 +1098,7 @@ namespace GameObjects
 
 			RegionData rd = reflectionPlace.GetRegionData();
 
-			Vector reflectionPoint = new Vector(-10,5);
+			Vector reflectionPoint = new Vector(-10, 5);
 			return reflectionPoint;
 		}
 	}
