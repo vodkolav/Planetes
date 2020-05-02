@@ -28,28 +28,28 @@ namespace PolygonCollision {
 			//p.Points.Add(new Vector(100, 150));
 			//p.Points.Add(new Vector(0, 100));
 
-			p.Points.Add(new Vector(50, 50));
-			p.Points.Add(new Vector(80, 50));
-			p.Points.Add(new Vector(100, 60));
-			p.Points.Add(new Vector(80, 70));
-			p.Points.Add(new Vector(50, 70));
+			p.Vertices.Add(new Vector(50, 50));
+			p.Vertices.Add(new Vector(80, 50));
+			p.Vertices.Add(new Vector(100, 60));
+			p.Vertices.Add(new Vector(80, 70));
+			p.Vertices.Add(new Vector(50, 70));
 			p.Rotate(20);
 			polygons.Add(p);
 
 			p = new Polygon();
-			p.Points.Add(new Vector(50, 50));
-			p.Points.Add(new Vector(100, 0));
-			p.Points.Add(new Vector(150, 150));
+			p.Vertices.Add(new Vector(50, 50));
+			p.Vertices.Add(new Vector(100, 0));
+			p.Vertices.Add(new Vector(150, 150));
 			p.Offset(80, 80);
 
 			polygons.Add(p);			
 
 			p = new Polygon();
-			p.Points.Add(new Vector(0, 50));
-			p.Points.Add(new Vector(50,0));
-			p.Points.Add(new Vector(150,80));
-			p.Points.Add(new Vector(160,200));
-			p.Points.Add(new Vector(-10, 190));
+			p.Vertices.Add(new Vector(0, 50));
+			p.Vertices.Add(new Vector(50,0));
+			p.Vertices.Add(new Vector(150,80));
+			p.Vertices.Add(new Vector(160,200));
+			p.Vertices.Add(new Vector(-10, 190));
 			p.Offset(300, 300);
 			
 			polygons.Add(p);
@@ -63,12 +63,12 @@ namespace PolygonCollision {
 			Vector p1;
 			Vector p2;
 			foreach (Polygon polygon in polygons) {
-				for (int i = 0; i < polygon.Points.Count; i++) {
-					p1 = polygon.Points[i];
-					if (i + 1 >= polygon.Points.Count) {
-						p2 = polygon.Points[0];
+				for (int i = 0; i < polygon.Vertices.Count; i++) {
+					p1 = polygon.Vertices[i];
+					if (i + 1 >= polygon.Vertices.Count) {
+						p2 = polygon.Vertices[0];
 					} else {
-						p2 = polygon.Points[i + 1];
+						p2 = polygon.Vertices[i + 1];
 					}
 					e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 					e.Graphics.DrawLine(new Pen(Color.Black), p1, p2);
@@ -119,7 +119,7 @@ namespace PolygonCollision {
 			foreach (Polygon polygon in polygons) {
 				if (polygon == player) continue;
 
-				PolygonCollisionResult r = player.Collision(player, polygon, velocity);
+				PolygonCollisionResult r = player.Collides(polygon, velocity);
 
 				if (r.WillIntersect) {
 					playerTranslation = velocity + r.MinimumTranslationVector;

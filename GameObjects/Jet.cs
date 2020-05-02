@@ -16,50 +16,49 @@ namespace GameObjects
 		//protected int WHeight { get; set; }
 		public int Height { get; set; }
 		public int Width { get; set; }
+
+		public Vector Pos { get => Hull.Center; }
 		public int Pos_x { get; set; }
 		public int Pos_y { get; set; }
-		public double Bearing { get; set; }
+
+		public Vector Bearing { get; set; } = new Vector(1, 0);
 		public Point Aim { get; set; }
 		public Size Cockpit_size { get; set; }
 		public Brush Color { get; set; }
 
-		public Rectangle Hull
+		public Polygon Hull{ get; set; }
+		
+
+		public Polygon Cockpit { get; set;	}
+
+
+		private Vector _speed;
+
+		public Vector Speed
 		{
-			get
-			{
-				return new Rectangle(new Point(Pos_x, Pos_y), new Size(30, 24));
-			}
+			get { return _speed; }
+			set { _speed = value;  }
 		}
 
-		public Rectangle Cockpit
-		{
-			get
-			{
-				return new Rectangle(new Point(Pos_x, Pos_y) + new Size(30, 6), Cockpit_size);
-			}
-		}
-
-		private int _speed_x;
 
 		public int Speed_x
 		{
-			get { return _speed_x; }
+			get { return (int)_speed.X; }
 			set
 			{
 				if (Math.Abs(value) <= 20)
-					_speed_x = value;
+					_speed.X = value;
 			}
 		}
 
-		private int _speed_y;
 
 		public int Speed_y
 		{
-			get { return _speed_y; }
+			get { return (int)_speed.Y; }
 			set
 			{
 				if (Math.Abs(value) <= 10)
-					_speed_y = value;
+					_speed.Y = value;
 			}
 		}
 
@@ -69,12 +68,41 @@ namespace GameObjects
 		{
 			//WWidth = wwidth;
 			//WHeight = wheight;
-			Pos_x = start.X;
-			Pos_y = start.Y;
+			Hull = new Polygon();
+			Hull.AddVertex(new Vector(50, 50));
+			Hull.AddVertex(new Vector(80, 50));
+			// for cockpit Hull.AddVertex(new Vector(100, 60));
+			Hull.AddVertex(new Vector(80, 70));
+			Hull.AddVertex(new Vector(50, 70));
+			
+			Cockpit = new Polygon();			
+			Cockpit.AddVertex(new Vector(80, 50));
+			Cockpit.AddVertex(new Vector(100, 60));
+			Cockpit.AddVertex(new Vector(80, 70));
+
+			Offset(Vector.FromPoint(start));
+
+			//Pos_x = start.X;
+			//Pos_y = start.Y;
 			Color = color;
-			Cockpit_size = new Size(12, 12);
 			Acceleration = 1;
 			FireRate = 10;
+		}
+
+	
+
+		private void Offset(Vector destination)
+		{
+			Hull.Offset(destination);
+			Cockpit.Offset(destination);
+		}
+
+		private void Rotate(Vector dir)
+		{
+			float diff = Bearing.Angle(dir);
+			Bearing = dir;
+			Hull.RotateAt(diff, Hull.Center);
+			Cockpit.RotateAt(diff, Hull.Center);
 		}
 
 
@@ -98,29 +126,51 @@ namespace GameObjects
 
 		public void Move(ClsGameObjects gO)
 		{
-			Wall coll = gO.Walls.FirstOrDefault(w => w.IntersectsWith(Hull));
-			if (coll != null)
+			PolygonCollisionResult r;
+			foreach(Wall w in gO.Walls)
 			{
-				Bounce(coll);
+				r = Hull.Collides(w.region, Speed);
+				if (r.Intersect)
+				{
+					Bounce(r.translationAxis);
+				}
 			}
-			Pos_x += Speed_x;
-			Pos_y += Speed_y;
+			Offset(Speed);
 
 			//Rotate
-			Vector diff = new Vector(Aim) - new Vector(Hull.Center());
-			Bearing = diff.Angle;
-			Console.WriteLine("X:{0}| Y:{1} | Angle:{2})", diff.X, diff.X, Bearing);
+			Vector dir = new Vector(Aim) - new Vector(Hull.Center);
+			
+			Rotate(dir);
+			//Console.WriteLine("X:{0}| Y:{1} | Angle:{2})", diff.X, diff.X, Bearing);
+
+
+
+			//Wall coll = gO.Walls.FirstOrDefault(w => Hull.Collides(w.region, Speed));
+			//if (coll != null)
+			//{
+			//	//Bounce(coll);
+			//}
+			//Pos_x += Speed_x;
+			//Pos_y += Speed_y;
 
 		}
+
+
 
 		public void Bounce(Wall w)
 		{
 			Vector velocity = new Vector(Speed_x, Speed_y);
-			Vector normal = new Vector(Hull.Center()) - w.Reflect(Hull);
+			Vector normal = new Vector(Hull.Center) - w.Reflect(Hull);
 			normal.Normalize();
 			Vector reflection = velocity - 2 * velocity.Dot(normal) * normal;
 			Speed_x = (int)reflection.X;
 			Speed_y = (int)reflection.Y;
+		}
+
+		public void Bounce(Vector normal)
+		{
+			Vector reflection = Speed - 2 * Speed.Dot(normal) * normal;
+			Speed = reflection;
 		}
 
 		public abstract void Steer(Keys dir);
@@ -129,15 +179,16 @@ namespace GameObjects
 
 		public void Draw(Graphics g)
 		{
-			using (Matrix m = new Matrix())
-			{
-				m.RotateAt((float)Bearing, Hull.Center());
-				g.Transform = m;
-				g.FillRectangle(Color, Hull);
-				g.FillRectangle(Brushes.Gray, Cockpit);
-				g.ResetTransform();
+			//using (Matrix m = new Matrix())
+			//{
+			//	m.RotateAt((float)Bearing, Hull.Center());
+			//	g.Transform = m;
+		
+			Hull.Draw(g, Color);
+			Cockpit.Draw(g,Brushes.Gray);
+			//	g.ResetTransform();
 
-			}
+			//}
 		}
 
 		internal void Turn(Point aim)

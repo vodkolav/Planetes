@@ -13,39 +13,65 @@ namespace PolygonCollision
 		public bool WillIntersect; // Are the polygons going to intersect forward in time?
 		public bool Intersect; // Are the polygons currently intersecting
 		public Vector MinimumTranslationVector; // The translation to apply to polygon A to push the polygons appart.
+		public Vector translationAxis;
 	}
 
 	public class Polygon
 	{
-
-		public void BuildEdges()
+		public List<Vector> BuildEdges()
 		{
 			Vector p1;
 			Vector p2;
-			Edges.Clear();
-			for (int i = 0; i < Points.Count; i++)
+			List<Vector> Edges = new List<Vector>();
+			for (int i = 0; i < Vertices.Count; i++)
 			{
-				p1 = Points[i];
-				if (i + 1 >= Points.Count)
+				p1 = Vertices[i];
+				if (i + 1 >= Vertices.Count)
 				{
-					p2 = Points[0];
+					p2 = Vertices[0];
 				}
 				else
 				{
-					p2 = Points[i + 1];
+					p2 = Vertices[i + 1];
 				}
 				Edges.Add(p2 - p1);
 			}
+			return Edges;
 		}
 
-		public List<Vector> Edges { get; } = new List<Vector>();
+		public void AddVertex(Vector vertex)
+		{
+			Vertices.Add(vertex);
+		}
 
-		public List<Vector> Points { get; private set; } = new List<Vector>();
+		public List<Vector> Edges { get { return BuildEdges(); } }
+
+
+		public Vector Edge(int i)
+		{		
+			if (i > Vertices.Count)
+			{ throw new IndexOutOfRangeException(string.Format("There are only {0} vertices", Vertices.Count)); }
+
+			Vector p1 = Vertices[i];
+			Vector p2;
+			if (i + 1 >= Vertices.Count)
+			{
+				p2 = Vertices[0];
+			}
+			else
+			{
+				p2 = Vertices[i + 1];
+			}
+			return p2 - p1;			 
+		}
+
+
+		public List<Vector> Vertices { get; private set; } = new List<Vector>();
 
 		public PointF[] PointFs
 		{
-			get { return Points.ConvertAll(new Converter<Vector, PointF>(Vector.asPointF)).ToArray(); }
-			set { Points = new List<PointF>(value).ConvertAll(new Converter<PointF, Vector>(Vector.FromPointF)); }
+			get { return Vertices.ConvertAll(new Converter<Vector, PointF>(Vector.asPointF)).ToArray(); }
+			set { Vertices = new List<PointF>(value).ConvertAll(new Converter<PointF, Vector>(Vector.FromPointF)); }
 		}
 
 		public Vector Center
@@ -54,13 +80,13 @@ namespace PolygonCollision
 			{
 				float totalX = 0;
 				float totalY = 0;
-				for (int i = 0; i < Points.Count; i++)
+				for (int i = 0; i < Vertices.Count; i++)
 				{
-					totalX += Points[i].X;
-					totalY += Points[i].Y;
+					totalX += Vertices[i].X;
+					totalY += Vertices[i].Y;
 				}
 
-				return new Vector(totalX / (float)Points.Count, totalY / (float)Points.Count);
+				return new Vector(totalX / (float)Vertices.Count, totalY / (float)Vertices.Count);
 			}
 		}
 
@@ -73,10 +99,10 @@ namespace PolygonCollision
 
 		public void Offset(float x, float y)
 		{
-			for (int i = 0; i < Points.Count; i++)
+			for (int i = 0; i < Vertices.Count; i++)
 			{
-				Vector p = Points[i];
-				Points[i] = new Vector(p.X + x, p.Y + y);
+				Vector p = Vertices[i];
+				Vertices[i] = new Vector(p.X + x, p.Y + y);
 			}
 		}
 
@@ -90,14 +116,24 @@ namespace PolygonCollision
 			PointFs = p;
 		}
 
+		public void RotateAt(float angle, Vector at)
+		{
+			Matrix myMatrix = new Matrix();
+			myMatrix.RotateAt(angle, at);
+			//PointF[] toRotate = PointFs;
+			PointF[] p = PointFs;
+			myMatrix.TransformPoints(p);
+			PointFs = p;
+		}
+
 		public override string ToString()
 		{
 			string result = "";
 
-			for (int i = 0; i < Points.Count; i++)
+			for (int i = 0; i < Vertices.Count; i++)
 			{
 				if (result != "") result += " ";
-				result += "{" + Points[i].ToString(true) + "}";
+				result += "{" + Vertices[i].ToString(true) + "}";
 			}
 			return result;
 		}
@@ -105,7 +141,7 @@ namespace PolygonCollision
 		[Obsolete]
 		public GraphicsPath toGraphicsPath()
 		{
-			List<PointF> p = Points.ConvertAll(new Converter<Vector, PointF>(Vector.asPointF));
+			List<PointF> p = Vertices.ConvertAll(new Converter<Vector, PointF>(Vector.asPointF));
 
 			List<byte> pp = new List<byte>() { (byte)PathPointType.Start };
 			for (int i = 0; i < p.Count - 2; i++)
@@ -119,14 +155,14 @@ namespace PolygonCollision
 
 
 		// Check if polygon A is going to collide with polygon B for the given velocity
-		public PolygonCollisionResult Collision(Polygon polygonA, Polygon polygonB, Vector velocity)
+		public PolygonCollisionResult Collides(Polygon Other, Vector velocity)
 		{
 			PolygonCollisionResult result = new PolygonCollisionResult();
 			result.Intersect = true;
 			result.WillIntersect = true;
 
-			int edgeCountA = polygonA.Edges.Count;
-			int edgeCountB = polygonB.Edges.Count;
+			int edgeCountA = Vertices.Count;  //because the num of edges and vertices are the same
+			int edgeCountB = Other.Vertices.Count;
 			float minIntervalDistance = float.PositiveInfinity;
 			Vector translationAxis = new Vector();
 			Vector edge;
@@ -136,11 +172,11 @@ namespace PolygonCollision
 			{
 				if (edgeIndex < edgeCountA)
 				{
-					edge = polygonA.Edges[edgeIndex];
+					edge = Edge(edgeIndex);
 				}
 				else
 				{
-					edge = polygonB.Edges[edgeIndex - edgeCountA];
+					edge = Other.Edge(edgeIndex - edgeCountA);
 				}
 
 				// ===== 1. Find if the polygons are currently intersecting =====
@@ -151,8 +187,8 @@ namespace PolygonCollision
 
 				// Find the projection of the polygon on the current axis
 				float minA = 0; float minB = 0; float maxA = 0; float maxB = 0;
-				ProjectPolygon(axis, polygonA, ref minA, ref maxA);
-				ProjectPolygon(axis, polygonB, ref minB, ref maxB);
+				ProjectPolygon(axis, this, ref minA, ref maxA);
+				ProjectPolygon(axis, Other, ref minB, ref maxB);
 
 				// Check if the polygon projections are currentlty intersecting
 				if (IntervalDistance(minA, maxA, minB, maxB) > 0) result.Intersect = false;
@@ -188,9 +224,10 @@ namespace PolygonCollision
 					minIntervalDistance = intervalDistance;
 					translationAxis = axis;
 
-					Vector d = polygonA.Center - polygonB.Center;
+					Vector d = Center - Other.Center;
 					if (d.Dot(translationAxis) < 0) translationAxis = -translationAxis;
 					MTV = translationAxis;
+					result.translationAxis = translationAxis;
 				}
 			}
 
@@ -200,6 +237,11 @@ namespace PolygonCollision
 			if (result.WillIntersect) result.MinimumTranslationVector = translationAxis * minIntervalDistance;
 
 			return result;
+		}
+
+		public void Draw(Graphics g, Brush color)
+		{
+			g.FillPolygon(color, PointFs);
 		}
 
 		// Calculate the distance between [minA, maxA] and [minB, maxB]
@@ -220,12 +262,12 @@ namespace PolygonCollision
 		public void ProjectPolygon(Vector axis, Polygon polygon, ref float min, ref float max)
 		{
 			// To project a point on an axis use the dot product
-			float d = axis.Dot(polygon.Points[0]);
+			float d = axis.Dot(polygon.Vertices[0]);
 			min = d;
 			max = d;
-			for (int i = 0; i < polygon.Points.Count; i++)
+			for (int i = 0; i < polygon.Vertices.Count; i++)
 			{
-				d = polygon.Points[i].Dot(axis);
+				d = polygon.Vertices[i].Dot(axis);
 				if (d < min)
 				{
 					min = d;

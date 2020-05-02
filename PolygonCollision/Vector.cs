@@ -40,7 +40,7 @@ namespace PolygonCollision
 			return new Vector(p.X, p.Y);
 		}
 
-		public Point asPoint
+		public Point AsPoint
 		{
 			get { return new Point((int)X, (int)Y); }
 		}
@@ -61,8 +61,13 @@ namespace PolygonCollision
 			return new Vector(X / magnitude, Y / magnitude);
 		}
 
-		public float Dot(Vector vector) {
-			return this.X * vector.X + this.Y * vector.Y;
+		public float Dot(Vector other) {
+			return (this * other).Sum();
+		}
+
+		public float Sum()
+		{
+			return X + Y;
 		}
 
 		public float DistanceTo(Vector vector) {
@@ -73,20 +78,21 @@ namespace PolygonCollision
 		{
 			float dot = v1.Dot(v2);      // dot product between [x1, y1] and [x2, y2]
 			float det = v1.X * v2.Y - v1.Y * v2.X;      // determinant
-			float angle = (float)(-Math.Atan2(det, dot) * 57.2958);
+			float angle = (float)(Math.Atan2(det, dot) * 57.2958);
 			//Console.WriteLine("X:{0}| Y:{1} | Angle:{2})", v2.x, v2.y, angle);
 			return angle;
 		}
 
 
-		public float Angle
+		public float Angle()
 		{
-			get
-			{
 				return angle(this, new Vector(1, 0));
-			}
 		}
 
+		public float Angle( Vector other)
+		{
+			return angle(this,other);
+		}
 
 
 		public static implicit operator Point(Vector p) {
@@ -124,6 +130,11 @@ namespace PolygonCollision
 
 		public static Vector operator *(Vector a, double b) {
 			return new Vector((float)(a.X * b), (float)(a.Y * b));
+		}
+
+		public static Vector operator *(Vector a, Vector b)
+		{
+			return new Vector((float)(a.X * b.X), (float)(a.Y * b.Y));
 		}
 
 		public override bool Equals(object obj) {

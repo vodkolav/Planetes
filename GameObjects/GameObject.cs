@@ -11,7 +11,7 @@ namespace GameObjects
 
 	public class ClsGameObjects : MarshalByRefObject
 	{
-		public static int FrameRate = 10;
+		public static int FrameRate = 20;
 		public static ClsGameObjects theObject;
 		public bool Connected { get; set; }
 		public bool ServerClosed { get; set; }
@@ -32,14 +32,16 @@ namespace GameObjects
 
 			Walls = new List<Wall>();
 			Brush wallBrush = Brushes.Magenta;
-			Walls.Add(new Wall(wallBrush, new Point(0, 0), new Size(winSize_x, 5)));
-			Walls.Add(new Wall(wallBrush, new Point(0, 0), new Size(5, winSize_y)));
-			Walls.Add(new Wall(wallBrush, new Point(0, winSize_y - 5), new Size(winSize_x, 5)));
-			Walls.Add(new Wall(wallBrush, new Point(winSize_x - 5, 0), new Size(5, winSize_y)));
+			int ww = 15; //wallwidth
 
-			Walls.Add(new Wall(wallBrush, new Point(winSize_x - 50, 500), new Size(5, 100)));
+			Walls.Add(new Wall(wallBrush, new Point(0, 0), new Size(winSize_x, ww)));
+			Walls.Add(new Wall(wallBrush, new Point(0, 0), new Size(ww, winSize_y)));
+			Walls.Add(new Wall(wallBrush, new Point(0, winSize_y - ww), new Size(winSize_x, ww)));
+			Walls.Add(new Wall(wallBrush, new Point(winSize_x - ww, 0), new Size(ww, winSize_y)));
 
-			Walls.Add(new Wall(wallBrush, new Point(100, 100), new Point(200, 200)));
+			Walls.Add(new Wall(wallBrush, new Point(winSize_x - 100, 400), new Size(ww, 100)));
+
+			Walls.Add(new Wall(wallBrush, new Point(100, 100), new Point(200, 200), ww));
 
 
 			Player1 = new Player1("Player1", 20, 300, winSize_x, winSize_y, this);
