@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PolygonCollision;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
@@ -15,8 +16,8 @@ namespace GameObjects
 		public static ClsGameObjects theObject;
 		public bool Connected { get; set; }
 		public bool ServerClosed { get; set; }
-		public Player1 Player1 { get; set; }
-		public Player2 Player2 { get; set; }
+		public Player1 player1 { get; set; }
+		public Player2 player2 { get; set; }
 		public int WinSize_x { get; set; }
 		public int WinSize_y { get; set; }
 		public List<Astroid> AstroidList { get; set; }
@@ -43,9 +44,15 @@ namespace GameObjects
 
 			Walls.Add(new Wall(wallBrush, new Point(100, 100), new Point(200, 200), ww));
 
+			Point p1Start = new Point(100, winSize_y / 2);
+			player1 = new Player1("Player1", 20, 300, p1Start, this);
 
-			Player1 = new Player1("Player1", 20, 300, winSize_x, winSize_y, this);
-			Player2 = new Player2("Player2", 20, 300, winSize_x, winSize_y, this);
+			Point p2Start = new Point(winSize_x - 100, winSize_y / 2);
+			player2 = new Player2("Player2", 20, 300, p2Start, this);
+
+			player1.Enemy = player2;
+			player2.Enemy = player1;
+
 			AstroidList = new List<Astroid>();
 			theObject = this;
 			Connected = false;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PolygonCollision;
+using System;
 using System.Drawing;
 
 namespace GameObjects
@@ -8,10 +9,8 @@ namespace GameObjects
 	public class Astroid : MarshalByRefObject
 	{
 		public int Size { get; set; }
-		public int Speed { get; set; }
-		public int Angle { get; set; }
-		public int Pos_x { get; set; }
-		public int Pos_y { get; set; }
+		public Vector Speed { get; set; }
+		public Vector Pos { get; set; }
 		public AstType Type { get; set; }
 		public bool HasHit { get; set; }
 		static public int Timeout { get { return 50; } }
@@ -52,10 +51,11 @@ namespace GameObjects
 		{
 			Random random = new Random();
 			Size = random.Next(20) + 5;
-			Speed = random.Next(1, 5) + 1;
-			Pos_x = random.Next(winSize_x);
-			Pos_y = random.Next(winSize_y);
-			Angle = random.Next(360);
+			int linearSpeed = random.Next(1, 5) + 1;
+			double Angle = Math.PI/180 * random.Next(360);
+			Vector mult = new Vector((float)Math.Cos(Angle), (float)Math.Sin(Angle));
+			Speed = mult * linearSpeed;
+			Pos = new Vector(random.Next(winSize_x), random.Next(winSize_y));			
 			TossType(random);
 			HasHit = false;
 		}
@@ -68,59 +68,97 @@ namespace GameObjects
 		public void Draw(Graphics g)
 		{
 			if (!HasHit)
-				g.FillEllipse(Color, Pos_x, Pos_y, Size, Size);
+				g.FillEllipse( Color, Pos.X, Pos.Y, Size, Size);
 		}
 
-		public void Update(ClsGameObjects gameObjects)
+
+		public void Collides(Player p)
 		{
-			if (!HasHit)
+			if (p.Jet.Collides(this))
+					//Pos_x + Size > gameObjects.player1.Jet.Pos_x
+					//&& Pos_x - Size < gameObjects.player1.Jet.Pos_x + gameObjects.player1.Jet.Width
+					//&& Pos_y - Size < gameObjects.player1.Jet.Pos_y + gameObjects.player1.Jet.Height
+					//&& Pos_y + Size > gameObjects.player1.Jet.Pos_y)
 			{
-				if (Pos_x + Size > gameObjects.Player1.Jet.Pos_x
-					&& Pos_x - Size < gameObjects.Player1.Jet.Pos_x + gameObjects.Player1.Jet.Width
-					&& Pos_y - Size < gameObjects.Player1.Jet.Pos_y + gameObjects.Player1.Jet.Height
-					&& Pos_y + Size > gameObjects.Player1.Jet.Pos_y)
+				HasHit = true;
+				if (Type == AstType.Ammo)
 				{
-					HasHit = true;
-					if (Type == AstType.Ammo)
-					{
-						gameObjects.Player1.Recharge(Size);
-					}
-					else if (Type == AstType.Health)
-					{
-						gameObjects.Player1.Heal(1);
-					}
-					else if (gameObjects.Player1.Health > 0)
-						gameObjects.Player1.Health--;
-					else
-						GameOver.Show(gameObjects.Player2);
+					p.Recharge(Size);
 				}
-				if (Pos_x + Size > gameObjects.Player2.Jet.Pos_x - gameObjects.Player2.Jet.Width - gameObjects.Player2.Jet.Cockpit_size.Width
-					&& Pos_x - Size < gameObjects.Player2.Jet.Pos_x + gameObjects.Player2.Jet.Width
-					&& Pos_y - Size < gameObjects.Player2.Jet.Pos_y + gameObjects.Player2.Jet.Height
-					&& Pos_y + Size > gameObjects.Player2.Jet.Pos_y)
+				else if (Type == AstType.Health)
 				{
-					HasHit = true;
-					if (Type == AstType.Ammo)
-					{
-						gameObjects.Player2.Recharge(Size);
-					}
-					else if (Type == AstType.Health)
-					{
-						gameObjects.Player2.Heal(1);
-					}
-					else if (gameObjects.Player2.Health > 0)
-						gameObjects.Player2.Health--;
-					else
-						GameOver.Show(gameObjects.Player1);
+					p.Heal(1);
 				}
-				if (Pos_x + Size > gameObjects.WinSize_x || Pos_x < 0 || Pos_y > gameObjects.WinSize_y || Pos_y < 0)
+				else
+					p.Hit(Size);
+			}
+		}
+
+
+		//if (
+		//	//Pos_x + Size > gameObjects.player1.Jet.Pos_x
+		//	//&& Pos_x - Size < gameObjects.player1.Jet.Pos_x + gameObjects.player1.Jet.Width
+		//	//&& Pos_y - Size < gameObjects.player1.Jet.Pos_y + gameObjects.player1.Jet.Height
+		//	//&& Pos_y + Size > gameObjects.player1.Jet.Pos_y)
+		//{
+		//	HasHit = true;
+		//	if (Type == AstType.Ammo)
+		//	{
+		//		gameObjects.player1.Recharge(Size);
+		//	}
+		//	else if (Type == AstType.Health)
+		//	{
+		//		gameObjects.player1.Heal(1);
+		//	}
+		//	else if (gameObjects.player1.Health > 0)
+		//		gameObjects.player1.Health--;
+		//	else
+		//		GameOver.Show(gameObjects.player2);
+		//}
+		//if (Pos_x + Size > gameObjects.player2.Jet.Pos_x - gameObjects.player2.Jet.Width - gameObjects.player2.Jet.Cockpit_size.Width
+		//	&& Pos_x - Size < gameObjects.player2.Jet.Pos_x + gameObjects.player2.Jet.Width
+		//	&& Pos_y - Size < gameObjects.player2.Jet.Pos_y + gameObjects.player2.Jet.Height
+		//	&& Pos_y + Size > gameObjects.player2.Jet.Pos_y)
+		//{
+		//	HasHit = true;
+		//	if (Type == AstType.Ammo)
+		//	{
+		//		gameObjects.player2.Recharge(Size);
+		//	}
+		//	else if (Type == AstType.Health)
+		//	{
+		//		gameObjects.player2.Heal(1);
+		//	}
+		//	else if (gameObjects.player2.Health > 0)
+		//		gameObjects.player2.Health--;
+		//	else
+		//		GameOver.Show(gameObjects.player1);
+		//}
+
+
+		public void Move(ClsGameObjects gameObjects)
+		{
+			Collides(gameObjects.player1);
+			Collides(gameObjects.player2);
+
+			//Asteroid is out of screen
+			if (Pos.X + Size > gameObjects.WinSize_x || Pos.X < 0 || Pos.Y > gameObjects.WinSize_y || Pos.Y < 0)
+			{
+				HasHit = true;
+			}
+
+			
+
+			foreach (Wall w in gameObjects.Walls)
+			{
+				if (w.region.Collides(Pos))
 				{
 					HasHit = true;
 				}
 			}
-
-			Pos_x += (int)(Math.Cos(2 * Math.PI / 360 * Angle) * Speed);
-			Pos_y += (int)(Math.Sin(2 * Math.PI / 360 * Angle) * Speed);
+			Pos += Speed;
+			//Pos_x += (int)(Math.Cos(2 * Math.PI / 360 * Angle) * Speed);
+			//Pos_y += (int)(Math.Sin(2 * Math.PI / 360 * Angle) * Speed);
 		}
 
 

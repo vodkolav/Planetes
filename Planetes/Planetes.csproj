@@ -131,6 +131,10 @@
       <Project>{50F700F1-1A12-4BE6-9AFB-1D0543A0AF70}</Project>
       <Name>Networking</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PolygonCollision\PolygonCollision.csproj">
+      <Project>{4AF31DBD-DEA0-426B-BB0C-545051127F6E}</Project>
+      <Name>PolygonCollision</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">

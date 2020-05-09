@@ -1,7 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 
 namespace PolygonCollision
 {
@@ -53,6 +52,16 @@ namespace PolygonCollision
 			float magnitude = Magnitude;
 			X = X / magnitude;
 			Y = Y / magnitude;
+		}
+
+		public void RotateAt(float angle, Vector at)
+		{
+			Matrix myMatrix = new Matrix();
+			myMatrix.RotateAt(angle, at);
+			//This conversion is bad, but I don't know how to rotate vector
+			PointF[] p = new PointF[] { AsPoint };
+			myMatrix.TransformPoints(p);
+			FromPointF(p[0]);
 		}
 
 		public Vector GetNormalized() {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
@@ -14,12 +15,12 @@ namespace GameObjects
 		protected List<Keys> directions = new List<Keys> { Keys.Up, Keys.Down };
 
 
-		public Bot(string name, int health, int ammo, int winSize_x, int winSize_y, ClsGameObjects game)
-			: base(name, health, ammo, winSize_x, winSize_y, game)
+		public Bot(string name, int health, int ammo,Point At, ClsGameObjects game)
+			: base(name, health, ammo, At, game)
 		{
 
 			//Jet = new Jet2(winSize_x, winSize_y / 2);
-
+			Enemy = game.player1;
 			Thread t = new Thread(Play);
 			t.Name = "BotThread";
 			t.IsBackground = true;
@@ -37,8 +38,8 @@ namespace GameObjects
 		/// <param name="winSize_y"></param>
 		/// <param name="game"></param>
 		/// <param name="timer"></param>
-		public Bot(string name, int health, int ammo, int winSize_x, int winSize_y, ClsGameObjects game, System.Windows.Forms.Timer timer)
-			: base(name, health, ammo, winSize_x, winSize_y, game)
+		public Bot(string name, int health, int ammo,Point At, ClsGameObjects game, System.Windows.Forms.Timer timer)
+			: base(name, health, ammo, At, game)
 		{
 
 			//Jet = new Jet2(winSize_x, winSize_y / 2);
@@ -122,14 +123,13 @@ namespace GameObjects
 	}
 	public class Bot4 : Bot
 	{
-		bool chasing = false;
 		int messagenum = 0;
-		public Bot4(string name, int health, int ammo, int winSize_x, int winSize_y, ClsGameObjects game)
-			: base(name, health, ammo, winSize_x, winSize_y, game)
+		public Bot4(string name, int health, int ammo, Point At, ClsGameObjects game)
+			: base(name, health, ammo, At,  game)
 		{ }
 
-		public Bot4(string name, int health, int ammo, int winSize_x, int winSize_y, ClsGameObjects game, System.Windows.Forms.Timer timer)
-			: base(name, health, ammo, winSize_x, winSize_y, game, timer)
+		public Bot4(string name, int health, int ammo, Point At, ClsGameObjects game, System.Windows.Forms.Timer timer)
+			: base(name, health, ammo, At,  game, timer)
 		{ }
 
 		protected override void Play()
@@ -145,7 +145,7 @@ namespace GameObjects
 			while (true)
 			{
 
-				//double astavg = gamenow.AstroidList.Where(a => a.Pos_y + 50 < Jet.Pos_y && a.Pos_y - 50 > Jet.Pos_y).Select(c => c.Pos_x).Average();
+				//double astavg = gamenow.AstroidList.Where(a => a.Pos.Y + 50 < Jet.Pos.Y && a.Pos.Y - 50 > Jet.Pos.Y).Select(c => c.Pos.X).Average();
 				//int astClosest = gamenow.AstroidList.Min(a => Jet.Dist(a));
 
 				try
@@ -153,12 +153,12 @@ namespace GameObjects
 					//asteroid evasion tactic
 					Astroid astClosest = GameState.AstroidList.Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
 
-					if (astClosest.Pos_x - astClosest.Size * 10 < Jet.Pos_x && Jet.Pos_x < astClosest.Pos_x && astClosest.Type == AstType.Rubble)
+					if (astClosest.Pos.X - astClosest.Size * 10 < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X && astClosest.Type == AstType.Rubble)
 					{
 						//Jet.Move(Keys.Left);
 						BotSteer(Keys.Left);
 					}
-					else if (astClosest.Pos_x < Jet.Pos_x && Jet.Pos_x < astClosest.Pos_x + astClosest.Size * 10 && astClosest.Type == AstType.Rubble)
+					else if (astClosest.Pos.X < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X + astClosest.Size * 10 && astClosest.Type == AstType.Rubble)
 					{
 						//Jet.Move(Keys.Right);
 						BotSteer(Keys.Right);
@@ -176,17 +176,17 @@ namespace GameObjects
 
 				try
 				{
-					//bullet evasion tactic (not good yet) Where(b=> b.Pos_x + 50 > Jet.Pos_x).
+					//bullet evasion tactic (not good yet) Where(b=> b.Pos.X + 50 > Jet.Pos.X).
 
-					Bullet bulClosest = GameState.Player1.Bulletlist.Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
-					//Jet.Pos_y-50 > bulClosest.Pos_y  &&
-					if (Jet.Pos_y < bulClosest.Pos_y && bulClosest.Pos_y < Jet.Pos_y + 50)
+					Bullet bulClosest = GameState.player1.Bulletlist.Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
+					//Jet.Pos.Y-50 > bulClosest.Pos.Y  &&
+					if (Jet.Pos.Y < bulClosest.Pos.Y && bulClosest.Pos.Y < Jet.Pos.Y + 50)
 					{
 						BotSteer(Keys.Down);
 						//Jet.Move(Keys.Up);
 						//Jet.Move(Keys.Up);
-					}//Jet.Pos_y + 50 < bulClosest.Pos_y  &&
-					else if (Jet.Pos_y - 50 < bulClosest.Pos_y && bulClosest.Pos_y <= Jet.Pos_y)
+					}//Jet.Pos.Y + 50 < bulClosest.Pos.Y  &&
+					else if (Jet.Pos.Y - 50 < bulClosest.Pos.Y && bulClosest.Pos.Y <= Jet.Pos.Y)
 					{
 						BotSteer(Keys.Up);
 						//Jet.Move(Keys.Down);
@@ -204,12 +204,12 @@ namespace GameObjects
 
 
 				//aiming at opponent tactic
-				if (Jet.Pos_y < GameState.Player1.Jet.Pos_y - 30)
+				if (Jet.Pos.Y < GameState.player1.Jet.Pos.Y - 30)
 				{
 					//Jet.Move(Keys.Down);
 					BotSteer(Keys.Down);
 				}
-				else if (Jet.Pos_y > GameState.Player1.Jet.Pos_y + 30)
+				else if (Jet.Pos.Y > GameState.player1.Jet.Pos.Y + 30)
 				{
 					BotSteer(Keys.Up);
 				}
@@ -219,7 +219,7 @@ namespace GameObjects
 				}
 
 				//shoot at opponent tactic
-				if (Math.Abs(Jet.Pos_y - GameState.Player1.Jet.Pos_y) < 30)
+				if (Math.Abs(Jet.Pos.Y - GameState.player1.Jet.Pos.Y) < 30)
 				{
 					//BotShoot(timeElapsed);
 					BotSteer(Keys.Return);
@@ -238,14 +238,13 @@ namespace GameObjects
 
 	public class Bot3 : Bot
 	{
-		bool chasing = false;
 
-		public Bot3(string name, int health, int ammo, int winSize_x, int winSize_y, ClsGameObjects game)
-			: base(name, health, ammo, winSize_x, winSize_y, game)
+		public Bot3(string name, int health, int ammo, Point At, ClsGameObjects game)
+			: base(name, health, ammo, At, game)
 		{ }
 
-		public Bot3(string name, int health, int ammo, int winSize_x, int winSize_y, ClsGameObjects game, System.Windows.Forms.Timer timer)
-			: base(name, health, ammo, winSize_x, winSize_y, game, timer)
+		public Bot3(string name, int health, int ammo, Point At, ClsGameObjects game, System.Windows.Forms.Timer timer)
+			: base(name, health, ammo,  At, game, timer)
 		{ }
 
 		protected override void Play()
@@ -261,7 +260,7 @@ namespace GameObjects
 			while (true)
 			{
 
-				//double astavg = gamenow.AstroidList.Where(a => a.Pos_y + 50 < Jet.Pos_y && a.Pos_y - 50 > Jet.Pos_y).Select(c => c.Pos_x).Average();
+				//double astavg = gamenow.AstroidList.Where(a => a.Pos.Y + 50 < Jet.Pos.Y && a.Pos.Y - 50 > Jet.Pos.Y).Select(c => c.Pos.X).Average();
 				//int astClosest = gamenow.AstroidList.Min(a => Jet.Dist(a));
 
 				try
@@ -269,12 +268,12 @@ namespace GameObjects
 					//asteroid evasion tactic
 					Astroid astClosest = GameState.AstroidList.Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
 
-					if (astClosest.Pos_x - astClosest.Size * 10 < Jet.Pos_x && Jet.Pos_x < astClosest.Pos_x && astClosest.Type == AstType.Rubble)
+					if (astClosest.Pos.X - astClosest.Size * 10 < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X && astClosest.Type == AstType.Rubble)
 					{
 						//Jet.Move(Keys.Left);
 						BotSteer(Keys.Left);
 					}
-					else if (astClosest.Pos_x < Jet.Pos_x && Jet.Pos_x < astClosest.Pos_x + astClosest.Size * 10 && astClosest.Type == AstType.Rubble)
+					else if (astClosest.Pos.X < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X + astClosest.Size * 10 && astClosest.Type == AstType.Rubble)
 					{
 						//Jet.Move(Keys.Right);
 						BotSteer(Keys.Right);
@@ -294,15 +293,15 @@ namespace GameObjects
 				{
 					//bullet evasion tactic (not good yet)
 
-					Bullet bulClosest = GameState.Player1.Bulletlist.Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
-					//Jet.Pos_y-50 > bulClosest.Pos_y  &&
-					if (bulClosest.Pos_y > Jet.Pos_y && bulClosest.Pos_x + 50 > Jet.Pos_x)
+					Bullet bulClosest = GameState.player1.Bulletlist.Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
+					//Jet.Pos.Y-50 > bulClosest.Pos.Y  &&
+					if (bulClosest.Pos.Y > Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
 					{
 						BotSteer(Keys.Up);
 						//Jet.Move(Keys.Up);
 						//Jet.Move(Keys.Up);
-					}//Jet.Pos_y + 50 < bulClosest.Pos_y  &&
-					else if (bulClosest.Pos_y < Jet.Pos_y && bulClosest.Pos_x + 50 > Jet.Pos_x)
+					}//Jet.Pos.Y + 50 < bulClosest.Pos.Y  &&
+					else if (bulClosest.Pos.Y < Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
 					{
 						BotSteer(Keys.Down);
 						//Jet.Move(Keys.Down);
@@ -320,12 +319,12 @@ namespace GameObjects
 
 
 				//aiming at opponent tactic
-				if (Jet.Pos_y - GameState.Player1.Jet.Pos_y < -20)
+				if (Jet.Pos.Y - GameState.player1.Jet.Pos.Y < -20)
 				{
 					//Jet.Move(Keys.Down);
 					BotSteer(Keys.Down);
 				}
-				else if (Jet.Pos_y - GameState.Player1.Jet.Pos_y > 20)
+				else if (Jet.Pos.Y - GameState.player1.Jet.Pos.Y > 20)
 				{
 					BotSteer(Keys.Up);
 				}
@@ -336,7 +335,7 @@ namespace GameObjects
 				}
 
 				//shoot at opponent tactic
-				if (Math.Abs(Jet.Pos_y - GameState.Player1.Jet.Pos_y) < 20)
+				if (Math.Abs(Jet.Pos.Y - GameState.player1.Jet.Pos.Y) < 20)
 				{
 					//BotShoot(timeElapsed);
 					BotSteer(Keys.Return);
@@ -374,7 +373,7 @@ namespace GameObjects
 
 	//		while (true)
 	//		{
-	//			//double astavg = gamenow.AstroidList.Where(a => a.Pos_y + 50 < Jet.Pos_y && a.Pos_y - 50 > Jet.Pos_y).Select(c => c.Pos_x).Average();
+	//			//double astavg = gamenow.AstroidList.Where(a => a.Pos.Y + 50 < Jet.Pos.Y && a.Pos.Y - 50 > Jet.Pos.Y).Select(c => c.Pos.X).Average();
 	//			//int astClosest = gamenow.AstroidList.Min(a => Jet.Dist(a));
 
 	//			try
@@ -382,12 +381,12 @@ namespace GameObjects
 	//				//asteroid evasion tactic
 	//				Astroid astClosest = GameState.AstroidList.Aggregate((curMin, x) => (curMin == null || (B.Jet.Dist(x)) < B.Jet.Dist(curMin) ? x : curMin));
 
-	//				if (astClosest.Pos_x - astClosest.Size * 10 < B.Jet.Pos_x && B.Jet.Pos_x < astClosest.Pos_x && astClosest.Type == AstType.Rubble)
+	//				if (astClosest.Pos.X - astClosest.Size * 10 < B.Jet.Pos.X && B.Jet.Pos.X < astClosest.Pos.X && astClosest.Type == AstType.Rubble)
 	//				{
 	//					//Jet.Move(Keys.Left);
 	//					B.BotSteer(Keys.Left);
 	//				}
-	//				else if (astClosest.Pos_x < B.Jet.Pos_x && B.Jet.Pos_x < astClosest.Pos_x + astClosest.Size * 10 && astClosest.Type == AstType.Rubble)
+	//				else if (astClosest.Pos.X < B.Jet.Pos.X && B.Jet.Pos.X < astClosest.Pos.X + astClosest.Size * 10 && astClosest.Type == AstType.Rubble)
 	//				{
 	//					//Jet.Move(Keys.Right);
 	//					B.BotSteer(Keys.Right);
@@ -408,15 +407,15 @@ namespace GameObjects
 	//				//bullet evasion tactic (not good yet)
 
 	//				Bullet bulClosest = GameState.Player1.Bulletlist.Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
-	//				//Jet.Pos_y-50 > bulClosest.Pos_y  &&
-	//				if (bulClosest.Pos_y > B.Jet.Pos_y && bulClosest.Pos_x + 50 > B.Jet.Pos_x)
+	//				//Jet.Pos.Y-50 > bulClosest.Pos.Y  &&
+	//				if (bulClosest.Pos.Y > B.Jet.Pos.Y && bulClosest.Pos.X + 50 > B.Jet.Pos.X)
 	//				{
 	//					B.BotSteer(Keys.Up);
 	//					B.mo
 	//					//Jet.Move(Keys.Up);
 	//					//Jet.Move(Keys.Up);
-	//				}//Jet.Pos_y + 50 < bulClosest.Pos_y  &&
-	//				else if (bulClosest.Pos_y < Jet.Pos_y && bulClosest.Pos_x + 50 > Jet.Pos_x)
+	//				}//Jet.Pos.Y + 50 < bulClosest.Pos.Y  &&
+	//				else if (bulClosest.Pos.Y < Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
 	//				{
 	//					BotSteer(Keys.Down);
 	//					//Jet.Move(Keys.Down);
@@ -434,12 +433,12 @@ namespace GameObjects
 
 
 	//			//aiming at opponent tactic
-	//			if (Jet.Pos_y - GameState.Player1.Jet.Pos_y < -20)
+	//			if (Jet.Pos.Y - GameState.Player1.Jet.Pos.Y < -20)
 	//			{
 	//				//Jet.Move(Keys.Down);
 	//				BotSteer(Keys.Down);
 	//			}
-	//			else if (Jet.Pos_y - GameState.Player1.Jet.Pos_y > 20)
+	//			else if (Jet.Pos.Y - GameState.Player1.Jet.Pos.Y > 20)
 	//			{
 	//				BotSteer(Keys.Up);
 	//			}
@@ -449,7 +448,7 @@ namespace GameObjects
 
 	//			}
 
-	//			if (Math.Abs(Jet.Pos_y - GameState.Player1.Jet.Pos_y) < 20)
+	//			if (Math.Abs(Jet.Pos.Y - GameState.Player1.Jet.Pos.Y) < 20)
 	//			{
 	//				BotShoot(timeElapsed);
 	//			}
@@ -464,8 +463,8 @@ namespace GameObjects
 	public class Bot2 : Bot
 	{
 
-		public Bot2(string name, int health, int ammo, int winSize_x, int winSize_y, ref ClsGameObjects game)
-			: base(name, health, ammo, winSize_x, winSize_y, game)
+		public Bot2(string name, int health, int ammo, Point At,  ref ClsGameObjects game)
+			: base(name, health, ammo, At, game)
 		{ }
 
 
@@ -478,7 +477,7 @@ namespace GameObjects
 			{
 
 				//Console.WriteLine(gamenow.GetHashCode());
-				if (Jet.Pos_y < GameState.Player1.Jet.Pos_y)
+				if (Jet.Pos.Y < GameState.player1.Jet.Pos.Y)
 				{
 					Jet.Move(GameState);// (Keys.Down);									
 				}
@@ -487,7 +486,7 @@ namespace GameObjects
 					Jet.Move(GameState);// Keys.Up);					
 				}
 
-				if (Jet.Pos_y - GameState.Player1.Jet.Pos_y < 50)
+				if (Jet.Pos.Y - GameState.player1.Jet.Pos.Y < 50)
 				{
 					Jet.Shoot(this, timeElapsed);
 				}
@@ -502,8 +501,8 @@ namespace GameObjects
 
 	public class Bot1 : Bot
 	{
-		public Bot1(string name, int health, int ammo, int winSize_x, int winSize_y, ClsGameObjects game)
-			: base(name, health, ammo, winSize_x, winSize_y, game)
+		public Bot1(string name, int health, int ammo, Point At, ClsGameObjects game)
+			: base(name, health, ammo,  At, game)
 		{ }
 
 

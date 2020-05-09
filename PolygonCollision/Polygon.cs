@@ -39,10 +39,12 @@ namespace PolygonCollision
 			return Edges;
 		}
 
+
 		public void AddVertex(Vector vertex)
 		{
 			Vertices.Add(vertex);
 		}
+
 
 		public List<Vector> Edges { get { return BuildEdges(); } }
 
@@ -74,6 +76,7 @@ namespace PolygonCollision
 			set { Vertices = new List<PointF>(value).ConvertAll(new Converter<PointF, Vector>(Vector.FromPointF)); }
 		}
 
+
 		public Vector Center
 		{
 			get
@@ -90,12 +93,15 @@ namespace PolygonCollision
 			}
 		}
 
+
 		public Vector MTV { get; set; }
+
 
 		public void Offset(Vector v)
 		{
 			Offset(v.X, v.Y);
 		}
+
 
 		public void Offset(float x, float y)
 		{
@@ -105,6 +111,7 @@ namespace PolygonCollision
 				Vertices[i] = new Vector(p.X + x, p.Y + y);
 			}
 		}
+
 
 		public void Rotate(float angle)
 		{
@@ -116,6 +123,7 @@ namespace PolygonCollision
 			PointFs = p;
 		}
 
+
 		public void RotateAt(float angle, Vector at)
 		{
 			Matrix myMatrix = new Matrix();
@@ -125,6 +133,7 @@ namespace PolygonCollision
 			myMatrix.TransformPoints(p);
 			PointFs = p;
 		}
+
 
 		public override string ToString()
 		{
@@ -153,6 +162,39 @@ namespace PolygonCollision
 			return new GraphicsPath(p.ToArray(), pp.ToArray());
 		}
 
+		// POLYGON/POINT
+		// only needed if you're going to check if the circle
+		// is INSIDE the polygon
+		public bool Collides(Vector p)
+		{
+			bool collision = false;
+
+			// go through each of the vertices, plus the next
+			// vertex in the list
+			int next = 0;
+			for (int current = 0; current < Vertices.Count; current++)
+			{
+
+				// get next vertex in list
+				// if we've hit the end, wrap around to 0
+				next = current + 1;
+				if (next == Vertices.Count) next = 0;
+
+				// get the PVectors at our current position
+				// this makes our if statement a little cleaner
+				Vector vc = Vertices[current];    // c for "current"
+				Vector vn = Vertices[next];       // n for "next"
+
+				// compare position, flip 'collision' variable
+				// back and forth
+				if (((vc.Y > p.Y && vn.Y < p.Y) || (vc.Y < p.Y && vn.Y > p.Y)) &&
+					 (p.X < (vn.X - vc.X) * (p.Y - vc.Y) / (vn.Y - vc.Y) + vc.X))
+				{
+					collision = !collision;
+				}
+			}
+			return collision;
+		}
 
 		// Check if polygon A is going to collide with polygon B for the given velocity
 		public PolygonCollisionResult Collides(Polygon Other, Vector velocity)

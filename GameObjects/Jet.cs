@@ -27,17 +27,18 @@ namespace GameObjects
 		public Brush Color { get; set; }
 
 		public Polygon Hull{ get; set; }
-		
+
+		public Vector Gun { get { return Cockpit.Vertices[1]; } }
 
 		public Polygon Cockpit { get; set;	}
 
-
+		
 		private Vector _speed;
 
 		public Vector Speed
 		{
 			get { return _speed; }
-			set { _speed = value;  }
+			set { _speed = value; }
 		}
 
 
@@ -64,7 +65,7 @@ namespace GameObjects
 
 
 		//public Point Pos { get; set; }
-		public Jet(Point start, Brush color, int wwidth, int wheight)
+		public Jet(Point start, Brush color)
 		{
 			//WWidth = wwidth;
 			//WHeight = wheight;
@@ -74,8 +75,8 @@ namespace GameObjects
 			// for cockpit Hull.AddVertex(new Vector(100, 60));
 			Hull.AddVertex(new Vector(80, 70));
 			Hull.AddVertex(new Vector(50, 70));
-			
-			Cockpit = new Polygon();			
+
+			Cockpit = new Polygon();
 			Cockpit.AddVertex(new Vector(80, 50));
 			Cockpit.AddVertex(new Vector(100, 60));
 			Cockpit.AddVertex(new Vector(80, 70));
@@ -89,7 +90,7 @@ namespace GameObjects
 			FireRate = 10;
 		}
 
-	
+
 
 		private void Offset(Vector destination)
 		{
@@ -108,7 +109,7 @@ namespace GameObjects
 
 		public double Dist(Astroid a)
 		{
-			return Math.Sqrt((a.Pos_x - Pos_x) ^ 2 + (a.Pos_y - Pos_y) ^ 2);
+			return (Pos - a.Pos).Magnitude;
 		}
 
 
@@ -118,9 +119,20 @@ namespace GameObjects
 		}
 
 
-		public virtual double Dist(Bullet b)
+		public virtual float Dist(Bullet b)
 		{
-			return Math.Sqrt((b.Pos_x - Pos_x) ^ 2 + (b.Pos_y - Pos_y) ^ 2);
+			Vector diff = b.Pos - Pos;
+			return diff.Magnitude;
+		}
+
+		internal bool Collides(Astroid a)
+		{
+			return Hull.Collides(a.Pos) || Cockpit.Collides(a.Pos);
+		}
+
+		public bool Collides(Bullet b)
+		{
+			return Hull.Collides(b.Pos) || Cockpit.Collides(b.Pos);
 		}
 
 
@@ -141,22 +153,11 @@ namespace GameObjects
 			Vector dir = new Vector(Aim) - new Vector(Hull.Center);
 			
 			Rotate(dir);
-			//Console.WriteLine("X:{0}| Y:{1} | Angle:{2})", diff.X, diff.X, Bearing);
-
-
-
-			//Wall coll = gO.Walls.FirstOrDefault(w => Hull.Collides(w.region, Speed));
-			//if (coll != null)
-			//{
-			//	//Bounce(coll);
-			//}
-			//Pos_x += Speed_x;
-			//Pos_y += Speed_y;
 
 		}
 
 
-
+		[Obsolete]
 		public void Bounce(Wall w)
 		{
 			Vector velocity = new Vector(Speed_x, Speed_y);
@@ -175,7 +176,19 @@ namespace GameObjects
 
 		public abstract void Steer(Keys dir);
 
-		public abstract void Shoot(Player player, int timeElapsed);
+		public void Shoot(Player player, int timeElapsed)
+		{
+			if (player.Ammo != 0 && timeElapsed > LastFired + FireRate)
+			{
+				LastFired = timeElapsed;
+				Bullet bullet = new Bullet(player);
+				lock (player.GameState)
+				{
+					player.Bulletlist.Add(bullet);
+				}
+				player.Ammo--;
+			}
+		}
 
 		public void Draw(Graphics g)
 		{
@@ -233,7 +246,7 @@ namespace GameObjects
 
 	public class Jet1 : Jet
 	{
-		public Jet1(Point start, int wwidth, int wheight) : base(start, Brushes.Blue, wwidth, wheight) { }
+		public Jet1(Point start) : base(start, Brushes.Blue) { }
 
 		public override void Steer(Keys dir)
 		{
@@ -253,50 +266,12 @@ namespace GameObjects
 					break;
 			}
 		}
-
-		public override void Shoot(Player player, int timeElapsed)
-		{
-			if (player.Ammo != 0 && timeElapsed > LastFired + FireRate)
-			{
-				LastFired = timeElapsed;
-				Bullet1 bullet = new Bullet1(Pos_x + Width + Cockpit_size.Width, Pos_y + Height / 2);
-				lock (player.GameState)
-				{
-					player.Bulletlist.Add(bullet);
-				}
-				player.Ammo--;
-			}
-		}
-
 	}
 
 	public class Jet2 : Jet
 	{
-		public Jet2(Point start, int wwidth, int wheight) : base(start, Brushes.Red, wwidth, wheight) { }
-
-		//public override void Move(Keys dir)
-		//{
-		//    switch (dir)
-		//    {
-		//        case Keys.Right:
-		//            if (Pos_x < WWidth)// - Width - Cockpit_size)
-		//                Pos_x += Acceleration;
-		//            break;
-		//        case Keys.Down:
-		//            if (Pos_y < WHeight - Height)
-		//                Pos_y += Acceleration;
-		//            break;
-		//        case Keys.Left:
-		//            if (Pos_x > WWidth/2 + Width + Cockpit_size)
-		//                Pos_x -= Acceleration;
-		//            break;
-		//        case Keys.Up:
-		//            if (Pos_y > 0)
-		//                Pos_y -= Acceleration;
-		//            break;
-		//    }
-
-		//}
+		public Jet2(Point start) : base(start, Brushes.Red) { }
+				
 
 		public override void Steer(Keys dir)
 		{
@@ -316,34 +291,5 @@ namespace GameObjects
 					break;
 			}
 		}
-
-		public override void Shoot(Player player, int timeElapsed)
-		{
-			if (player.Ammo != 0 && timeElapsed > LastFired + FireRate)
-			{
-				LastFired = timeElapsed;
-				Bullet2 bullet = new Bullet2(Pos_x - Width - Cockpit_size.Width, Pos_y + Height / 2);
-
-				lock (player.GameState)
-				{
-					player.Bulletlist.Add(bullet);
-				}
-				player.Ammo--;
-			}
-		}
-
-		public override double Dist(Bullet b)
-		{
-			//Bullet1 b1 = (Bullet1)b;
-			if (b.Pos_x < Pos_x)
-			{
-				return Math.Sqrt((b.Pos_x - Pos_x) ^ 2 + (b.Pos_y - Pos_y) ^ 2);
-			}
-			else
-			{
-				return 1000.0;
-			}
-		}
 	}
-
 }
