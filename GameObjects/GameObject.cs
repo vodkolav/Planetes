@@ -16,13 +16,14 @@ namespace GameObjects
 		public static ClsGameObjects theObject;
 		public bool Connected { get; set; }
 		public bool ServerClosed { get; set; }
-		public Player1 player1 { get; set; }
-		public Player2 player2 { get; set; }
+		public Player player1 { get; set; }
+		public Player player2 { get; set; }
 		public int WinSize_x { get; set; }
 		public int WinSize_y { get; set; }
 		public List<Astroid> AstroidList { get; set; }
 		public List<Wall> Walls { get; set; }
 		public bool Paused { get; set; }
+		public Controls control { get; set; }
 
 
 		public ClsGameObjects(int winSize_x, int winSize_y)
@@ -33,7 +34,7 @@ namespace GameObjects
 
 			Walls = new List<Wall>();
 			Brush wallBrush = Brushes.Magenta;
-			int ww = 15; //wallwidth
+			int ww = 20; //wallwidth
 
 			Walls.Add(new Wall(wallBrush, new Point(0, 0), new Size(winSize_x, ww)));
 			Walls.Add(new Wall(wallBrush, new Point(0, 0), new Size(ww, winSize_y)));
@@ -45,13 +46,17 @@ namespace GameObjects
 			Walls.Add(new Wall(wallBrush, new Point(100, 100), new Point(200, 200), ww));
 
 			Point p1Start = new Point(100, winSize_y / 2);
-			player1 = new Player1("Player1", 20, 300, p1Start, this);
+			player1 = new Player("Player1", 20, 300, p1Start, Brushes.Blue, this);
 
 			Point p2Start = new Point(winSize_x - 100, winSize_y / 2);
-			player2 = new Player2("Player2", 20, 300, p2Start, this);
+			player2 = new Player("Player2", 20, 300, p2Start, Brushes.Red, this);
 
 			player1.Enemy = player2;
 			player2.Enemy = player1;
+
+			control = new Controls();
+			control.bindWASDto(player1);
+			control.bindARROWSto(player2);
 
 			AstroidList = new List<Astroid>();
 			theObject = this;

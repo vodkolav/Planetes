@@ -169,7 +169,7 @@ namespace PolygonCollision
 		}
 
 		public override string ToString() {
-			return X + ", " + Y;
+			return Math.Abs(X).ToString("+##.##;-##.##;0") + ", " + Math.Abs(Y).ToString("+#;-#;0");
 		}
 
 		public string ToString(bool rounded) {

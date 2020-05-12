@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PolygonCollision;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -10,13 +11,13 @@ namespace GameObjects
 	/// <summary>
 	/// Most basic bot
 	/// </summary>
-	public class Bot : Player2
+	public class Bot : Player
 	{
-		protected List<Keys> directions = new List<Keys> { Keys.Up, Keys.Down };
+		protected List<HOTAS> directions = new List<HOTAS> { HOTAS.Up, HOTAS.Down };
 
 
-		public Bot(string name, int health, int ammo,Point At, ClsGameObjects game)
-			: base(name, health, ammo, At, game)
+		public Bot(string name, int health, int ammo,Point At, Brush color, ClsGameObjects game)
+			: base(name, health, ammo, At,color, game)
 		{
 
 			//Jet = new Jet2(winSize_x, winSize_y / 2);
@@ -38,8 +39,8 @@ namespace GameObjects
 		/// <param name="winSize_y"></param>
 		/// <param name="game"></param>
 		/// <param name="timer"></param>
-		public Bot(string name, int health, int ammo,Point At, ClsGameObjects game, System.Windows.Forms.Timer timer)
-			: base(name, health, ammo, At, game)
+		public Bot(string name, int health, int ammo,Point At, Brush color, ClsGameObjects game, System.Windows.Forms.Timer timer)
+			: base(name, health, ammo,  At,color, game)
 		{
 
 			//Jet = new Jet2(winSize_x, winSize_y / 2);
@@ -48,12 +49,12 @@ namespace GameObjects
 		}
 
 
-		public sealed override void Steer(Keys command)
+		public sealed override void Steer(HOTAS command)
 		{
 			//Must remain empty to prevent user from controling bot
 		}
 
-		public sealed override void Release(Keys command)
+		public sealed override void Release(HOTAS command)
 		{
 			//Must remain empty to prevent user from controling bot
 		}
@@ -64,12 +65,12 @@ namespace GameObjects
 		//}
 
 
-		public void BotSteer(Keys command)
+		public void BotSteer(HOTAS command)
 		{
 			base.Steer(command);
 		}
 
-		public void BotRelease(Keys command)
+		public void BotRelease(HOTAS command)
 		{
 			base.Release(command);
 		}
@@ -79,7 +80,12 @@ namespace GameObjects
 			base.Shoot(timeElapsed);
 		}
 
-		protected virtual Keys pickOther(Keys k)
+		public void BotTurn(Vector location)
+		{
+			Aim(location);
+		}
+
+		protected virtual HOTAS pickOther(HOTAS k)
 		{
 			return directions.Where(c => c.CompareTo(k) != 0).Single();
 		}
@@ -102,7 +108,7 @@ namespace GameObjects
 		{
 			int timeElapsed = 0;
 			int count = 0;
-			Keys direction = directions[0];
+			HOTAS direction = directions[0];
 			while (true)
 			{
 				Thread.Sleep(50);
@@ -124,12 +130,12 @@ namespace GameObjects
 	public class Bot4 : Bot
 	{
 		int messagenum = 0;
-		public Bot4(string name, int health, int ammo, Point At, ClsGameObjects game)
-			: base(name, health, ammo, At,  game)
+		public Bot4(string name, int health, int ammo, Point At, Brush color, ClsGameObjects game)
+			: base(name, health, ammo, At,color,  game)
 		{ }
 
-		public Bot4(string name, int health, int ammo, Point At, ClsGameObjects game, System.Windows.Forms.Timer timer)
-			: base(name, health, ammo, At,  game, timer)
+		public Bot4(string name, int health, int ammo, Point At, Brush color,ClsGameObjects game, System.Windows.Forms.Timer timer)
+			: base(name, health, ammo, At,color,   game, timer)
 		{ }
 
 		protected override void Play()
@@ -156,16 +162,16 @@ namespace GameObjects
 					if (astClosest.Pos.X - astClosest.Size * 10 < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X && astClosest.Type == AstType.Rubble)
 					{
 						//Jet.Move(Keys.Left);
-						BotSteer(Keys.Left);
+						BotSteer(HOTAS.Left);
 					}
 					else if (astClosest.Pos.X < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X + astClosest.Size * 10 && astClosest.Type == AstType.Rubble)
 					{
 						//Jet.Move(Keys.Right);
-						BotSteer(Keys.Right);
+						BotSteer(HOTAS.Right);
 					}
 					else
 					{
-						BotRelease(Keys.Right);
+						BotRelease(HOTAS.Right);
 					}
 				}
 				catch (Exception e)
@@ -182,19 +188,19 @@ namespace GameObjects
 					//Jet.Pos.Y-50 > bulClosest.Pos.Y  &&
 					if (Jet.Pos.Y < bulClosest.Pos.Y && bulClosest.Pos.Y < Jet.Pos.Y + 50)
 					{
-						BotSteer(Keys.Down);
+						BotSteer(HOTAS.Down);
 						//Jet.Move(Keys.Up);
 						//Jet.Move(Keys.Up);
 					}//Jet.Pos.Y + 50 < bulClosest.Pos.Y  &&
 					else if (Jet.Pos.Y - 50 < bulClosest.Pos.Y && bulClosest.Pos.Y <= Jet.Pos.Y)
 					{
-						BotSteer(Keys.Up);
+						BotSteer(HOTAS.Up);
 						//Jet.Move(Keys.Down);
 						//Jet.Move(Keys.Down);
 					}
 					else
 					{
-						BotRelease(Keys.Up);
+						BotRelease(HOTAS.Up);
 					}
 				}
 				catch (Exception e)
@@ -204,29 +210,31 @@ namespace GameObjects
 
 
 				//aiming at opponent tactic
+
+				BotTurn(Enemy.Jet.Pos);
 				if (Jet.Pos.Y < GameState.player1.Jet.Pos.Y - 30)
 				{
 					//Jet.Move(Keys.Down);
-					BotSteer(Keys.Down);
+					BotSteer(HOTAS.Down);
 				}
 				else if (Jet.Pos.Y > GameState.player1.Jet.Pos.Y + 30)
 				{
-					BotSteer(Keys.Up);
+					BotSteer(HOTAS.Up);
 				}
 				else
 				{
-					BotRelease(Keys.Up);
+					BotRelease(HOTAS.Up);
 				}
 
 				//shoot at opponent tactic
 				if (Math.Abs(Jet.Pos.Y - GameState.player1.Jet.Pos.Y) < 30)
 				{
 					//BotShoot(timeElapsed);
-					BotSteer(Keys.Return);
+					BotSteer(HOTAS.Shoot);
 				}
 				else
 				{
-					BotRelease(Keys.Return);
+					BotRelease(HOTAS.Shoot);
 				}
 
 				timeElapsed += ClsGameObjects.FrameRate;
@@ -239,12 +247,12 @@ namespace GameObjects
 	public class Bot3 : Bot
 	{
 
-		public Bot3(string name, int health, int ammo, Point At, ClsGameObjects game)
-			: base(name, health, ammo, At, game)
+		public Bot3(string name, int health, int ammo, Point At, Brush color, ClsGameObjects game)
+			: base(name, health, ammo, At,  color, game)
 		{ }
 
-		public Bot3(string name, int health, int ammo, Point At, ClsGameObjects game, System.Windows.Forms.Timer timer)
-			: base(name, health, ammo,  At, game, timer)
+		public Bot3(string name, int health, int ammo, Point At, Brush color, ClsGameObjects game, System.Windows.Forms.Timer timer)
+			: base(name, health, ammo,  At, color, game, timer)
 		{ }
 
 		protected override void Play()
@@ -271,16 +279,16 @@ namespace GameObjects
 					if (astClosest.Pos.X - astClosest.Size * 10 < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X && astClosest.Type == AstType.Rubble)
 					{
 						//Jet.Move(Keys.Left);
-						BotSteer(Keys.Left);
+						BotSteer(HOTAS.Left);
 					}
 					else if (astClosest.Pos.X < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X + astClosest.Size * 10 && astClosest.Type == AstType.Rubble)
 					{
 						//Jet.Move(Keys.Right);
-						BotSteer(Keys.Right);
+						BotSteer(HOTAS.Right);
 					}
 					else
 					{
-						BotRelease(Keys.Right);
+						BotRelease(HOTAS.Right);
 					}
 				}
 				catch
@@ -297,19 +305,19 @@ namespace GameObjects
 					//Jet.Pos.Y-50 > bulClosest.Pos.Y  &&
 					if (bulClosest.Pos.Y > Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
 					{
-						BotSteer(Keys.Up);
+						BotSteer(HOTAS.Up);
 						//Jet.Move(Keys.Up);
 						//Jet.Move(Keys.Up);
 					}//Jet.Pos.Y + 50 < bulClosest.Pos.Y  &&
 					else if (bulClosest.Pos.Y < Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
 					{
-						BotSteer(Keys.Down);
+						BotSteer(HOTAS.Down);
 						//Jet.Move(Keys.Down);
 						//Jet.Move(Keys.Down);
 					}
 					else
 					{
-						BotRelease(Keys.Up);
+						BotRelease(HOTAS.Up);
 					}
 				}
 				catch
@@ -322,15 +330,15 @@ namespace GameObjects
 				if (Jet.Pos.Y - GameState.player1.Jet.Pos.Y < -20)
 				{
 					//Jet.Move(Keys.Down);
-					BotSteer(Keys.Down);
+					BotSteer(HOTAS.Down);
 				}
 				else if (Jet.Pos.Y - GameState.player1.Jet.Pos.Y > 20)
 				{
-					BotSteer(Keys.Up);
+					BotSteer(HOTAS.Up);
 				}
 				else
 				{
-					BotRelease(Keys.Up);
+					BotRelease(HOTAS.Up);
 
 				}
 
@@ -338,11 +346,11 @@ namespace GameObjects
 				if (Math.Abs(Jet.Pos.Y - GameState.player1.Jet.Pos.Y) < 20)
 				{
 					//BotShoot(timeElapsed);
-					BotSteer(Keys.Return);
+					BotSteer(HOTAS.Shoot);
 				}
 				else
 				{
-					BotRelease(Keys.Return);
+					BotRelease(HOTAS.Shoot);
 				}
 				timeElapsed += ClsGameObjects.FrameRate;
 				Thread.Sleep(ClsGameObjects.FrameRate * 10);
@@ -463,8 +471,8 @@ namespace GameObjects
 	public class Bot2 : Bot
 	{
 
-		public Bot2(string name, int health, int ammo, Point At,  ref ClsGameObjects game)
-			: base(name, health, ammo, At, game)
+		public Bot2(string name, int health, int ammo, Point At, Brush color, ref ClsGameObjects game)
+			: base(name, health, ammo, At, color, game)
 		{ }
 
 
@@ -472,7 +480,7 @@ namespace GameObjects
 		{
 			int timeElapsed = 0;
 
-			Keys direction = directions[0];
+			HOTAS direction = directions[0];
 			while (true)
 			{
 
@@ -501,8 +509,8 @@ namespace GameObjects
 
 	public class Bot1 : Bot
 	{
-		public Bot1(string name, int health, int ammo, Point At, ClsGameObjects game)
-			: base(name, health, ammo,  At, game)
+		public Bot1(string name, int health, int ammo, Point At, Brush color, ClsGameObjects game)
+			: base(name, health, ammo,  At, color, game)
 		{ }
 
 
@@ -510,7 +518,7 @@ namespace GameObjects
 		{
 			int timeElapsed = 0;
 			int count = 0;
-			Keys direction = directions[0];
+			HOTAS direction = directions[0];
 			while (true)
 			{
 				Thread.Sleep(50);

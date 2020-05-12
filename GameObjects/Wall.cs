@@ -19,7 +19,7 @@ namespace GameObjects
 			Vector v10 = new Vector(1, 0);
 			Vector v01 = new Vector(0, 1);
 			Vector vsize = new Vector(size.Width, size.Height);
-			Vector vloc = Vector.FromPoint(location);
+			Vector vloc = new Vector(location);
 			region = new Polygon();
 			region.AddVertex(vloc);
 			region.AddVertex(vloc + v10*vsize);

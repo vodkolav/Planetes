@@ -1,11 +1,12 @@
-﻿using System;
+﻿using PolygonCollision;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
 namespace GameObjects
 {
-	public abstract class Player : MarshalByRefObject
+	public class Player : MarshalByRefObject
 	{
 		public string Name { get; set; }
 		public bool Host { get; set; }
@@ -13,27 +14,44 @@ namespace GameObjects
 		public int MaxHealth { get; set; }
 		public int Ammo { get; set; }
 		public int MaxAmmo { get; set; }
-		public bool Fired { get; set; }
+		//public bool Fired { get; set; }
 		public Player Enemy { get; set; }
 		public Jet Jet { get; set; }
 		public List<Bullet> Bulletlist { get; set; }
-		public Keys? KeyVert { get; set; }
-		public Keys? KeyHorz { get; set; }
-		public Keys? KeyShoot { get; set; }
+		public Vector Acceleration;
+		public bool KeyShoot { get; set; }
 		public ClsGameObjects GameState { get; set; }
 		protected List<Keys> SteerKeysBindings;
 		protected Keys ShootKeyBindings;
+		public Dictionary<HOTAS, Vector> commands { get; set; }
 
-		public Player(string name, int health, int ammo , ClsGameObjects game)
+
+		public Player(string name, int health, int ammo, Point At, Brush color, ClsGameObjects game)
 		{
 			Name = name;
 			Health = health;
 			MaxHealth = health;
 			Ammo = ammo;
-			MaxAmmo = ammo;			
+			MaxAmmo = ammo;
+			Jet = new Jet(At, color);
 			Bulletlist = new List<Bullet>();
-			Fired = false;
+			//Fired = false;
 			GameState = game;
+			bindCommands();
+		}
+
+		private void bindCommands()
+		{
+			//commands = new Dictionary<HOTAS, Vector>();
+			//commands.Add(HOTAS.Up, new Vector(0, -1));
+			//commands.Add(HOTAS.Down, new Vector(0, 1));
+			//commands.Add(HOTAS.Left, new Vector(-1,0));
+			//commands.Add(HOTAS.Right, new Vector(1,0));
+		}
+
+		public override string ToString()
+		{
+			return Jet.ToString();
 		}
 
 		public void Recharge(int amount)
@@ -46,103 +64,102 @@ namespace GameObjects
 			Health = Math.Min(Health + amount, MaxHealth);
 		}
 
-		public virtual void Steer(Keys command)
+		public virtual void Steer(HOTAS command)
 		{
-			if (SteerKeysBindings.Contains(command))
+			switch(command)
 			{
-				Jet.Steer(command);
+				case (HOTAS.Up):
+					{
+						Acceleration.Y = -1;
+						break;
+					}
+				case (HOTAS.Down):
+					{
+						Acceleration.Y = 1;
+						break;
+					}
+				case (HOTAS.Left):
+					{
+						Acceleration.X = -1;
+						break;
+					}
+				case (HOTAS.Right):
+					{
+						Acceleration.X = 1;
+						break;
+					}
+				case (HOTAS.Shoot):
+					{
+						KeyShoot = true;
+						break;
+					}
 			}
-			else if (command == ShootKeyBindings)
-			{
-				KeyShoot = command;
-			}
+			Jet.Acceleration = Acceleration;
+			//if (SteerKeysBindings.Contains(command))
+			//{
+			//	Jet.Steer(command);
+			//}
+			//else if (command == ShootKeyBindings)
+			//{
+			//	KeyShoot = command;
+			//}
 		}
 
-
-		public abstract void Release(Keys command);
+		public virtual void Release(HOTAS command)
+		{
+			switch (command)
+			{
+				case (HOTAS.Up):
+					{
+						Acceleration.Y = 0;
+						break;
+					}
+				case (HOTAS.Down):
+					{
+						Acceleration.Y = 0;
+						break;
+					}
+				case (HOTAS.Left):
+					{
+						Acceleration.X = 0;
+						break;
+					}
+				case (HOTAS.Right):
+					{
+						Acceleration.X = 0;
+						break;
+					}
+				case (HOTAS.Shoot):
+					{
+						KeyShoot = false;
+						break;
+					}
+			}
+			Jet.Acceleration = Acceleration;
+		}
 
 		public void Move()
 		{
 			Jet.Move(GameState);
 		}
 
-		public void Turn(Point location)
+		public void Aim(Vector location)
 		{
-			Jet.Turn(location);
+			Jet.Aim = location;
 		}
 
 		public virtual void Shoot(int timeElapsed)
 		{
-			if (KeyShoot != null)
+			if (KeyShoot)
 				Jet.Shoot(this, timeElapsed);
 		}
 
 		internal void Hit(int points)
 		{
-			if (Health > 0)
+			if (Health > points)
 				Health-= points;
 			else
 				GameOver.Show(Enemy);
-		}
-	}
-
-	public class Player1 : Player
-	{
-		public Player1(string name, int health, int ammo, Point At, ClsGameObjects game)
-			: base(name, health, ammo, game)
-		{
-			Jet = new Jet1(At);
-			SteerKeysBindings = new List<Keys> { Keys.A, Keys.D, Keys.W, Keys.S };
-			ShootKeyBindings = Keys.Space;
-		}
-
-
-		public override void Release(Keys command)
-		{
-			if (command == Keys.A || command == Keys.D)
-			{
-				//then it's a horizontal move
-				KeyHorz = null;
-			}
-			else if (command == Keys.W || command == Keys.S)
-			{
-				//then it's a horizontal move
-				KeyVert = null;
-			}
-			else if (command == Keys.Space)
-			{
-				KeyShoot = null;
-			}
-		}
-
-
-	}
-
-	public class Player2 : Player
-	{
-		public Player2(string name, int health, int ammo, Point At, ClsGameObjects game)
-			: base(name, health, ammo, game)
-		{
-			Jet = new Jet2(At);
-			SteerKeysBindings = new List<Keys> { Keys.Up, Keys.Down, Keys.Left, Keys.Right };
-			ShootKeyBindings = Keys.Enter;
-		}
-
-
-		public override void Release(Keys command)
-		{
-			if (command == Keys.Left || command == Keys.Right)
-			{
-				KeyHorz = null;
-			}
-			else if (command == Keys.Up || command == Keys.Down)
-			{
-				KeyVert = null;
-			}
-			else if (command == Keys.Return)
-			{
-				KeyShoot = null;
-			}
 		}
 	}
 }

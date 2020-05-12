@@ -16,7 +16,7 @@ namespace GameObjects
 		public Bullet(Player player, float linearSpeed = 10)
 		{
 			Shooter = player;
-			Pos = player.Jet.Pos;
+			Pos = player.Jet.Gun;
 			Speed = player.Jet.Bearing * (linearSpeed / player.Jet.Bearing.Magnitude);
 			Size = 5;
 			Pen = new Pen(Color.Yellow, Size);

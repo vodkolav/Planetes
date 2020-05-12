@@ -58,6 +58,7 @@
     <Compile Include="Astroid.cs" />
     <Compile Include="Bot.cs" />
     <Compile Include="Bullet.cs" />
+    <Compile Include="Controls.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="Jet.cs" />
     <Compile Include="Player.cs" />

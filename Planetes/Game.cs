@@ -14,6 +14,7 @@ using System.Runtime.Remoting.Channels.Tcp;
 using Services;
 using Service.Internal;
 using System.Drawing.Drawing2D;
+using PolygonCollision;
 
 namespace Planetes
 {
@@ -120,17 +121,7 @@ namespace Planetes
 			}
 		}
 
-		private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
-		{
-			if (stillOpen)
-				gameObjects.player1.Turn(e.Location); 
-		}
 
-		private void Form1_KeyUp(object sender, KeyEventArgs e)
-		{
-			gameObjects.player1.Release(e.KeyData);
-			gameObjects.player2.Release(e.KeyData);
-		}
 				
 		private void Form1_KeyDown(object sender, KeyEventArgs e)
 		{
@@ -138,74 +129,82 @@ namespace Planetes
 			{
 				if (localGame) // local game
 				 {
-
-					if (e.KeyData == Keys.Space)
-					{
-						gameObjects.player1.Steer(e.KeyData);
-					}
-					else if (e.KeyData == Keys.Return)
-					{
-						gameObjects.player2.Steer(e.KeyData);
-					}
-					//else if (e.KeyData == Keys.A || e.KeyData == Keys.D || e.KeyData == Keys.W || e.KeyData == Keys.S )
-					else if (new Keys[] { Keys.W, Keys.A, Keys.S, Keys.D }.Contains(e.KeyData))
-					{
-						//then it's a horizontal move
-						gameObjects.player1.Steer(e.KeyData);
-					}
-					else if (e.KeyData == Keys.Left || e.KeyData == Keys.Right || e.KeyData == Keys.Up || e.KeyData == Keys.Down)
-					{
-						//then it's a horizontal move
-						gameObjects.player2.Steer(e.KeyData);
-					}
-					else if (e.KeyData == Keys.P)
-					{
-						//then it's a horizontal move
-						gameObjects.Paused = !gameObjects.Paused;
-					}
-				}
-
-				else  // network game
-				{
-					if (localPlayerIsHost)
-					{
-						if (e.KeyData == Keys.Space)
-						{
-							gameObjects.player1.Shoot(timeElapsed);
-						}
-						else if (e.KeyData == Keys.A || e.KeyData == Keys.D)
-						{
-							//then it's a horizontal move
-							gameObjects.player1.Steer(e.KeyData);
-						}
-						else if (e.KeyData == Keys.W || e.KeyData == Keys.S)
-						{
-							//then it's a vertical move
-							gameObjects.player1.Steer(e.KeyData);
-						}
-					}
-					else
-					{
-
-						if (e.KeyData == Keys.Return)
-						{
-							gameObjects.player2.Shoot(timeElapsed);
-						}
-						else if (e.KeyData == Keys.Left || e.KeyData == Keys.Right)
-						{
-							//then it's a horizontal move
-							gameObjects.player2.Steer(e.KeyData);
-						}
-						else if (e.KeyData == Keys.Up || e.KeyData == Keys.Down)
-						{
-							//then it's a vertical move
-							gameObjects.player2.Steer(e.KeyData);
-
-						}
-					}
+					gameObjects.control.Press(e.KeyData);					
 				}
 			}
 		}
+
+		private void Form1_KeyUp(object sender, KeyEventArgs e)
+		{
+			gameObjects.control.Release(e.KeyData);
+			//gameObjects.player2.Release(e.KeyData);
+		}
+
+		
+		//if (e.KeyData == Keys.Space)
+					//{
+					//	gameObjects.player1.Steer(e.KeyData);
+					//}
+					//else if (e.KeyData == Keys.Return)
+					//{
+					//	gameObjects.player2.Steer(e.KeyData);
+					//}
+					////else if (e.KeyData == Keys.A || e.KeyData == Keys.D || e.KeyData == Keys.W || e.KeyData == Keys.S )
+					//else if (new Keys[] { Keys.W, Keys.A, Keys.S, Keys.D }.Contains(e.KeyData))
+					//{
+					//	//then it's a horizontal move
+					//	gameObjects.player1.Steer(e.KeyData);
+					//}
+					//else if (e.KeyData == Keys.Left || e.KeyData == Keys.Right || e.KeyData == Keys.Up || e.KeyData == Keys.Down)
+					//{
+					//	//then it's a horizontal move
+					//	gameObjects.player2.Steer(e.KeyData);
+					//}
+					//else if (e.KeyData == Keys.P)
+					//{
+					//	//then it's a pause
+					//	gameObjects.Paused = !gameObjects.Paused;
+					//}
+		//else  // network game
+		//{
+		//	if (localPlayerIsHost)
+		//	{
+		//		if (e.KeyData == Keys.Space)
+		//		{
+		//			gameObjects.player1.Shoot(timeElapsed);
+		//		}
+		//		else if (e.KeyData == Keys.A || e.KeyData == Keys.D)
+		//		{
+		//			//then it's a horizontal move
+		//			gameObjects.player1.Steer(e.KeyData);
+		//		}
+		//		else if (e.KeyData == Keys.W || e.KeyData == Keys.S)
+		//		{
+		//			//then it's a vertical move
+		//			gameObjects.player1.Steer(e.KeyData);
+		//		}
+		//	}
+		//	else
+		//	{
+
+		//		if (e.KeyData == Keys.Return)
+		//		{
+		//			gameObjects.player2.Shoot(timeElapsed);
+		//		}
+		//		else if (e.KeyData == Keys.Left || e.KeyData == Keys.Right)
+		//		{
+		//			//then it's a horizontal move
+		//			gameObjects.player2.Steer(e.KeyData);
+		//		}
+		//		else if (e.KeyData == Keys.Up || e.KeyData == Keys.Down)
+		//		{
+		//			//then it's a vertical move
+		//			gameObjects.player2.Steer(e.KeyData);
+
+		//		}
+		//	}
+		//}
+
 
 		//else  // network game
 		//		{
@@ -270,6 +269,17 @@ namespace Planetes
 		//			}
 		//		}
 
+		private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
+		{
+			if (stillOpen)
+				gameObjects.player1.Aim(new Vector(e.Location));
+		}
+
+		private void pictureBox1_MouseClick(object sender, MouseEventArgs e)
+		{
+			MouseButtons b = e.Button;
+		}
+
 		private void timer1_Tick(object sender, EventArgs e)
 		{			
 			if (gameObjects.Paused) return;
@@ -278,6 +288,9 @@ namespace Planetes
 				gameObjects.player1.Move();
 				gameObjects.player2.Move();
 			}
+
+			Console.WriteLine(gameObjects.player1.ToString());
+
 
 			gameObjects.player1.Shoot(timeElapsed);
 			gameObjects.player2.Shoot(timeElapsed);
@@ -413,9 +426,10 @@ namespace Planetes
 			localGame = true;
 			gameObjects = new ClsGameObjects(pictureBox1.Width, pictureBox1.Height);
 			
-			Point p2Start = new Point(gameObjects.WinSize_x - 100, gameObjects.WinSize_y / 2);
+			Point p2Start = new Point(gameObjects.WinSize_x - 100, gameObjects.WinSize_y / 2 - 100);
 
-			gameObjects.player2 = new Bot4("Bot4", 20, 300, p2Start, gameObjects);
+			gameObjects.player2 = new Bot4("Bot4", 20, 300, p2Start, Brushes.Orange, gameObjects);
+			gameObjects.player2.Jet.Aim = new Vector(0, gameObjects.WinSize_y / 2);
 			startGame();
 		}
 
