@@ -10,16 +10,16 @@ namespace GameObjects
 		public Vector Speed { get; set; }
 		public int Size { get; set; }
 		public bool HasHit { get; set; }
-		public Pen Pen { get; protected set; }
+		private Pen Pen;
 		public Player Shooter { get; private set; }
 
-		public Bullet(Player player, float linearSpeed = 10)
+		public Bullet(Player player, float linearSpeed = 20)
 		{
 			Shooter = player;
 			Pos = player.Jet.Gun;
 			Speed = player.Jet.Bearing * (linearSpeed / player.Jet.Bearing.Magnitude);
 			Size = 5;
-			Pen = new Pen(Color.Yellow, Size);
+			Pen = new Pen(player.Jet.Color, Size);
 			HasHit = false;
 		}
 

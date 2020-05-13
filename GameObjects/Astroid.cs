@@ -13,7 +13,7 @@ namespace GameObjects
 		public Vector Pos { get; set; }
 		public AstType Type { get; set; }
 		public bool HasHit { get; set; }
-		static public int Timeout { get { return 50; } }
+		static public int Timeout { get { return 10; } }
 
 		public void TossType(Random random)
 		{
@@ -70,7 +70,6 @@ namespace GameObjects
 			if (!HasHit)
 				g.FillEllipse( Color, Pos.X, Pos.Y, Size, Size);
 		}
-
 
 		public void Collides(Player p)
 		{

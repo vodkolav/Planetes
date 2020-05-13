@@ -128,14 +128,14 @@ namespace Planetes
 			if (GameOver.End == false)
 			{
 				if (localGame) // local game
-				 {
+				{
 					gameObjects.control.Press(e.KeyData);					
 				}
 			}
 		}
 
 		private void Form1_KeyUp(object sender, KeyEventArgs e)
-		{
+		{			
 			gameObjects.control.Release(e.KeyData);
 			//gameObjects.player2.Release(e.KeyData);
 		}
@@ -271,17 +271,29 @@ namespace Planetes
 
 		private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
 		{
+			
 			if (stillOpen)
-				gameObjects.player1.Aim(new Vector(e.Location));
+				gameObjects.control.Aim(new Vector(e.Location));
 		}
 
-		private void pictureBox1_MouseClick(object sender, MouseEventArgs e)
+		private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
 		{
-			MouseButtons b = e.Button;
+			if (GameOver.End == false)
+			{
+				if (localGame) // local game
+				{
+					gameObjects.control.Press(e.Button);
+				}
+			}
+		}
+
+		private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
+		{
+			gameObjects.control.Release(e.Button);
 		}
 
 		private void timer1_Tick(object sender, EventArgs e)
-		{			
+		{						
 			if (gameObjects.Paused) return;
 			lock (gameObjects)
 			{
@@ -426,10 +438,9 @@ namespace Planetes
 			localGame = true;
 			gameObjects = new ClsGameObjects(pictureBox1.Width, pictureBox1.Height);
 			
-			Point p2Start = new Point(gameObjects.WinSize_x - 100, gameObjects.WinSize_y / 2 - 100);
+			Point p2Start = new Point(gameObjects.WinSize_x -100, gameObjects.WinSize_y / 2);
+			gameObjects.ReplacePlayerWith(new Bot4("Bot4", 20, 300, p2Start, Color.Orange, gameObjects));
 
-			gameObjects.player2 = new Bot4("Bot4", 20, 300, p2Start, Brushes.Orange, gameObjects);
-			gameObjects.player2.Jet.Aim = new Vector(0, gameObjects.WinSize_y / 2);
 			startGame();
 		}
 

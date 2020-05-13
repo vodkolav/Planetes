@@ -26,7 +26,7 @@ namespace GameObjects
 		public Dictionary<HOTAS, Vector> commands { get; set; }
 
 
-		public Player(string name, int health, int ammo, Point At, Brush color, ClsGameObjects game)
+		public Player(string name, int health, int ammo, Point At, Color color, ClsGameObjects game)
 		{
 			Name = name;
 			Health = health;

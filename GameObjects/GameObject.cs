@@ -41,21 +41,22 @@ namespace GameObjects
 			Walls.Add(new Wall(wallBrush, new Point(0, winSize_y - ww), new Size(winSize_x, ww)));
 			Walls.Add(new Wall(wallBrush, new Point(winSize_x - ww, 0), new Size(ww, winSize_y)));
 
-			Walls.Add(new Wall(wallBrush, new Point(winSize_x - 100, 400), new Size(ww, 100)));
+			Walls.Add(new Wall(wallBrush, new Point(winSize_x/2, 400), new Size(ww, 100)));
 
 			Walls.Add(new Wall(wallBrush, new Point(100, 100), new Point(200, 200), ww));
 
 			Point p1Start = new Point(100, winSize_y / 2);
-			player1 = new Player("Player1", 20, 300, p1Start, Brushes.Blue, this);
+			player1 = new Player("Player1", 200, 300, p1Start, Color.Blue, this);
 
 			Point p2Start = new Point(winSize_x - 100, winSize_y / 2);
-			player2 = new Player("Player2", 20, 300, p2Start, Brushes.Red, this);
+			player2 = new Player("Player2", 200, 300, p2Start, Color.Red, this);
 
 			player1.Enemy = player2;
 			player2.Enemy = player1;
 
 			control = new Controls();
 			control.bindWASDto(player1);
+			control.bindMouse(MouseButtons.Left, player1, HOTAS.Shoot);
 			control.bindARROWSto(player2);
 
 			AstroidList = new List<Astroid>();
@@ -67,6 +68,15 @@ namespace GameObjects
 		public override object InitializeLifetimeService()
 		{
 			return null;
+		}
+
+
+		public void ReplacePlayerWith(Bot bot)
+		{
+			player2 = bot;
+			player1.Enemy = player2;
+			player2.Enemy = player1;
+			player2.Jet.Aim = new Vector(0, WinSize_y / 2);
 		}
 	}
 

@@ -48,6 +48,15 @@ namespace PolygonCollision
 			get { return (float)Math.Sqrt(X * X + Y * Y); }
 		}
 
+		public float Magnitude_X
+		{
+			get { return Math.Abs(X); }
+		}
+		public float Magnitude_Y
+		{
+			get { return Math.Abs(Y); }
+		}
+
 		public void Normalize() {
 			float magnitude = Magnitude;
 			X = X / magnitude;
@@ -169,7 +178,7 @@ namespace PolygonCollision
 		}
 
 		public override string ToString() {
-			return Math.Abs(X).ToString("+##.##;-##.##;0") + ", " + Math.Abs(Y).ToString("+#;-#;0");
+			return Math.Abs(X).ToString("+##.##;-##.##;0") + ", " + Math.Abs(Y).ToString("+##.##;-##.##;0");
 		}
 
 		public string ToString(bool rounded) {

@@ -13,19 +13,19 @@ namespace GameObjects
 	
 		private Vector _speed;
 
-		private Vector Speed
+		public Vector Speed
 		{
 			get { return _speed; }
-			set
+			private set
 			{
-				if (value.Magnitude <= 20)
-				{
+				if (value.Magnitude_X <= 15 && value.Magnitude_Y <=15)
+				{					
 					_speed = value;
 				}
 			}
 		}
 
-		public Vector Acceleration;
+		public Vector Acceleration { get; set; }
 
 		public float Thrust { get; set; }	
 		
@@ -33,7 +33,13 @@ namespace GameObjects
 
 		public Vector Aim { get; set; }
 
-		public Brush Color { get; set; }
+		private SolidBrush brush;
+
+		public Color Color
+		{
+			get { return brush.Color; }
+			set { brush = new SolidBrush(value); }
+		}
 
 		public Polygon Hull{ get; set; }
 
@@ -45,7 +51,7 @@ namespace GameObjects
 
 		public int Cooldown { get; set; }
 
-		public Jet(Point start, Brush color)
+		public Jet(Point start, Color color)
 		{			
 			Hull = new Polygon();
 			Hull.AddVertex(new Vector(50, 50));
@@ -63,7 +69,7 @@ namespace GameObjects
 			//Pos_x = start.X;
 			//Pos_y = start.Y;
 			Color = color;
-			Thrust = 0.1f;
+			Thrust = 0.5f;
 			Cooldown = 10;
 		}
 		
@@ -92,6 +98,8 @@ namespace GameObjects
 			return diff.Magnitude;
 		}
 
+		// In some cases Asteroids don't collide when they should 
+		// that's because I use polygon/point collision while asteroids are circles 
 		public bool Collides(Astroid a)
 		{
 			return Hull.Collides(a.Pos) || Cockpit.Collides(a.Pos);
@@ -110,8 +118,9 @@ namespace GameObjects
 			foreach(Wall w in gO.Walls)
 			{
 				r = Hull.Collides(w.region, Speed);
-				if (r.Intersect)
+				if (r.WillIntersect)
 				{
+					Offset(Speed + r.MinimumTranslationVector);
 					Bounce(r.translationAxis);
 				}
 			}
@@ -132,7 +141,7 @@ namespace GameObjects
 		public void Shoot(Player player, int timeElapsed)
 		{
 			if (player.Ammo != 0 && timeElapsed > LastFired + Cooldown)
-			{
+			{				
 				LastFired = timeElapsed;
 				Bullet bullet = new Bullet(player);
 				lock (player.GameState)
@@ -149,8 +158,8 @@ namespace GameObjects
 			//{
 			//	m.RotateAt((float)Bearing, Hull.Center());
 			//	g.Transform = m;
-		
-			Hull.Draw(g, Color);
+
+			Hull.Draw(g, brush);
 			Cockpit.Draw(g,Brushes.Gray);
 			//	g.ResetTransform();
 
