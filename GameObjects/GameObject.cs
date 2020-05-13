@@ -12,8 +12,8 @@ namespace GameObjects
 
 	public class ClsGameObjects : MarshalByRefObject
 	{
-		public static int FrameRate = 20;
-		public static ClsGameObjects theObject;
+		public static int FrameInterval = 40;
+		//public static ClsGameObjects theObject;
 		public bool Connected { get; set; }
 		public bool ServerClosed { get; set; }
 		public Player player1 { get; set; }
@@ -23,7 +23,7 @@ namespace GameObjects
 		public List<Astroid> AstroidList { get; set; }
 		public List<Wall> Walls { get; set; }
 		public bool Paused { get; set; }
-		public Controls control { get; set; }
+		public ControlPanel control { get; set; }
 
 
 		public ClsGameObjects(int winSize_x, int winSize_y)
@@ -48,19 +48,19 @@ namespace GameObjects
 			Point p1Start = new Point(100, winSize_y / 2);
 			player1 = new Player("Player1", 200, 300, p1Start, Color.Blue, this);
 
-			Point p2Start = new Point(winSize_x - 100, winSize_y / 2);
+			Point p2Start = new Point(winSize_x - 150, winSize_y / 2);
 			player2 = new Player("Player2", 200, 300, p2Start, Color.Red, this);
 
 			player1.Enemy = player2;
 			player2.Enemy = player1;
 
-			control = new Controls();
+			control = new ControlPanel();
 			control.bindWASDto(player1);
 			control.bindMouse(MouseButtons.Left, player1, HOTAS.Shoot);
 			control.bindARROWSto(player2);
 
 			AstroidList = new List<Astroid>();
-			theObject = this;
+			//theObject = this;
 			Connected = false;
 			ServerClosed = false;
 		}

@@ -9,13 +9,13 @@ using PolygonCollision;
 namespace GameObjects
 {
 	public enum HOTAS {Up, Down, Left, Right, Shoot, Aim };
-	public class Controls
+	public class ControlPanel
 	{
 		private Dictionary<Keys, Tuple<Player, HOTAS>> KeyBindings;
 
 		private Dictionary<MouseButtons, Tuple<Player, HOTAS>> MouseBindings;
 
-		public Controls()
+		public ControlPanel()
 		{
 			KeyBindings = new Dictionary<Keys, Tuple<Player, HOTAS>>();
 			MouseBindings = new Dictionary<MouseButtons, Tuple<Player, HOTAS>>();

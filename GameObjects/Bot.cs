@@ -15,6 +15,7 @@ namespace GameObjects
 	{
 		protected List<HOTAS> directions = new List<HOTAS> { HOTAS.Up, HOTAS.Down };
 
+		public int ReactionSlowDown { get; private set; } = 10;
 
 		public Bot(string name, int health, int ammo,Point At, Color color, ClsGameObjects game)
 			: base(name, health, ammo, At,color, game)
@@ -71,7 +72,7 @@ namespace GameObjects
 			HOTAS direction = directions[0];
 			while (true)
 			{
-				Thread.Sleep(50);
+				Thread.Sleep(ClsGameObjects.FrameInterval* ReactionSlowDown);
 
 				if (count == 5)
 				{
@@ -98,7 +99,7 @@ namespace GameObjects
 
 		protected override void Play()
 		{
-			int timeElapsed = 0;
+			//int timeElapsed = 0;
 
 
 			//todo:
@@ -195,8 +196,8 @@ namespace GameObjects
 					Release(HOTAS.Shoot);
 				}
 
-				timeElapsed += ClsGameObjects.FrameRate;
-				Thread.Sleep(ClsGameObjects.FrameRate * 10);
+				//timeElapsed += ClsGameObjects.FrameRate;
+				Thread.Sleep(ClsGameObjects.FrameInterval * ReactionSlowDown);
 			}
 		}
 	}
@@ -213,9 +214,11 @@ namespace GameObjects
 			: base(name, health, ammo,  At, color, game, timer)
 		{ }
 
+		
+
 		protected override void Play()
 		{
-			int timeElapsed = 0;
+			//int timeElapsed = 0;
 
 
 			//todo:
@@ -310,8 +313,8 @@ namespace GameObjects
 				{
 					Release(HOTAS.Shoot);
 				}
-				timeElapsed += ClsGameObjects.FrameRate;
-				Thread.Sleep(ClsGameObjects.FrameRate * 10);
+				//timeElapsed += ClsGameObjects.FrameRate;
+				Thread.Sleep(ClsGameObjects.FrameInterval * ReactionSlowDown);
 			}
 		}
 	}

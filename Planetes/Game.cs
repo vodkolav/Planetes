@@ -24,7 +24,7 @@ namespace Planetes
 		private Pen p1;
 		private Graphics g;
 		private ClsGameObjects gameObjects;
-		private Thread thrdDrawGraphics;
+		private Thread thrdGameLoop;
 		private bool stillOpen;
 		private int timeElapsed;
 		private bool localGame;
@@ -44,49 +44,133 @@ namespace Planetes
 			SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.FixedHeight | ControlStyles.FixedWidth | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
 		}
 
+
+
+
 		private void startGame()
 		{
 			stillOpen = true;
 			bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
 			g = Graphics.FromImage(bmp);
 			g.SmoothingMode = SmoothingMode.AntiAlias;
-			pbPl1Ammo.Visible = true;
-			pbPl1Ammo.Maximum = gameObjects.player1.MaxAmmo;
-			pbPl1Hlth.Visible = true;
-			pbPl1Hlth.Maximum = gameObjects.player1.MaxHealth;
-			pbPl2Ammo.Visible = true;
-			pbPl2Ammo.Maximum = gameObjects.player2.MaxAmmo;
-			pbPl2Hlth.Visible = true;
-			pbPl2Hlth.Maximum = gameObjects.player2.MaxHealth;
 			pictureBox1.Image = bmp;
-			thrdDrawGraphics = new Thread(DrawGraphics);
-			thrdDrawGraphics.Name = "DrawGraphics";
-			thrdDrawGraphics.Start();
-			GameOver.End = false;
+
+			hudLeft.bind(gameObjects, gameObjects.player1);
+			hudRight.bind(gameObjects, gameObjects.player2);
+
+			thrdGameLoop = new Thread(GameLoop)
 			{
-				timer1.Interval = ClsGameObjects.FrameRate;
-				timer1.Start();
-				timeElapsed = 0;
-			}
+				Name = "GameLoop"
+			};
+			thrdGameLoop.Start();
+			GameOver.End = false;
+			timer1.Interval = ClsGameObjects.FrameInterval;
+			timer1.Start();
+			timeElapsed = 0;
+
 		}
 
-		private void DrawGraphics()
+		private void timer1_Tick(object sender, EventArgs e)
+		{
+			DrawGraphics();
+		}
+
+		private void GameLoop()
 		{
 			while (stillOpen)
 			{
+				Thread.Sleep(ClsGameObjects.FrameInterval);
+				Frame();
+			}
+		}
+
+		private void Frame()
+		{
+			if (gameObjects.Paused) return;
+			lock (gameObjects)
+			{
+				gameObjects.player1.Move();
+				gameObjects.player2.Move();
+			}
+
+			Console.WriteLine(gameObjects.player1.Jet.ToString());
+
+
+			gameObjects.player1.Shoot(timeElapsed);
+			gameObjects.player2.Shoot(timeElapsed);
+
+			//pbPl1Ammo.Value = gameObjects.player1.Ammo;
+			//pbPl1Hlth.Value = gameObjects.player1.Health;
+			//pbPl2Ammo.Value = gameObjects.player2.Ammo;
+			//pbPl2Hlth.Value = gameObjects.player2.Health;
+			//if (!localGame && !localPlayerIsHost)
+			//{
+			//	if (gameObjects.ServerClosed)
+			//	{
+			//		disconnect();
+			//		Close();
+			//	}
+			//}
+			//else
+			//{
+			if (GameOver.End == false)
+			{
+				//Move player 1 bullets
+				lock (gameObjects)
+				{
+					gameObjects.player1.Bulletlist.ForEach(b => b.Move(gameObjects));
+					gameObjects.player1.Bulletlist.RemoveAll(b => b.HasHit);
+				}
+				//Move player 2 bullets
+				lock (gameObjects)
+				{
+					gameObjects.player2.Bulletlist.ForEach(b => b.Move(gameObjects));
+					gameObjects.player2.Bulletlist.RemoveAll(b => b.HasHit);
+				}
+				//Move asteroids
+				lock (gameObjects)
+				{
+					gameObjects.AstroidList.ForEach(b => b.Move(gameObjects));
+					gameObjects.AstroidList.RemoveAll(c => c.HasHit);
+				}
+				//Spawn asteroid after timeout
+				if (timeElapsed % Astroid.Timeout == 0)
+				{
+					Astroid astroid = new Astroid(Width, Height);
+					lock (gameObjects)
+					{
+						gameObjects.AstroidList.Add(astroid);
+					}
+				}
+				timeElapsed++;
+			}
+			else
+			{
+				stillOpen = false;
+				timer1.Enabled = false;
+			}
+		}
+
+
+		private void DrawGraphics()
+		{
+			
 				//gameObjects = (ClsGameObjects)Activator.GetObject(typeof(ClsGameObjects), "tcp://127.0.0.1:8085/GameObjects");
 				p1 = new Pen(Color.White, 5);
-				g.FillRectangle(Brushes.Black, new Rectangle(0, 0, pictureBox1.Width, pictureBox1.Height));							   			
-					foreach (Wall w in gameObjects.Walls)
-					{
-						w.Draw(g);
-					}
+				g.FillRectangle(Brushes.Black, new Rectangle(0, 0, pictureBox1.Width, pictureBox1.Height));
+				foreach (Wall w in gameObjects.Walls)
+				{
+					w.Draw(g);
+				}
 
 				lock (gameObjects)
 				{
 					gameObjects.player1.Jet.Draw(g);
 					gameObjects.player2.Jet.Draw(g);
 				}
+
+				hudLeft.Draw();
+				hudRight.Draw();
 
 				lock (gameObjects)
 				{
@@ -118,53 +202,53 @@ namespace Planetes
 				pictureBox1.Image = bmp;
 				if (pictureBox1 != null)
 					pictureBox1.Invoke(new RefreshBitmapDelegate(pictureBox1.Refresh));
-			}
+			
 		}
 
 
-				
+
 		private void Form1_KeyDown(object sender, KeyEventArgs e)
 		{
 			if (GameOver.End == false)
 			{
 				if (localGame) // local game
 				{
-					gameObjects.control.Press(e.KeyData);					
+					gameObjects.control.Press(e.KeyData);
 				}
 			}
 		}
 
 		private void Form1_KeyUp(object sender, KeyEventArgs e)
-		{			
+		{
 			gameObjects.control.Release(e.KeyData);
 			//gameObjects.player2.Release(e.KeyData);
 		}
 
-		
+
 		//if (e.KeyData == Keys.Space)
-					//{
-					//	gameObjects.player1.Steer(e.KeyData);
-					//}
-					//else if (e.KeyData == Keys.Return)
-					//{
-					//	gameObjects.player2.Steer(e.KeyData);
-					//}
-					////else if (e.KeyData == Keys.A || e.KeyData == Keys.D || e.KeyData == Keys.W || e.KeyData == Keys.S )
-					//else if (new Keys[] { Keys.W, Keys.A, Keys.S, Keys.D }.Contains(e.KeyData))
-					//{
-					//	//then it's a horizontal move
-					//	gameObjects.player1.Steer(e.KeyData);
-					//}
-					//else if (e.KeyData == Keys.Left || e.KeyData == Keys.Right || e.KeyData == Keys.Up || e.KeyData == Keys.Down)
-					//{
-					//	//then it's a horizontal move
-					//	gameObjects.player2.Steer(e.KeyData);
-					//}
-					//else if (e.KeyData == Keys.P)
-					//{
-					//	//then it's a pause
-					//	gameObjects.Paused = !gameObjects.Paused;
-					//}
+		//{
+		//	gameObjects.player1.Steer(e.KeyData);
+		//}
+		//else if (e.KeyData == Keys.Return)
+		//{
+		//	gameObjects.player2.Steer(e.KeyData);
+		//}
+		////else if (e.KeyData == Keys.A || e.KeyData == Keys.D || e.KeyData == Keys.W || e.KeyData == Keys.S )
+		//else if (new Keys[] { Keys.W, Keys.A, Keys.S, Keys.D }.Contains(e.KeyData))
+		//{
+		//	//then it's a horizontal move
+		//	gameObjects.player1.Steer(e.KeyData);
+		//}
+		//else if (e.KeyData == Keys.Left || e.KeyData == Keys.Right || e.KeyData == Keys.Up || e.KeyData == Keys.Down)
+		//{
+		//	//then it's a horizontal move
+		//	gameObjects.player2.Steer(e.KeyData);
+		//}
+		//else if (e.KeyData == Keys.P)
+		//{
+		//	//then it's a pause
+		//	gameObjects.Paused = !gameObjects.Paused;
+		//}
 		//else  // network game
 		//{
 		//	if (localPlayerIsHost)
@@ -271,7 +355,7 @@ namespace Planetes
 
 		private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
 		{
-			
+
 			if (stillOpen)
 				gameObjects.control.Aim(new Vector(e.Location));
 		}
@@ -292,86 +376,40 @@ namespace Planetes
 			gameObjects.control.Release(e.Button);
 		}
 
-		private void timer1_Tick(object sender, EventArgs e)
-		{						
-			if (gameObjects.Paused) return;
-			lock (gameObjects)
-			{
-				gameObjects.player1.Move();
-				gameObjects.player2.Move();
-			}
+		
 
-			Console.WriteLine(gameObjects.player1.ToString());
+		//private void Form1_Load(object sender, EventArgs e)
+		//{
 
-
-			gameObjects.player1.Shoot(timeElapsed);
-			gameObjects.player2.Shoot(timeElapsed);
-
-			pbPl1Ammo.Value = gameObjects.player1.Ammo;
-			pbPl1Hlth.Value = gameObjects.player1.Health;
-			pbPl2Ammo.Value = gameObjects.player2.Ammo;
-			pbPl2Hlth.Value = gameObjects.player2.Health;
-			//if (!localGame && !localPlayerIsHost)
-			//{
-			//	if (gameObjects.ServerClosed)
-			//	{
-			//		disconnect();
-			//		Close();
-			//	}
-			//}
-			//else
-			//{
-			if (GameOver.End == false)
-			{
-				//Move player 1 bullets
-				lock (gameObjects)
-				{
-					gameObjects.player1.Bulletlist.ForEach(b => b.Move(gameObjects));
-					gameObjects.player1.Bulletlist.RemoveAll(b => b.HasHit);
-				}
-				//Move player 2 bullets
-				lock (gameObjects)
-				{
-					gameObjects.player2.Bulletlist.ForEach(b => b.Move(gameObjects));
-					gameObjects.player2.Bulletlist.RemoveAll(b => b.HasHit);
-				}
-				//Move asteroids
-				lock (gameObjects)
-				{
-					gameObjects.AstroidList.ForEach(b => b.Move(gameObjects));
-					gameObjects.AstroidList.RemoveAll(c => c.HasHit);
-				}
-				//Spawn asteroid after timeout
-				if (timeElapsed % Astroid.Timeout == 0)
-				{
-					Astroid astroid = new Astroid(Width, Height);
-					lock (gameObjects)
-					{
-						gameObjects.AstroidList.Add(astroid);
-					}
-				}
-				timeElapsed++;
-			}
-			else
-			{
-				stillOpen = false;
-				timer1.Enabled = false;
-			}
-		}
-
-		private void Form1_Load(object sender, EventArgs e)
-		{
-
-		}
+		//}
 
 		private void Form1_FormClosing(object sender, FormClosingEventArgs e)
 		{
 			stillOpen = false;
-			if (thrdDrawGraphics != null)
-				thrdDrawGraphics.Abort();
+			if (thrdGameLoop != null)
+				thrdGameLoop.Abort();
 			if (!localGame && localPlayerIsHost) stopServer();
 		}
 
+		private void humanVsHumanToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			localGame = true;
+			gameObjects = new ClsGameObjects(pictureBox1.Width, pictureBox1.Height);
+			startGame();
+		}
+
+		private void humanVsBotToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			localGame = true;
+			gameObjects = new ClsGameObjects(pictureBox1.Width, pictureBox1.Height);
+
+			Point p2Start = new Point(gameObjects.WinSize_x - 100, gameObjects.WinSize_y / 2);
+			gameObjects.ReplacePlayerWith(new Bot4("Bot4", 20, 300, p2Start, Color.Orange, gameObjects));
+
+			startGame();
+		}
+
+		#region Network Game
 
 		private void hostNetworkGame()
 		{
@@ -426,26 +464,6 @@ namespace Planetes
 			hostNetworkGame();
 		}
 
-		private void humanVsHumanToolStripMenuItem_Click(object sender, EventArgs e)
-		{
-			localGame = true;
-			gameObjects = new ClsGameObjects(pictureBox1.Width, pictureBox1.Height);
-			startGame();
-		}
-
-		private void humanVsBotToolStripMenuItem_Click(object sender, EventArgs e)
-		{
-			localGame = true;
-			gameObjects = new ClsGameObjects(pictureBox1.Width, pictureBox1.Height);
-			
-			Point p2Start = new Point(gameObjects.WinSize_x -100, gameObjects.WinSize_y / 2);
-			gameObjects.ReplacePlayerWith(new Bot4("Bot4", 20, 300, p2Start, Color.Orange, gameObjects));
-
-			startGame();
-		}
-
-
-
 		private void joinToolStripMenuItem_Click_1(object sender, EventArgs e)
 		{
 			VerbindungsDialog vd = new VerbindungsDialog();
@@ -460,12 +478,18 @@ namespace Planetes
 				catch (Exception ex) { MessageBox.Show("Could not connect to server!\n" + ex.Message); }
 		}
 
-
+		private void Game_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+		{
+			e.IsInputKey = true;
+		}
 
 		private void LocalGameToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 
 		}
+		#endregion
+
+
 	}
 }
 

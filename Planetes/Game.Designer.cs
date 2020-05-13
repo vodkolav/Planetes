@@ -32,10 +32,6 @@
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Game));
 			this.pictureBox1 = new System.Windows.Forms.PictureBox();
 			this.timer1 = new System.Windows.Forms.Timer(this.components);
-			this.pbPl1Ammo = new System.Windows.Forms.ProgressBar();
-			this.pbPl1Hlth = new System.Windows.Forms.ProgressBar();
-			this.pbPl2Ammo = new System.Windows.Forms.ProgressBar();
-			this.pbPl2Hlth = new System.Windows.Forms.ProgressBar();
 			this.toolStrip1 = new System.Windows.Forms.ToolStrip();
 			this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
 			this.LocalGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -44,10 +40,8 @@
 			this.NetworkGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.hostToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.joinToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.label1 = new System.Windows.Forms.Label();
-			this.label2 = new System.Windows.Forms.Label();
-			this.label3 = new System.Windows.Forms.Label();
-			this.label4 = new System.Windows.Forms.Label();
+			this.hudRight = new Planetes.HUD();
+			this.hudLeft = new Planetes.HUD();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			this.toolStrip1.SuspendLayout();
 			this.SuspendLayout();
@@ -68,48 +62,6 @@
 			// 
 			this.timer1.Interval = 10;
 			this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
-			// 
-			// pbPl1Ammo
-			// 
-			this.pbPl1Ammo.BackColor = System.Drawing.Color.White;
-			this.pbPl1Ammo.ForeColor = System.Drawing.Color.Red;
-			this.pbPl1Ammo.Location = new System.Drawing.Point(220, 854);
-			this.pbPl1Ammo.Maximum = 150;
-			this.pbPl1Ammo.Name = "pbPl1Ammo";
-			this.pbPl1Ammo.Size = new System.Drawing.Size(202, 30);
-			this.pbPl1Ammo.Step = 1;
-			this.pbPl1Ammo.TabIndex = 1;
-			this.pbPl1Ammo.Visible = false;
-			// 
-			// pbPl1Hlth
-			// 
-			this.pbPl1Hlth.BackColor = System.Drawing.Color.Red;
-			this.pbPl1Hlth.ForeColor = System.Drawing.Color.Red;
-			this.pbPl1Hlth.Location = new System.Drawing.Point(12, 854);
-			this.pbPl1Hlth.Maximum = 20;
-			this.pbPl1Hlth.Name = "pbPl1Hlth";
-			this.pbPl1Hlth.Size = new System.Drawing.Size(202, 30);
-			this.pbPl1Hlth.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
-			this.pbPl1Hlth.TabIndex = 2;
-			this.pbPl1Hlth.Visible = false;
-			// 
-			// pbPl2Ammo
-			// 
-			this.pbPl2Ammo.Location = new System.Drawing.Point(554, 854);
-			this.pbPl2Ammo.Maximum = 150;
-			this.pbPl2Ammo.Name = "pbPl2Ammo";
-			this.pbPl2Ammo.Size = new System.Drawing.Size(202, 30);
-			this.pbPl2Ammo.TabIndex = 3;
-			this.pbPl2Ammo.Visible = false;
-			// 
-			// pbPl2Hlth
-			// 
-			this.pbPl2Hlth.Location = new System.Drawing.Point(762, 854);
-			this.pbPl2Hlth.Maximum = 20;
-			this.pbPl2Hlth.Name = "pbPl2Hlth";
-			this.pbPl2Hlth.Size = new System.Drawing.Size(198, 30);
-			this.pbPl2Hlth.TabIndex = 4;
-			this.pbPl2Hlth.Visible = false;
 			// 
 			// toolStrip1
 			// 
@@ -180,45 +132,26 @@
 			this.joinToolStripMenuItem.Text = "Join";
 			this.joinToolStripMenuItem.Click += new System.EventHandler(this.joinToolStripMenuItem_Click_1);
 			// 
-			// label1
+			// hudRight
 			// 
-			this.label1.AutoSize = true;
-			this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			this.label1.Location = new System.Drawing.Point(70, 831);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(56, 20);
-			this.label1.TabIndex = 6;
-			this.label1.Text = "Health";
+			this.hudRight.Location = new System.Drawing.Point(1280, 831);
+			this.hudRight.MaximumSize = new System.Drawing.Size(320, 130);
+			this.hudRight.MinimumSize = new System.Drawing.Size(320, 130);
+			this.hudRight.Name = "hudRight";
+			this.hudRight.Size = new System.Drawing.Size(320, 130);
+			this.hudRight.TabIndex = 7;
+			this.hudRight.Visible = false;
 			// 
-			// label2
+			// hudLeft
 			// 
-			this.label2.AutoSize = true;
-			this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			this.label2.Location = new System.Drawing.Point(642, 831);
-			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(55, 20);
-			this.label2.TabIndex = 7;
-			this.label2.Text = "Ammo";
-			// 
-			// label3
-			// 
-			this.label3.AutoSize = true;
-			this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			this.label3.Location = new System.Drawing.Point(304, 831);
-			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(55, 20);
-			this.label3.TabIndex = 8;
-			this.label3.Text = "Ammo";
-			// 
-			// label4
-			// 
-			this.label4.AutoSize = true;
-			this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			this.label4.Location = new System.Drawing.Point(851, 831);
-			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(56, 20);
-			this.label4.TabIndex = 9;
-			this.label4.Text = "Health";
+			this.hudLeft.Dock = System.Windows.Forms.DockStyle.Bottom;
+			this.hudLeft.Location = new System.Drawing.Point(0, 831);
+			this.hudLeft.MaximumSize = new System.Drawing.Size(320, 130);
+			this.hudLeft.MinimumSize = new System.Drawing.Size(320, 130);
+			this.hudLeft.Name = "hudLeft";
+			this.hudLeft.Size = new System.Drawing.Size(320, 130);
+			this.hudLeft.TabIndex = 6;
+			this.hudLeft.Visible = false;
 			// 
 			// Game
 			// 
@@ -226,25 +159,20 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.Color.White;
 			this.ClientSize = new System.Drawing.Size(1600, 961);
-			this.Controls.Add(this.pbPl2Hlth);
-			this.Controls.Add(this.label4);
-			this.Controls.Add(this.pbPl1Ammo);
-			this.Controls.Add(this.pbPl2Ammo);
-			this.Controls.Add(this.label1);
-			this.Controls.Add(this.label2);
-			this.Controls.Add(this.pbPl1Hlth);
+			this.Controls.Add(this.hudRight);
+			this.Controls.Add(this.hudLeft);
 			this.Controls.Add(this.pictureBox1);
-			this.Controls.Add(this.label3);
 			this.Controls.Add(this.toolStrip1);
 			this.DoubleBuffered = true;
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.KeyPreview = true;
 			this.Name = "Game";
 			this.Text = "Planetes";
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
-			this.Load += new System.EventHandler(this.Form1_Load);
 			this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
 			this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyUp);
+			this.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.Game_PreviewKeyDown);
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
 			this.toolStrip1.ResumeLayout(false);
 			this.toolStrip1.PerformLayout();
@@ -257,10 +185,6 @@
 
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Timer timer1;
-        private System.Windows.Forms.ProgressBar pbPl1Ammo;
-        private System.Windows.Forms.ProgressBar pbPl1Hlth;
-        private System.Windows.Forms.ProgressBar pbPl2Ammo;
-        private System.Windows.Forms.ProgressBar pbPl2Hlth;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
         private System.Windows.Forms.ToolStripMenuItem LocalGameToolStripMenuItem;
@@ -269,10 +193,8 @@
         private System.Windows.Forms.ToolStripMenuItem joinToolStripMenuItem;
 	private System.Windows.Forms.ToolStripMenuItem humanVsHumanToolStripMenuItem;
 	private System.Windows.Forms.ToolStripMenuItem humanVsBotToolStripMenuItem;
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.Label label4;
+		private HUD hudLeft;
+		private HUD hudRight;
 	}
 }
 

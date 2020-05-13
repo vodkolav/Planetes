@@ -51,7 +51,7 @@ namespace GameObjects
 
 		public override string ToString()
 		{
-			return Jet.ToString();
+			return "player1";
 		}
 
 		public void Recharge(int amount)
