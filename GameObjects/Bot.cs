@@ -20,6 +20,7 @@ namespace GameObjects
 		public Bot(string name, int health, int ammo,Point At, Color color, ClsGameObjects game)
 			: base(name, health, ammo, At,color, game)
 		{
+			Name = GetType().FullName + " " + color.ToString();
 			Thread t = new Thread(Play);
 			t.Name = "BotThread";
 			t.IsBackground = true;
@@ -40,6 +41,7 @@ namespace GameObjects
 		public Bot(string name, int health, int ammo,Point At, Color color, ClsGameObjects game, System.Windows.Forms.Timer timer)
 			: base(name, health, ammo,  At,color, game)
 		{
+			
 
 			//Jet = new Jet2(winSize_x, winSize_y / 2);
 			GameState = game;
@@ -143,7 +145,7 @@ namespace GameObjects
 				{
 					//bullet evasion tactic (not good yet) Where(b=> b.Pos.X + 50 > Jet.Pos.X).
 
-					Bullet bulClosest = GameState.player1.Bulletlist.Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
+					Bullet bulClosest = Enemy.Bulletlist.Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
 					//Jet.Pos.Y-50 > bulClosest.Pos.Y  &&
 					if (Jet.Pos.Y < bulClosest.Pos.Y && bulClosest.Pos.Y < Jet.Pos.Y + 50)
 					{
@@ -171,12 +173,13 @@ namespace GameObjects
 				//aiming at opponent tactic
 
 				Aim(Enemy.Jet.Pos);
-				if (Jet.Pos.Y < GameState.player1.Jet.Pos.Y - 30)
+				if (Jet.Pos.Y < Enemy.Jet.Pos.Y - 50)
 				{
 					//Jet.Move(Keys.Down);
+					
 					Steer(HOTAS.Down);
 				}
-				else if (Jet.Pos.Y > GameState.player1.Jet.Pos.Y + 30)
+				else if (Jet.Pos.Y > Enemy.Jet.Pos.Y + 50)
 				{
 					Steer(HOTAS.Up);
 				}
@@ -186,7 +189,7 @@ namespace GameObjects
 				}
 
 				//shoot at opponent tactic
-				if (Math.Abs(Jet.Pos.Y - GameState.player1.Jet.Pos.Y) < 30)
+				if ((Jet.Pos - Enemy.Jet.Pos).Magnitude < 300)
 				{
 					//BotShoot(timeElapsed);
 					Steer(HOTAS.Shoot);

@@ -13,7 +13,7 @@ namespace GameObjects
 		private Pen Pen;
 		public Player Shooter { get; private set; }
 
-		public Bullet(Player player, float linearSpeed = 20)
+		public Bullet(Player player, float linearSpeed = 30)
 		{
 			Shooter = player;
 			Pos = player.Jet.Gun;
@@ -37,7 +37,7 @@ namespace GameObjects
 		{
 			if (!HasHit)
 			{
-				g.DrawLine(Pen, (Pos - Speed).AsPoint, Pos.AsPoint);
+				g.DrawLine(Pen, (Pos - (Speed*0.5)).AsPoint, Pos.AsPoint);
 			}
 		}
 

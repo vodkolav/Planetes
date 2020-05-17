@@ -12,10 +12,11 @@ namespace GameObjects
 
 	public class ClsGameObjects : MarshalByRefObject
 	{
-		public static int FrameInterval = 40;
+		public static int FrameInterval = 40; // default. If you want to Change it, do it from outside
 		//public static ClsGameObjects theObject;
 		public bool Connected { get; set; }
 		public bool ServerClosed { get; set; }
+		public List<Player> players { get;private set; }
 		public Player player1 { get; set; }
 		public Player player2 { get; set; }
 		public int WinSize_x { get; set; }
@@ -41,7 +42,7 @@ namespace GameObjects
 			Walls.Add(new Wall(wallBrush, new Point(0, winSize_y - ww), new Size(winSize_x, ww)));
 			Walls.Add(new Wall(wallBrush, new Point(winSize_x - ww, 0), new Size(ww, winSize_y)));
 
-			Walls.Add(new Wall(wallBrush, new Point(winSize_x/2, 400), new Size(ww, 100)));
+			Walls.Add(new Wall(wallBrush, new Point(winSize_x/2, 100), new Size(ww, 100)));
 
 			Walls.Add(new Wall(wallBrush, new Point(100, 100), new Point(200, 200), ww));
 
@@ -59,6 +60,7 @@ namespace GameObjects
 			control.bindMouse(MouseButtons.Left, player1, HOTAS.Shoot);
 			control.bindARROWSto(player2);
 
+			players = new List<Player>(){ player1,	player2};
 			AstroidList = new List<Astroid>();
 			//theObject = this;
 			Connected = false;
@@ -71,12 +73,21 @@ namespace GameObjects
 		}
 
 
-		public void ReplacePlayerWith(Bot bot)
+		public void ReplacePlayer2(Bot bot)
 		{
 			player2 = bot;
 			player1.Enemy = player2;
 			player2.Enemy = player1;
 			player2.Jet.Aim = new Vector(0, WinSize_y / 2);
+			players[1] = player2;
+		}
+		public void ReplacePlayer1(Bot bot)
+		{
+			player1 = bot;
+			player1.Enemy = player2;
+			player2.Enemy = player1;
+			player1.Jet.Aim = new Vector(0, WinSize_y / 2);
+			players[0] = player1;
 		}
 	}
 
@@ -93,24 +104,4 @@ namespace GameObjects
 		}
 	}
 
-	
-
-	static public class GameOver
-	{
-		static bool end = false;
-
-		public static bool End
-		{
-			get { return GameOver.end; }
-			set { GameOver.end = value; }
-		}
-		static public void Show(Player winner)
-		{
-			if (end == false)
-			{
-				end = true;
-				MessageBox.Show(winner.Name + " wins!", @"Game Over! ");
-			}
-		}
-	}
 }

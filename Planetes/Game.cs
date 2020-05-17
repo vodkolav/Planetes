@@ -25,11 +25,12 @@ namespace Planetes
 		private Graphics g;
 		private ClsGameObjects gameObjects;
 		private Thread thrdGameLoop;
-		private bool stillOpen;
 		private int timeElapsed;
 		private bool localGame;
 		private bool localPlayerIsHost;
+		private Player looser;
 
+		private bool GameOver { get; set; } = true;
 
 
 		// network
@@ -47,9 +48,9 @@ namespace Planetes
 
 
 
-		private void startGame()
+		private void StartGame()
 		{
-			stillOpen = true;
+			GameOver = false;
 			bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
 			g = Graphics.FromImage(bmp);
 			g.SmoothingMode = SmoothingMode.AntiAlias;
@@ -63,21 +64,32 @@ namespace Planetes
 				Name = "GameLoop"
 			};
 			thrdGameLoop.Start();
-			GameOver.End = false;
+			GameOver = false;
 			timer1.Interval = ClsGameObjects.FrameInterval;
 			timer1.Start();
 			timeElapsed = 0;
 
 		}
 
+
+		private void EndGame(Player winner)
+		{
+			GameOver = true;
+			timer1.Enabled = false;
+			MessageBox.Show(winner.Name + " wins!", @"Game Over! ");
+		}
+
 		private void timer1_Tick(object sender, EventArgs e)
 		{
-			DrawGraphics();
+			if (!GameOver)
+			{
+				DrawGraphics();
+			}
 		}
 
 		private void GameLoop()
 		{
-			while (stillOpen)
+			while (!GameOver)
 			{
 				Thread.Sleep(ClsGameObjects.FrameInterval);
 				Frame();
@@ -113,7 +125,7 @@ namespace Planetes
 			//}
 			//else
 			//{
-			if (GameOver.End == false)
+			if (!GameOver)
 			{
 				//Move player 1 bullets
 				lock (gameObjects)
@@ -142,13 +154,18 @@ namespace Planetes
 						gameObjects.AstroidList.Add(astroid);
 					}
 				}
+				if ((looser = gameObjects.players.FirstOrDefault(p => p.isDead)) != null)
+				{
+					EndGame(looser.Enemy);
+				}
+
 				timeElapsed++;
 			}
-			else
-			{
-				stillOpen = false;
-				timer1.Enabled = false;
-			}
+			//else
+			//{
+			//	//stillOpen = false;
+			//	//timer1.Enabled = false;
+			//}
 		}
 
 
@@ -209,7 +226,7 @@ namespace Planetes
 
 		private void Form1_KeyDown(object sender, KeyEventArgs e)
 		{
-			if (GameOver.End == false)
+			if (!GameOver)
 			{
 				if (localGame) // local game
 				{
@@ -356,13 +373,13 @@ namespace Planetes
 		private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
 		{
 
-			if (stillOpen)
+			if (!GameOver)
 				gameObjects.control.Aim(new Vector(e.Location));
 		}
 
 		private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
 		{
-			if (GameOver.End == false)
+			if (!GameOver)
 			{
 				if (localGame) // local game
 				{
@@ -385,7 +402,7 @@ namespace Planetes
 
 		private void Form1_FormClosing(object sender, FormClosingEventArgs e)
 		{
-			stillOpen = false;
+			GameOver = true;
 			if (thrdGameLoop != null)
 				thrdGameLoop.Abort();
 			if (!localGame && localPlayerIsHost) stopServer();
@@ -395,7 +412,8 @@ namespace Planetes
 		{
 			localGame = true;
 			gameObjects = new ClsGameObjects(pictureBox1.Width, pictureBox1.Height);
-			startGame();
+			//ClsGameObjects.FrameInterval = 40;
+			StartGame();
 		}
 
 		private void humanVsBotToolStripMenuItem_Click(object sender, EventArgs e)
@@ -404,10 +422,27 @@ namespace Planetes
 			gameObjects = new ClsGameObjects(pictureBox1.Width, pictureBox1.Height);
 
 			Point p2Start = new Point(gameObjects.WinSize_x - 100, gameObjects.WinSize_y / 2);
-			gameObjects.ReplacePlayerWith(new Bot4("Bot4", 20, 300, p2Start, Color.Orange, gameObjects));
+			gameObjects.ReplacePlayer2(new Bot4("Bot4", 200, 300, p2Start, Color.Orange, gameObjects));
 
-			startGame();
+			StartGame();
 		}
+
+		private void botVsBotToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			localGame = true;
+			gameObjects = new ClsGameObjects(pictureBox1.Width, pictureBox1.Height);
+
+			Point p1Start = new Point(100, gameObjects.WinSize_y / 2);
+			gameObjects.ReplacePlayer1(new Bot4("Bot41", 200, 300, p1Start, Color.Green, gameObjects));
+
+			Point p2Start = new Point(gameObjects.WinSize_x - 100, gameObjects.WinSize_y / 2);
+			gameObjects.ReplacePlayer2(new Bot4("Bot4", 200, 300, p2Start, Color.Orange, gameObjects));
+
+
+
+			StartGame();
+		}
+
 
 		#region Network Game
 
@@ -427,7 +462,7 @@ namespace Planetes
 			{
 				if (gameObjects.Connected == true)
 				{
-					startGame();
+					StartGame();
 					break;
 				}
 			}
@@ -450,7 +485,7 @@ namespace Planetes
 			localGame = false;
 			localPlayerIsHost = false;
 			gameObjects.Connected = true;
-			startGame();
+			StartGame();
 		}
 
 		private void disconnect()
@@ -482,6 +517,7 @@ namespace Planetes
 		{
 			e.IsInputKey = true;
 		}
+
 
 		private void LocalGameToolStripMenuItem_Click(object sender, EventArgs e)
 		{

@@ -42,6 +42,7 @@
 			this.joinToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.hudRight = new Planetes.HUD();
 			this.hudLeft = new Planetes.HUD();
+			this.botVsBotToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			this.toolStrip1.SuspendLayout();
 			this.SuspendLayout();
@@ -89,23 +90,24 @@
 			// 
 			this.LocalGameToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.humanVsHumanToolStripMenuItem,
-            this.humanVsBotToolStripMenuItem});
+            this.humanVsBotToolStripMenuItem,
+            this.botVsBotToolStripMenuItem});
 			this.LocalGameToolStripMenuItem.Name = "LocalGameToolStripMenuItem";
-			this.LocalGameToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
+			this.LocalGameToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
 			this.LocalGameToolStripMenuItem.Text = "Local Game";
 			this.LocalGameToolStripMenuItem.Click += new System.EventHandler(this.LocalGameToolStripMenuItem_Click);
 			// 
 			// humanVsHumanToolStripMenuItem
 			// 
 			this.humanVsHumanToolStripMenuItem.Name = "humanVsHumanToolStripMenuItem";
-			this.humanVsHumanToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+			this.humanVsHumanToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
 			this.humanVsHumanToolStripMenuItem.Text = "Human vs. Human";
 			this.humanVsHumanToolStripMenuItem.Click += new System.EventHandler(this.humanVsHumanToolStripMenuItem_Click);
 			// 
 			// humanVsBotToolStripMenuItem
 			// 
 			this.humanVsBotToolStripMenuItem.Name = "humanVsBotToolStripMenuItem";
-			this.humanVsBotToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+			this.humanVsBotToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
 			this.humanVsBotToolStripMenuItem.Text = "Human vs. Bot";
 			this.humanVsBotToolStripMenuItem.Click += new System.EventHandler(this.humanVsBotToolStripMenuItem_Click);
 			// 
@@ -115,20 +117,20 @@
             this.hostToolStripMenuItem,
             this.joinToolStripMenuItem});
 			this.NetworkGameToolStripMenuItem.Name = "NetworkGameToolStripMenuItem";
-			this.NetworkGameToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
+			this.NetworkGameToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
 			this.NetworkGameToolStripMenuItem.Text = "Network Game";
 			// 
 			// hostToolStripMenuItem
 			// 
 			this.hostToolStripMenuItem.Name = "hostToolStripMenuItem";
-			this.hostToolStripMenuItem.Size = new System.Drawing.Size(99, 22);
+			this.hostToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
 			this.hostToolStripMenuItem.Text = "Host";
 			this.hostToolStripMenuItem.Click += new System.EventHandler(this.hostToolStripMenuItem_Click_1);
 			// 
 			// joinToolStripMenuItem
 			// 
 			this.joinToolStripMenuItem.Name = "joinToolStripMenuItem";
-			this.joinToolStripMenuItem.Size = new System.Drawing.Size(99, 22);
+			this.joinToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
 			this.joinToolStripMenuItem.Text = "Join";
 			this.joinToolStripMenuItem.Click += new System.EventHandler(this.joinToolStripMenuItem_Click_1);
 			// 
@@ -152,6 +154,13 @@
 			this.hudLeft.Size = new System.Drawing.Size(320, 130);
 			this.hudLeft.TabIndex = 6;
 			this.hudLeft.Visible = false;
+			// 
+			// botVsBotToolStripMenuItem
+			// 
+			this.botVsBotToolStripMenuItem.Name = "botVsBotToolStripMenuItem";
+			this.botVsBotToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.botVsBotToolStripMenuItem.Text = "Bot vs. Bot";
+			this.botVsBotToolStripMenuItem.Click += new System.EventHandler(this.botVsBotToolStripMenuItem_Click);
 			// 
 			// Game
 			// 
@@ -195,6 +204,7 @@
 	private System.Windows.Forms.ToolStripMenuItem humanVsBotToolStripMenuItem;
 		private HUD hudLeft;
 		private HUD hudRight;
+		private System.Windows.Forms.ToolStripMenuItem botVsBotToolStripMenuItem;
 	}
 }
 

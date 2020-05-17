@@ -48,6 +48,11 @@ namespace PolygonCollision
 			get { return (float)Math.Sqrt(X * X + Y * Y); }
 		}
 
+		public Vector Pow(float pow)
+		{
+			return new Vector((float)Math.Pow(X, pow), (float)Math.Pow(Y, pow));
+		}
+
 		public float Magnitude_X
 		{
 			get { return Math.Abs(X); }
@@ -80,12 +85,12 @@ namespace PolygonCollision
 		}
 
 		public float Dot(Vector other) {
-			return (this * other).Sum();
+			return (this * other).Sum;
 		}
 
-		public float Sum()
+		public float Sum
 		{
-			return X + Y;
+			get { return X + Y; }
 		}
 
 		public float DistanceTo(Vector vector) {
@@ -193,6 +198,38 @@ namespace PolygonCollision
 		{
 			return new PointF(v.X, v.Y);
 		}
-	}
+			   		 
 
+		/// <summary>
+		/// Whether this vector/point collides with line
+		/// </summary>
+		/// <param name="l1">point 1 of line </param>
+		/// <param name="l2">point 2 of line </param>
+		/// <returns></returns>
+		public bool Collides(Vector l1, Vector l2)
+		//float x1, float y1, float x2, float y2, float px, float py)
+		{
+
+			// get distance from the point to the two ends of the line
+			float d1 = (this - l1).Magnitude; //dist(px, py, x1, y1);
+			float d2 = (this - l2).Magnitude; //dist(px, py, x2, y2);
+
+			// get the length of the line
+			float lineLen = (l1 - l2).Magnitude; // dist(x1, y1, x2, y2);
+
+			// since floats are so minutely accurate, add
+			// a little buffer zone that will give collision
+			float buffer = 0.1f;    // higher # = less accurate
+
+			// if the two distances are equal to the line's
+			// length, the point is on the line!
+			// note we use the buffer here to give a range, rather
+			// than one #
+			if (d1 + d2 >= lineLen - buffer && d1 + d2 <= lineLen + buffer)
+			{
+				return true;
+			}
+			return false;
+		}
+	}
 }

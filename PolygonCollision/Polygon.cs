@@ -323,6 +323,51 @@ namespace PolygonCollision
 				}
 			}
 		}
+			   		 	  	  	   	
+		/// <summary>
+		/// Whether this polygon collides with circle
+		/// </summary>
+		/// <param name="c"></param>
+		/// <returns></returns>
+		public bool Collides(Circle c)
+		{
+
+			// go through each of the Vertices, plus
+			// the next vertex in the list
+			int next = 0;
+			for (int current = 0; current < Vertices.Count; current++)
+			{
+
+				// get next vertex in list
+				// if we've hit the end, wrap around to 0
+				next = current + 1;
+				if (next == Vertices.Count) next = 0;
+
+				// get the Vectors at our current position
+				// this makes our if statement a little cleaner
+				Vector vc = Vertices[current];    // c for "current"
+				Vector vn = Vertices[next];       // n for "next"
+
+				// check for collision between the circle and
+				// a line formed between the two Vertices
+				bool collision = c.Collides(vc, vn);
+				if (collision) return true;
+			}
+
+			// the above algorithm only checks if the circle
+			// is touching the edges of the polygon – in most
+			// cases this is enough, but you can un-comment the
+			// following code to also test if the center of the
+			// circle is inside the polygon
+
+			// bool centerInside = polygonPoint(Vertices, cx,cy);
+			// if (centerInside) return true;
+
+			// otherwise, after all that, return false
+			return false;
+		}
+
+
 	}
 }
 

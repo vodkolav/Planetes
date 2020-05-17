@@ -70,7 +70,7 @@ namespace GameObjects
 			//Pos_y = start.Y;
 			Color = color;
 			Thrust = 0.5f;
-			Cooldown = 10;
+			Cooldown = 3;
 		}
 		
 		private void Offset(Vector by)
@@ -102,7 +102,7 @@ namespace GameObjects
 		// that's because I use polygon/point collision while asteroids are circles 
 		public bool Collides(Astroid a)
 		{
-			return Hull.Collides(a.Pos) || Cockpit.Collides(a.Pos);
+			return Hull.Collides(a.Body) || Cockpit.Collides(a.Body);
 		}
 
 		public bool Collides(Bullet b)

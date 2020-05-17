@@ -24,6 +24,7 @@ namespace GameObjects
 		protected List<Keys> SteerKeysBindings;
 		protected Keys ShootKeyBindings;
 		public Dictionary<HOTAS, Vector> commands { get; set; }
+		public bool isDead { get; private set; }
 
 
 		public Player(string name, int health, int ammo, Point At, Color color, ClsGameObjects game)
@@ -56,7 +57,7 @@ namespace GameObjects
 
 		public void Recharge(int amount)
 		{
-			Ammo = Math.Min(Ammo + amount, MaxAmmo);
+			Ammo = Math.Min(Ammo + (int)amount, MaxAmmo);
 		}
 
 		public void Heal(int amount)
@@ -159,7 +160,7 @@ namespace GameObjects
 			if (Health > points)
 				Health-= points;
 			else
-				GameOver.Show(Enemy);
+				isDead=true;
 		}
 	}
 }

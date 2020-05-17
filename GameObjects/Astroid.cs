@@ -8,9 +8,10 @@ namespace GameObjects
 
 	public class Astroid : MarshalByRefObject
 	{
-		public int Size { get; set; }
+		public float Size {get { return Body.R * 2; } }
+		public Circle Body { get; set; }
 		public Vector Speed { get; set; }
-		public Vector Pos { get; set; }
+		public Vector Pos { get { return Body.Pos; } set { Body.Pos = value; } }
 		public AstType Type { get; set; }
 		public bool HasHit { get; set; }
 		static public int Timeout { get { return 10; } }
@@ -50,12 +51,11 @@ namespace GameObjects
 		public Astroid(int winSize_x, int winSize_y)
 		{
 			Random random = new Random();
-			Size = random.Next(20) + 5;
+			Body = new Circle(new Vector(random.Next(winSize_x), random.Next(winSize_y)),	random.Next(10) + 5);
 			int linearSpeed = random.Next(1, 5) + 1;
 			double Angle = Math.PI/180 * random.Next(360);
 			Vector mult = new Vector((float)Math.Cos(Angle), (float)Math.Sin(Angle));
 			Speed = mult * linearSpeed;
-			Pos = new Vector(random.Next(winSize_x), random.Next(winSize_y));			
 			TossType(random);
 			HasHit = false;
 		}
@@ -68,7 +68,9 @@ namespace GameObjects
 		public void Draw(Graphics g)
 		{
 			if (!HasHit)
-				g.FillEllipse( Color, Pos.X, Pos.Y, Size, Size);
+			{
+				Body.Draw(g, Color);
+			}
 		}
 
 		public void Collides(Player p)
@@ -82,14 +84,14 @@ namespace GameObjects
 				HasHit = true;
 				if (Type == AstType.Ammo)
 				{
-					p.Recharge(Size);
+					p.Recharge((int)Size);
 				}
 				else if (Type == AstType.Health)
 				{
 					p.Heal(1);
 				}
 				else
-					p.Hit(Size);
+					p.Hit((int)Size);
 			}
 		}
 
@@ -155,11 +157,14 @@ namespace GameObjects
 					HasHit = true;
 				}
 			}
-			Pos += Speed;
+			Offset(Speed);
 			//Pos_x += (int)(Math.Cos(2 * Math.PI / 360 * Angle) * Speed);
 			//Pos_y += (int)(Math.Sin(2 * Math.PI / 360 * Angle) * Speed);
 		}
 
-
+		private void Offset(Vector by)
+		{
+			Body.Offset(by);
+		}
 	}
 }
