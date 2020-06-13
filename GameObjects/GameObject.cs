@@ -19,38 +19,38 @@ namespace GameObjects
 		public List<Player> players { get;private set; }
 		public Player player1 { get; set; }
 		public Player player2 { get; set; }
-		public int WinSize_x { get; set; }
-		public int WinSize_y { get; set; }
+		public Size WinSize { get; set; }
+		//public int WinSize_y { get; set; }
 		public List<Astroid> AstroidList { get; set; }
 		public List<Wall> Walls { get; set; }
 		public bool Paused { get; set; }
 		public ControlPanel control { get; set; }
 
 
-		public ClsGameObjects(int winSize_x, int winSize_y)
+		public ClsGameObjects(Size winSize)
 		{
 
-			WinSize_x = winSize_x;
-			WinSize_y = winSize_y;
+			WinSize = winSize;
+			//WinSize_y = winSize_y;
 
 			Walls = new List<Wall>();
 			Brush wallBrush = Brushes.Magenta;
 			int ww = 20; //wallwidth
 
-			Walls.Add(new Wall(wallBrush, new Point(0, 0), new Size(winSize_x, ww)));
-			Walls.Add(new Wall(wallBrush, new Point(0, 0), new Size(ww, winSize_y)));
-			Walls.Add(new Wall(wallBrush, new Point(0, winSize_y - ww), new Size(winSize_x, ww)));
-			Walls.Add(new Wall(wallBrush, new Point(winSize_x - ww, 0), new Size(ww, winSize_y)));
+			Walls.Add(new Wall(wallBrush, new Point(0, 0), new Point(winSize.Width, 0)));
+			Walls.Add(new Wall(wallBrush, new Point(0, 0), new Size(ww, winSize.Height)));
+			Walls.Add(new Wall(wallBrush, new Point(0, winSize.Height - ww), new Size(winSize.Width, ww)));
+			Walls.Add(new Wall(wallBrush, new Point(winSize.Width - ww, 0), new Size(ww, winSize.Height)));
 
-			Walls.Add(new Wall(wallBrush, new Point(winSize_x/2, 100), new Size(ww, 100)));
+			Walls.Add(new Wall(wallBrush, new Point(winSize.Width/2, 100), new Size(ww, 100)));
 
 			Walls.Add(new Wall(wallBrush, new Point(100, 100), new Point(200, 200), ww));
 
-			Point p1Start = new Point(100, winSize_y / 2);
-			player1 = new Player("Player1", 200, 300, p1Start, Color.Blue, this);
+			Point p1Start = new Point(100, winSize.Height / 2);
+			player1 = new Player("Player1", 100, 300, p1Start, Color.Blue, this);
 
-			Point p2Start = new Point(winSize_x - 150, winSize_y / 2);
-			player2 = new Player("Player2", 200, 300, p2Start, Color.Red, this);
+			Point p2Start = new Point(winSize.Width - 150, winSize.Height / 2);
+			player2 = new Player("Player2", 100, 300, p2Start, Color.Red, this);
 
 			player1.Enemy = player2;
 			player2.Enemy = player1;
@@ -78,7 +78,7 @@ namespace GameObjects
 			player2 = bot;
 			player1.Enemy = player2;
 			player2.Enemy = player1;
-			player2.Jet.Aim = new Vector(0, WinSize_y / 2);
+			player2.Jet.Aim = new Vector(0, WinSize.Height / 2);
 			players[1] = player2;
 		}
 		public void ReplacePlayer1(Bot bot)
@@ -86,7 +86,7 @@ namespace GameObjects
 			player1 = bot;
 			player1.Enemy = player2;
 			player2.Enemy = player1;
-			player1.Jet.Aim = new Vector(0, WinSize_y / 2);
+			player1.Jet.Aim = new Vector(0, WinSize.Height / 2);
 			players[0] = player1;
 		}
 	}

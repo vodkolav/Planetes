@@ -145,7 +145,7 @@ namespace GameObjects
 				{
 					//bullet evasion tactic (not good yet) Where(b=> b.Pos.X + 50 > Jet.Pos.X).
 
-					Bullet bulClosest = Enemy.Bulletlist.Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
+					Bullet bulClosest = Enemy.Bulletlist.Aggregate((curMin, b) => (curMin == null || (Jet.Dist(b)) < Jet.Dist(curMin) ? b : curMin));
 					//Jet.Pos.Y-50 > bulClosest.Pos.Y  &&
 					if (Jet.Pos.Y < bulClosest.Pos.Y && bulClosest.Pos.Y < Jet.Pos.Y + 50)
 					{

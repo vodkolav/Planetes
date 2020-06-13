@@ -30,39 +30,46 @@
         {
 			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Game));
-			this.pictureBox1 = new System.Windows.Forms.PictureBox();
-			this.timer1 = new System.Windows.Forms.Timer(this.components);
+			this.pbxWorld = new System.Windows.Forms.PictureBox();
+			this.timerDraw = new System.Windows.Forms.Timer(this.components);
 			this.toolStrip1 = new System.Windows.Forms.ToolStrip();
 			this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
 			this.LocalGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.humanVsHumanToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.humanVsBotToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.botVsBotToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.NetworkGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.hostToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.joinToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.hudRight = new Planetes.HUD();
 			this.hudLeft = new Planetes.HUD();
-			this.botVsBotToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+			((System.ComponentModel.ISupportInitialize)(this.pbxWorld)).BeginInit();
 			this.toolStrip1.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+			this.splitContainer1.Panel1.SuspendLayout();
+			this.splitContainer1.Panel2.SuspendLayout();
+			this.splitContainer1.SuspendLayout();
 			this.SuspendLayout();
 			// 
-			// pictureBox1
+			// pbxWorld
 			// 
-			this.pictureBox1.BackColor = System.Drawing.SystemColors.Window;
-			this.pictureBox1.Location = new System.Drawing.Point(0, 28);
-			this.pictureBox1.Name = "pictureBox1";
-			this.pictureBox1.Size = new System.Drawing.Size(1600, 800);
-			this.pictureBox1.TabIndex = 0;
-			this.pictureBox1.TabStop = false;
-			this.pictureBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseDown);
-			this.pictureBox1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseMove);
-			this.pictureBox1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseUp);
+			this.pbxWorld.BackColor = System.Drawing.SystemColors.Window;
+			this.pbxWorld.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.pbxWorld.Location = new System.Drawing.Point(0, 0);
+			this.pbxWorld.Name = "pbxWorld";
+			this.pbxWorld.Size = new System.Drawing.Size(1600, 776);
+			this.pbxWorld.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+			this.pbxWorld.TabIndex = 0;
+			this.pbxWorld.TabStop = false;
+			this.pbxWorld.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pbxWorld_MouseDown);
+			this.pbxWorld.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pbxWorld_MouseMove);
+			this.pbxWorld.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pbxWorld_MouseUp);
 			// 
-			// timer1
+			// timerDraw
 			// 
-			this.timer1.Interval = 10;
-			this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+			this.timerDraw.Interval = 10;
+			this.timerDraw.Tick += new System.EventHandler(this.timerDraw_Tick);
 			// 
 			// toolStrip1
 			// 
@@ -93,23 +100,30 @@
             this.humanVsBotToolStripMenuItem,
             this.botVsBotToolStripMenuItem});
 			this.LocalGameToolStripMenuItem.Name = "LocalGameToolStripMenuItem";
-			this.LocalGameToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.LocalGameToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
 			this.LocalGameToolStripMenuItem.Text = "Local Game";
 			this.LocalGameToolStripMenuItem.Click += new System.EventHandler(this.LocalGameToolStripMenuItem_Click);
 			// 
 			// humanVsHumanToolStripMenuItem
 			// 
 			this.humanVsHumanToolStripMenuItem.Name = "humanVsHumanToolStripMenuItem";
-			this.humanVsHumanToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.humanVsHumanToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
 			this.humanVsHumanToolStripMenuItem.Text = "Human vs. Human";
 			this.humanVsHumanToolStripMenuItem.Click += new System.EventHandler(this.humanVsHumanToolStripMenuItem_Click);
 			// 
 			// humanVsBotToolStripMenuItem
 			// 
 			this.humanVsBotToolStripMenuItem.Name = "humanVsBotToolStripMenuItem";
-			this.humanVsBotToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.humanVsBotToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
 			this.humanVsBotToolStripMenuItem.Text = "Human vs. Bot";
 			this.humanVsBotToolStripMenuItem.Click += new System.EventHandler(this.humanVsBotToolStripMenuItem_Click);
+			// 
+			// botVsBotToolStripMenuItem
+			// 
+			this.botVsBotToolStripMenuItem.Name = "botVsBotToolStripMenuItem";
+			this.botVsBotToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+			this.botVsBotToolStripMenuItem.Text = "Bot vs. Bot";
+			this.botVsBotToolStripMenuItem.Click += new System.EventHandler(this.botVsBotToolStripMenuItem_Click);
 			// 
 			// NetworkGameToolStripMenuItem
 			// 
@@ -117,50 +131,64 @@
             this.hostToolStripMenuItem,
             this.joinToolStripMenuItem});
 			this.NetworkGameToolStripMenuItem.Name = "NetworkGameToolStripMenuItem";
-			this.NetworkGameToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.NetworkGameToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
 			this.NetworkGameToolStripMenuItem.Text = "Network Game";
 			// 
 			// hostToolStripMenuItem
 			// 
 			this.hostToolStripMenuItem.Name = "hostToolStripMenuItem";
-			this.hostToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.hostToolStripMenuItem.Size = new System.Drawing.Size(99, 22);
 			this.hostToolStripMenuItem.Text = "Host";
 			this.hostToolStripMenuItem.Click += new System.EventHandler(this.hostToolStripMenuItem_Click_1);
 			// 
 			// joinToolStripMenuItem
 			// 
 			this.joinToolStripMenuItem.Name = "joinToolStripMenuItem";
-			this.joinToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.joinToolStripMenuItem.Size = new System.Drawing.Size(99, 22);
 			this.joinToolStripMenuItem.Text = "Join";
 			this.joinToolStripMenuItem.Click += new System.EventHandler(this.joinToolStripMenuItem_Click_1);
 			// 
 			// hudRight
 			// 
-			this.hudRight.Location = new System.Drawing.Point(1280, 831);
-			this.hudRight.MaximumSize = new System.Drawing.Size(320, 130);
-			this.hudRight.MinimumSize = new System.Drawing.Size(320, 130);
+			this.hudRight.Dock = System.Windows.Forms.DockStyle.Right;
+			this.hudRight.Location = new System.Drawing.Point(1260, 0);
+			this.hudRight.MaximumSize = new System.Drawing.Size(340, 140);
+			this.hudRight.MinimumSize = new System.Drawing.Size(340, 140);
 			this.hudRight.Name = "hudRight";
-			this.hudRight.Size = new System.Drawing.Size(320, 130);
+			this.hudRight.Size = new System.Drawing.Size(340, 140);
 			this.hudRight.TabIndex = 7;
 			this.hudRight.Visible = false;
 			// 
 			// hudLeft
 			// 
-			this.hudLeft.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.hudLeft.Location = new System.Drawing.Point(0, 831);
-			this.hudLeft.MaximumSize = new System.Drawing.Size(320, 130);
-			this.hudLeft.MinimumSize = new System.Drawing.Size(320, 130);
+			this.hudLeft.Dock = System.Windows.Forms.DockStyle.Left;
+			this.hudLeft.Location = new System.Drawing.Point(0, 0);
+			this.hudLeft.MaximumSize = new System.Drawing.Size(340, 140);
+			this.hudLeft.MinimumSize = new System.Drawing.Size(340, 140);
 			this.hudLeft.Name = "hudLeft";
-			this.hudLeft.Size = new System.Drawing.Size(320, 130);
+			this.hudLeft.Size = new System.Drawing.Size(340, 140);
 			this.hudLeft.TabIndex = 6;
 			this.hudLeft.Visible = false;
 			// 
-			// botVsBotToolStripMenuItem
+			// splitContainer1
 			// 
-			this.botVsBotToolStripMenuItem.Name = "botVsBotToolStripMenuItem";
-			this.botVsBotToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-			this.botVsBotToolStripMenuItem.Text = "Bot vs. Bot";
-			this.botVsBotToolStripMenuItem.Click += new System.EventHandler(this.botVsBotToolStripMenuItem_Click);
+			this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
+			this.splitContainer1.Location = new System.Drawing.Point(0, 25);
+			this.splitContainer1.Name = "splitContainer1";
+			this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+			// 
+			// splitContainer1.Panel1
+			// 
+			this.splitContainer1.Panel1.Controls.Add(this.pbxWorld);
+			// 
+			// splitContainer1.Panel2
+			// 
+			this.splitContainer1.Panel2.Controls.Add(this.hudLeft);
+			this.splitContainer1.Panel2.Controls.Add(this.hudRight);
+			this.splitContainer1.Size = new System.Drawing.Size(1600, 936);
+			this.splitContainer1.SplitterDistance = 776;
+			this.splitContainer1.TabIndex = 8;
 			// 
 			// Game
 			// 
@@ -168,9 +196,7 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.Color.White;
 			this.ClientSize = new System.Drawing.Size(1600, 961);
-			this.Controls.Add(this.hudRight);
-			this.Controls.Add(this.hudLeft);
-			this.Controls.Add(this.pictureBox1);
+			this.Controls.Add(this.splitContainer1);
 			this.Controls.Add(this.toolStrip1);
 			this.DoubleBuffered = true;
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -178,13 +204,18 @@
 			this.KeyPreview = true;
 			this.Name = "Game";
 			this.Text = "Planetes";
-			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
-			this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
-			this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyUp);
+			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Game_FormClosing);
+			this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Game_KeyDown);
+			this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Game_KeyUp);
 			this.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.Game_PreviewKeyDown);
-			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.pbxWorld)).EndInit();
 			this.toolStrip1.ResumeLayout(false);
 			this.toolStrip1.PerformLayout();
+			this.splitContainer1.Panel1.ResumeLayout(false);
+			this.splitContainer1.Panel1.PerformLayout();
+			this.splitContainer1.Panel2.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+			this.splitContainer1.ResumeLayout(false);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -192,8 +223,8 @@
 
         #endregion
 
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.PictureBox pbxWorld;
+        private System.Windows.Forms.Timer timerDraw;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
         private System.Windows.Forms.ToolStripMenuItem LocalGameToolStripMenuItem;
@@ -205,6 +236,7 @@
 		private HUD hudLeft;
 		private HUD hudRight;
 		private System.Windows.Forms.ToolStripMenuItem botVsBotToolStripMenuItem;
+		private System.Windows.Forms.SplitContainer splitContainer1;
 	}
 }
 

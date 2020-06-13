@@ -28,20 +28,23 @@ namespace Planetes
 			pbAmmo.Maximum = player.MaxAmmo;
 			pbHlth.Maximum = player.MaxHealth;
 			Visible = true;
+			BackColor = player.Jet.Color;
 		}
 
 		public void Draw()
 		{
 			lock (GO)
 			{
-				lblSpeedX.Text = player.Jet.Speed.X.ToString();
-				lblSpeedY.Text = player.Jet.Speed.Y.ToString();
+				lblSpeedX.Text = ((int)player.Jet.Speed.X).ToString();
+				lblSpeedY.Text = ((int)player.Jet.Speed.Y).ToString();
 
 				lblAccX.Text = player.Jet.Acceleration.X.ToString();
 				lblAccY.Text = player.Jet.Acceleration.Y.ToString();
 
 				pbHlth.Value = player.Health;
+				lblHealth.Text = "Health: " + player.Health;
 				pbAmmo.Value = player.Ammo;
+				lblAmmo.Text = "Ammo: " + player.Ammo;
 			}
 		}
 	}

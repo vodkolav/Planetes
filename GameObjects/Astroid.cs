@@ -143,7 +143,7 @@ namespace GameObjects
 			Collides(gameObjects.player2);
 
 			//Asteroid is out of screen
-			if (Pos.X + Size > gameObjects.WinSize_x || Pos.X < 0 || Pos.Y > gameObjects.WinSize_y || Pos.Y < 0)
+			if (Pos.X + Size > gameObjects.WinSize.Width || Pos.X < 0 || Pos.Y > gameObjects.WinSize.Height || Pos.Y < 0)
 			{
 				HasHit = true;
 			}

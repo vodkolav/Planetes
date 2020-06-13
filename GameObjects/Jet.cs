@@ -55,14 +55,14 @@ namespace GameObjects
 		{			
 			Hull = new Polygon();
 			Hull.AddVertex(new Vector(50, 50));
-			Hull.AddVertex(new Vector(80, 50));
-			Hull.AddVertex(new Vector(80, 70));
+			Hull.AddVertex(new Vector(100, 50));
+			Hull.AddVertex(new Vector(100, 70));
 			Hull.AddVertex(new Vector(50, 70));
 
 			Cockpit = new Polygon();
-			Cockpit.AddVertex(new Vector(80, 50));
-			Cockpit.AddVertex(new Vector(100, 60));
-			Cockpit.AddVertex(new Vector(80, 70));
+			Cockpit.AddVertex(new Vector(100, 50));
+			Cockpit.AddVertex(new Vector(130, 60));
+			Cockpit.AddVertex(new Vector(100, 70));
 
 			Offset(new Vector(start));
 

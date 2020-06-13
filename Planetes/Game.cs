@@ -28,7 +28,7 @@ namespace Planetes
 		private int timeElapsed;
 		private bool localGame;
 		private bool localPlayerIsHost;
-		private Player looser;
+		private Player Winner;
 
 		private bool GameOver { get; set; } = true;
 
@@ -37,7 +37,7 @@ namespace Planetes
 		private TcpChannel serverChan, clientChan;
 
 		delegate void RefreshBitmapDelegate();
-		delegate void RefreshProgessBarDelegate();
+		//delegate void RefreshProgessBarDelegate();
 
 		public Game()
 		{
@@ -45,16 +45,13 @@ namespace Planetes
 			SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.FixedHeight | ControlStyles.FixedWidth | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
 		}
 
-
-
-
 		private void StartGame()
 		{
 			GameOver = false;
-			bmp = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+			bmp = new Bitmap(pbxWorld.Width, pbxWorld.Height);
 			g = Graphics.FromImage(bmp);
 			g.SmoothingMode = SmoothingMode.AntiAlias;
-			pictureBox1.Image = bmp;
+			pbxWorld.Image = bmp;
 
 			hudLeft.bind(gameObjects, gameObjects.player1);
 			hudRight.bind(gameObjects, gameObjects.player2);
@@ -64,26 +61,28 @@ namespace Planetes
 				Name = "GameLoop"
 			};
 			thrdGameLoop.Start();
-			GameOver = false;
-			timer1.Interval = ClsGameObjects.FrameInterval;
-			timer1.Start();
+			timerDraw.Interval = ClsGameObjects.FrameInterval;
+			timerDraw.Start();
 			timeElapsed = 0;
 
 		}
-
-
+		
 		private void EndGame(Player winner)
 		{
-			GameOver = true;
-			timer1.Enabled = false;
-			MessageBox.Show(winner.Name + " wins!", @"Game Over! ");
+			GameOver = true;			
+			Winner = winner;
 		}
 
-		private void timer1_Tick(object sender, EventArgs e)
+		private void timerDraw_Tick(object sender, EventArgs e)
 		{
 			if (!GameOver)
 			{
 				DrawGraphics();
+			}
+			else
+			{
+				timerDraw.Stop();
+				MessageBox.Show(this, Winner.Name + " wins!", @"Game Over! ");
 			}
 		}
 
@@ -154,7 +153,8 @@ namespace Planetes
 						gameObjects.AstroidList.Add(astroid);
 					}
 				}
-				if ((looser = gameObjects.players.FirstOrDefault(p => p.isDead)) != null)
+				Player looser;
+				if (( looser = gameObjects.players.FirstOrDefault(p => p.isDead)) != null)
 				{
 					EndGame(looser.Enemy);
 				}
@@ -171,10 +171,11 @@ namespace Planetes
 
 		private void DrawGraphics()
 		{
-			
+
+			List<IEnumerable<int>> asd;
 				//gameObjects = (ClsGameObjects)Activator.GetObject(typeof(ClsGameObjects), "tcp://127.0.0.1:8085/GameObjects");
 				p1 = new Pen(Color.White, 5);
-				g.FillRectangle(Brushes.Black, new Rectangle(0, 0, pictureBox1.Width, pictureBox1.Height));
+				g.FillRectangle(Brushes.Black, new Rectangle(0, 0, pbxWorld.Width, pbxWorld.Height));
 				foreach (Wall w in gameObjects.Walls)
 				{
 					w.Draw(g);
@@ -193,38 +194,39 @@ namespace Planetes
 				{
 					foreach (Bullet b in gameObjects.player1.Bulletlist)
 					{
-						if (!b.HasHit)
-						{
+						//if (!b.HasHit)
+						//{
 							b.Draw(g);
-						}
+						//}
 					}
 					foreach (Bullet b in gameObjects.player2.Bulletlist)
 					{
-						if (!b.HasHit)
-						{
+						//if (!b.HasHit)
+						//{
 							b.Draw(g);
-						}
+						//}
 					}
 				}
 
 				lock (gameObjects)
 				{
+				
 					foreach (Astroid ast in gameObjects.AstroidList)
 					{
+						//make it iDrawable interface
 						ast.Draw(g);
 						//if (!a.HasHit)
 						//	g.FillEllipse(a.Color, a.Pos_x, a.Pos_y, a.Size, a.Size);
 					}
 				}
-				pictureBox1.Image = bmp;
-				if (pictureBox1 != null)
-					pictureBox1.Invoke(new RefreshBitmapDelegate(pictureBox1.Refresh));
+				pbxWorld.Image = bmp;
+				if (pbxWorld != null)
+					pbxWorld.Invoke(new RefreshBitmapDelegate(pbxWorld.Refresh));
 			
 		}
 
 
-
-		private void Form1_KeyDown(object sender, KeyEventArgs e)
+		private void Game_KeyDown(object sender, KeyEventArgs e)
 		{
 			if (!GameOver)
 			{
@@ -235,7 +237,7 @@ namespace Planetes
 			}
 		}
 
-		private void Form1_KeyUp(object sender, KeyEventArgs e)
+		private void Game_KeyUp(object sender, KeyEventArgs e)
 		{
 			gameObjects.control.Release(e.KeyData);
 			//gameObjects.player2.Release(e.KeyData);
@@ -370,14 +372,13 @@ namespace Planetes
 		//			}
 		//		}
 
-		private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
+		private void pbxWorld_MouseMove(object sender, MouseEventArgs e)
 		{
-
 			if (!GameOver)
 				gameObjects.control.Aim(new Vector(e.Location));
 		}
 
-		private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
+		private void pbxWorld_MouseDown(object sender, MouseEventArgs e)
 		{
 			if (!GameOver)
 			{
@@ -388,7 +389,7 @@ namespace Planetes
 			}
 		}
 
-		private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
+		private void pbxWorld_MouseUp(object sender, MouseEventArgs e)
 		{
 			gameObjects.control.Release(e.Button);
 		}
@@ -400,7 +401,7 @@ namespace Planetes
 
 		//}
 
-		private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+		private void Game_FormClosing(object sender, FormClosingEventArgs e)
 		{
 			GameOver = true;
 			if (thrdGameLoop != null)
@@ -411,7 +412,7 @@ namespace Planetes
 		private void humanVsHumanToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			localGame = true;
-			gameObjects = new ClsGameObjects(pictureBox1.Width, pictureBox1.Height);
+			gameObjects = new ClsGameObjects(pbxWorld.Size);
 			//ClsGameObjects.FrameInterval = 40;
 			StartGame();
 		}
@@ -419,10 +420,10 @@ namespace Planetes
 		private void humanVsBotToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			localGame = true;
-			gameObjects = new ClsGameObjects(pictureBox1.Width, pictureBox1.Height);
+			gameObjects = new ClsGameObjects(pbxWorld.Size);
 
-			Point p2Start = new Point(gameObjects.WinSize_x - 100, gameObjects.WinSize_y / 2);
-			gameObjects.ReplacePlayer2(new Bot4("Bot4", 200, 300, p2Start, Color.Orange, gameObjects));
+			Point p2Start = new Point(gameObjects.WinSize.Width - 100, gameObjects.WinSize.Height / 2);
+			gameObjects.ReplacePlayer2(new Bot4("Bot4", 100, 300, p2Start, Color.Orange, gameObjects));
 
 			StartGame();
 		}
@@ -430,15 +431,15 @@ namespace Planetes
 		private void botVsBotToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			localGame = true;
-			gameObjects = new ClsGameObjects(pictureBox1.Width, pictureBox1.Height);
+			gameObjects = new ClsGameObjects(pbxWorld.Size);
 
-			Point p1Start = new Point(100, gameObjects.WinSize_y / 2);
+			Point p1Start = new Point(100, gameObjects.WinSize.Height / 2);
 			gameObjects.ReplacePlayer1(new Bot4("Bot41", 200, 300, p1Start, Color.Green, gameObjects));
 
-			Point p2Start = new Point(gameObjects.WinSize_x - 100, gameObjects.WinSize_y / 2);
+			Point p2Start = new Point(gameObjects.WinSize.Width - 100, gameObjects.WinSize.Height / 2);
 			gameObjects.ReplacePlayer2(new Bot4("Bot4", 200, 300, p2Start, Color.Orange, gameObjects));
 
-
+			//ClsGameObjects.FrameInterval = 1; 
 
 			StartGame();
 		}
@@ -451,7 +452,7 @@ namespace Planetes
 			Text = "World of Starcraft (Server)";
 			serverChan = new TcpChannel(8085);
 			ChannelServices.RegisterChannel(serverChan, false);
-			gameObjects = new ClsGameObjects(pictureBox1.Width, pictureBox1.Height);
+			gameObjects = new ClsGameObjects(pbxWorld.Size);
 			//RemotingConfiguration.RegisterWellKnownServiceType(typeof(ClsGameObjects), "GameObjects", WellKnownObjectMode.Singleton);
 
 			ObjRef or = RemotingServices.Marshal(gameObjects, "GameObjects");
@@ -517,7 +518,6 @@ namespace Planetes
 		{
 			e.IsInputKey = true;
 		}
-
 
 		private void LocalGameToolStripMenuItem_Click(object sender, EventArgs e)
 		{
