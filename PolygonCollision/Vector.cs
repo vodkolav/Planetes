@@ -5,10 +5,11 @@ using System.Drawing.Drawing2D;
 namespace PolygonCollision
 {
 
-	public struct Vector {
+	public class Vector : MarshalByRefObject, ICloneable
+	{
 
-		public float X;
-		public float Y;
+		public float X { get; set; }
+		public float Y { get; set; }
 
 		public Vector(float x, float y) {
 			X = x;
@@ -22,12 +23,20 @@ namespace PolygonCollision
 
 		public Vector (Point p)
 		{
-			this = new Vector(p.X, p.Y);
+			X = p.X;
+			Y = p.Y;
 		}
 
 		public Vector(PointF p)
 		{
-			this = new Vector(p.X, p.Y);
+			X = p.X;
+			Y = p.Y;
+		}
+
+		public Vector()
+		{
+			X = 0;
+			Y = 0;
 		}
 
 		static public Vector FromPoint(Point p) {
@@ -230,6 +239,11 @@ namespace PolygonCollision
 				return true;
 			}
 			return false;
+		}
+
+		public object Clone()
+		{
+			return new Vector(X, Y);
 		}
 	}
 }

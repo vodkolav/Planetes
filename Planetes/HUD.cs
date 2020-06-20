@@ -38,8 +38,9 @@ namespace Planetes
 				lblSpeedX.Text = ((int)player.Jet.Speed.X).ToString();
 				lblSpeedY.Text = ((int)player.Jet.Speed.Y).ToString();
 
-				lblAccX.Text = player.Jet.Acceleration.X.ToString();
-				lblAccY.Text = player.Jet.Acceleration.Y.ToString();
+				Vector acc = (Vector)player.Jet.Acceleration.Clone();
+				lblAccX.Text = acc.X.ToString();
+				lblAccY.Text = acc.Y.ToString();
 
 				pbHlth.Value = player.Health;
 				lblHealth.Text = "Health: " + player.Health;

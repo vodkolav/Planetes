@@ -3,7 +3,7 @@ using System.Drawing;
 
 namespace PolygonCollision
 {
-	public class Circle
+	public class Circle : MarshalByRefObject
 	{
 		public Circle(Vector center, int r)
 		{

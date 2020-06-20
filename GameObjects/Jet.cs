@@ -65,7 +65,9 @@ namespace GameObjects
 			Cockpit.AddVertex(new Vector(100, 70));
 
 			Offset(new Vector(start));
-
+			Speed = new Vector(0, 0);
+			Acceleration = new Vector(0, 0);
+			Aim = new Vector(0, 0);
 			//Pos_x = start.X;
 			//Pos_y = start.Y;
 			Color = color;

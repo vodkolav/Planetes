@@ -16,7 +16,7 @@ namespace PolygonCollision
 		public Vector translationAxis;
 	}
 
-	public class Polygon
+	public class Polygon : MarshalByRefObject
 	{
 		public List<Vector> BuildEdges()
 		{

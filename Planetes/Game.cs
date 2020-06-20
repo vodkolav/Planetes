@@ -15,26 +15,27 @@ using Services;
 using Service.Internal;
 using System.Drawing.Drawing2D;
 using PolygonCollision;
+using System.Collections;
+using System.Runtime.Serialization.Formatters;
 
 namespace Planetes
 {
 	public partial class Game : Form
 	{
-		private Bitmap bmp;
-		private Pen p1;
-		private Graphics g;
-		private ClsGameObjects gameObjects;
-		private Thread thrdGameLoop;
-		private int timeElapsed;
-		private bool localGame;
-		private bool localPlayerIsHost;
-		private Player Winner;
+		public Bitmap bmp;
+		public Graphics g;
+		public ClsGameObjects gameObjects;
+		//private Thread thrdGameLoop;
+		//private int timeElapsed;
+		public bool localGame;
+		public bool localPlayerIsHost;
+		//private Player Winner;
 
-		private bool GameOver { get; set; } = true;
-
-
+		private bool GameOver { get { return gameObjects == null ? true : gameObjects.GameOver; } }
+		 
+		
 		// network
-		private TcpChannel serverChan, clientChan;
+		public TcpChannel serverChan, clientChan;
 
 		delegate void RefreshBitmapDelegate();
 		//delegate void RefreshProgessBarDelegate();
@@ -45,35 +46,34 @@ namespace Planetes
 			SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.FixedHeight | ControlStyles.FixedWidth | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
 		}
 
-		private void StartGame()
+		public void StartLocalGame()
 		{
-			GameOver = false;
+			gameObjects.StartServer();
+			StartGraphics();
+		}
+
+		public void StartGraphics()
+		{ 
+			//GameOver = false;
 			bmp = new Bitmap(pbxWorld.Width, pbxWorld.Height);
 			g = Graphics.FromImage(bmp);
 			g.SmoothingMode = SmoothingMode.AntiAlias;
 			pbxWorld.Image = bmp;
-
 			hudLeft.bind(gameObjects, gameObjects.player1);
 			hudRight.bind(gameObjects, gameObjects.player2);
-
-			thrdGameLoop = new Thread(GameLoop)
-			{
-				Name = "GameLoop"
-			};
-			thrdGameLoop.Start();
 			timerDraw.Interval = ClsGameObjects.FrameInterval;
 			timerDraw.Start();
-			timeElapsed = 0;
+			//timeElapsed = 0;
 
 		}
 		
-		private void EndGame(Player winner)
-		{
-			GameOver = true;			
-			Winner = winner;
-		}
+		//private void EndGame(Player winner)
+		//{
+		//	GameOver = true;			
+		//	Winner = winner;
+		//}
 
-		private void timerDraw_Tick(object sender, EventArgs e)
+		public void timerDraw_Tick(object sender, EventArgs e)
 		{
 			if (!GameOver)
 			{
@@ -82,150 +82,30 @@ namespace Planetes
 			else
 			{
 				timerDraw.Stop();
-				MessageBox.Show(this, Winner.Name + " wins!", @"Game Over! ");
+				if (gameObjects.Winner != null)
+				{
+					MessageBox.Show(this, gameObjects.Winner.Name + " wins!", @"Game Over! ");
+				}
 			}
 		}
 
-		private void GameLoop()
+		
+		
+
+		public void DrawGraphics()
 		{
-			while (!GameOver)
-			{
-				Thread.Sleep(ClsGameObjects.FrameInterval);
-				Frame();
-			}
+			g.FillRectangle(Brushes.Black, new Rectangle(0, 0, pbxWorld.Width, pbxWorld.Height));			
+			hudLeft.Draw();
+			hudRight.Draw();
+			gameObjects.Draw(g);
+			pbxWorld.Image = bmp;
+			if (pbxWorld != null)
+				pbxWorld.Invoke(new RefreshBitmapDelegate(pbxWorld.Refresh));
+
 		}
 
-		private void Frame()
-		{
-			if (gameObjects.Paused) return;
-			lock (gameObjects)
-			{
-				gameObjects.player1.Move();
-				gameObjects.player2.Move();
-			}
-
-			Console.WriteLine(gameObjects.player1.Jet.ToString());
-
-
-			gameObjects.player1.Shoot(timeElapsed);
-			gameObjects.player2.Shoot(timeElapsed);
-
-			//pbPl1Ammo.Value = gameObjects.player1.Ammo;
-			//pbPl1Hlth.Value = gameObjects.player1.Health;
-			//pbPl2Ammo.Value = gameObjects.player2.Ammo;
-			//pbPl2Hlth.Value = gameObjects.player2.Health;
-			//if (!localGame && !localPlayerIsHost)
-			//{
-			//	if (gameObjects.ServerClosed)
-			//	{
-			//		disconnect();
-			//		Close();
-			//	}
-			//}
-			//else
-			//{
-			if (!GameOver)
-			{
-				//Move player 1 bullets
-				lock (gameObjects)
-				{
-					gameObjects.player1.Bulletlist.ForEach(b => b.Move(gameObjects));
-					gameObjects.player1.Bulletlist.RemoveAll(b => b.HasHit);
-				}
-				//Move player 2 bullets
-				lock (gameObjects)
-				{
-					gameObjects.player2.Bulletlist.ForEach(b => b.Move(gameObjects));
-					gameObjects.player2.Bulletlist.RemoveAll(b => b.HasHit);
-				}
-				//Move asteroids
-				lock (gameObjects)
-				{
-					gameObjects.AstroidList.ForEach(b => b.Move(gameObjects));
-					gameObjects.AstroidList.RemoveAll(c => c.HasHit);
-				}
-				//Spawn asteroid after timeout
-				if (timeElapsed % Astroid.Timeout == 0)
-				{
-					Astroid astroid = new Astroid(Width, Height);
-					lock (gameObjects)
-					{
-						gameObjects.AstroidList.Add(astroid);
-					}
-				}
-				Player looser;
-				if (( looser = gameObjects.players.FirstOrDefault(p => p.isDead)) != null)
-				{
-					EndGame(looser.Enemy);
-				}
-
-				timeElapsed++;
-			}
-			//else
-			//{
-			//	//stillOpen = false;
-			//	//timer1.Enabled = false;
-			//}
-		}
-
-
-		private void DrawGraphics()
-		{
-
-			List<IEnumerable<int>> asd;
-				//gameObjects = (ClsGameObjects)Activator.GetObject(typeof(ClsGameObjects), "tcp://127.0.0.1:8085/GameObjects");
-				p1 = new Pen(Color.White, 5);
-				g.FillRectangle(Brushes.Black, new Rectangle(0, 0, pbxWorld.Width, pbxWorld.Height));
-				foreach (Wall w in gameObjects.Walls)
-				{
-					w.Draw(g);
-				}
-
-				lock (gameObjects)
-				{
-					gameObjects.player1.Jet.Draw(g);
-					gameObjects.player2.Jet.Draw(g);
-				}
-
-				hudLeft.Draw();
-				hudRight.Draw();
-
-				lock (gameObjects)
-				{
-					foreach (Bullet b in gameObjects.player1.Bulletlist)
-					{
-						//if (!b.HasHit)
-						//{
-							b.Draw(g);
-						//}
-					}
-					foreach (Bullet b in gameObjects.player2.Bulletlist)
-					{
-						//if (!b.HasHit)
-						//{
-							b.Draw(g);
-						//}
-					}
-				}
-
-				lock (gameObjects)
-				{
-				
-					foreach (Astroid ast in gameObjects.AstroidList)
-					{
-						//make it iDrawable interface
-						ast.Draw(g);
-						//if (!a.HasHit)
-						//	g.FillEllipse(a.Color, a.Pos_x, a.Pos_y, a.Size, a.Size);
-					}
-				}
-				pbxWorld.Image = bmp;
-				if (pbxWorld != null)
-					pbxWorld.Invoke(new RefreshBitmapDelegate(pbxWorld.Refresh));
-			
-		}
-
-
+		//Region Piloting
+		#region Piloting
 		private void Game_KeyDown(object sender, KeyEventArgs e)
 		{
 			if (!GameOver)
@@ -375,7 +255,7 @@ namespace Planetes
 		private void pbxWorld_MouseMove(object sender, MouseEventArgs e)
 		{
 			if (!GameOver)
-				gameObjects.control.Aim(new Vector(e.Location));
+				gameObjects.control.Aim(e.Location);
 		}
 
 		private void pbxWorld_MouseDown(object sender, MouseEventArgs e)
@@ -394,27 +274,21 @@ namespace Planetes
 			gameObjects.control.Release(e.Button);
 		}
 
-		
-
-		//private void Form1_Load(object sender, EventArgs e)
-		//{
-
-		//}
+		#endregion
 
 		private void Game_FormClosing(object sender, FormClosingEventArgs e)
 		{
-			GameOver = true;
-			if (thrdGameLoop != null)
-				thrdGameLoop.Abort();
-			if (!localGame && localPlayerIsHost) stopServer();
+			gameObjects.AbortGame();
 		}
+
+		#region Local Game
 
 		private void humanVsHumanToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			localGame = true;
 			gameObjects = new ClsGameObjects(pbxWorld.Size);
 			//ClsGameObjects.FrameInterval = 40;
-			StartGame();
+			StartLocalGame();
 		}
 
 		private void humanVsBotToolStripMenuItem_Click(object sender, EventArgs e)
@@ -425,7 +299,7 @@ namespace Planetes
 			Point p2Start = new Point(gameObjects.WinSize.Width - 100, gameObjects.WinSize.Height / 2);
 			gameObjects.ReplacePlayer2(new Bot4("Bot4", 100, 300, p2Start, Color.Orange, gameObjects));
 
-			StartGame();
+			StartLocalGame();
 		}
 
 		private void botVsBotToolStripMenuItem_Click(object sender, EventArgs e)
@@ -441,19 +315,36 @@ namespace Planetes
 
 			//ClsGameObjects.FrameInterval = 1; 
 
-			StartGame();
+			StartLocalGame();
 		}
 
+		#endregion
 
 		#region Network Game
 
 		private void hostNetworkGame()
 		{
-			Text = "World of Starcraft (Server)";
-			serverChan = new TcpChannel(8085);
+			Text = "Planetes Server";			
+
+			var serv = new BinaryServerFormatterSinkProvider
+			{
+				TypeFilterLevel = TypeFilterLevel.Full
+			};
+
+			var clie = new BinaryClientFormatterSinkProvider();
+
+			// Creating the IDictionary to set the port on the channel instance.
+			IDictionary props = new Hashtable
+			{
+				["port"] = 8085
+			};
+			// Pass the properties for the port setting and the server provider in the server chain argument. (Client remains null here.)
+			serverChan = new TcpChannel(props, clie, serv);
+
+			//serverChan = new TcpChannel(8085);
 			ChannelServices.RegisterChannel(serverChan, false);
 			gameObjects = new ClsGameObjects(pbxWorld.Size);
-			//RemotingConfiguration.RegisterWellKnownServiceType(typeof(ClsGameObjects), "GameObjects", WellKnownObjectMode.Singleton);
+			RemotingConfiguration.RegisterWellKnownServiceType(typeof(ClsGameObjects), "GameObjects", WellKnownObjectMode.Singleton);
 
 			ObjRef or = RemotingServices.Marshal(gameObjects, "GameObjects");
 			//or.GetObjectData( ;
@@ -463,7 +354,8 @@ namespace Planetes
 			{
 				if (gameObjects.Connected == true)
 				{
-					StartGame();
+					gameObjects.StartServer();
+					StartGraphics();
 					break;
 				}
 			}
@@ -479,14 +371,27 @@ namespace Planetes
 
 		private void joinNetworkGame(string IPAdress)
 		{
-			Text = "World of Starcraft (Client)";
-			clientChan = new TcpChannel();
+			Text = "Planetes Client";
+			var serv = new BinaryServerFormatterSinkProvider
+			{
+				TypeFilterLevel = TypeFilterLevel.Full
+			};
+
+			var clie = new BinaryClientFormatterSinkProvider();
+
+			// Creating the IDictionary to set the port on the channel instance.
+			IDictionary props = new Hashtable
+			{
+				["port"] = 0
+			};
+			// Pass the properties for the port setting and the server provider in the server chain argument. (Client remains null here.)
+			clientChan = new TcpChannel(props, clie, serv);
 			ChannelServices.RegisterChannel(clientChan, false);
 			gameObjects = (ClsGameObjects)Activator.GetObject(typeof(ClsGameObjects), "tcp://" + IPAdress + ":8085/GameObjects");
 			localGame = false;
 			localPlayerIsHost = false;
 			gameObjects.Connected = true;
-			StartGame();
+			StartGraphics();
 		}
 
 		private void disconnect()
@@ -511,7 +416,11 @@ namespace Planetes
 					else
 						joinNetworkGame(vd.Controls[3].Text);
 				}
-				catch (Exception ex) { MessageBox.Show("Could not connect to server!\n" + ex.Message); }
+				catch (Exception ex)
+				{
+					MessageBox.Show("Could not connect to server!\n" + ex.Message);
+					Application.Exit();
+				}
 		}
 
 		private void Game_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)

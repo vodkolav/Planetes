@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,7 +10,7 @@ using PolygonCollision;
 namespace GameObjects
 {
 	public enum HOTAS {Up, Down, Left, Right, Shoot, Aim };
-	public class ControlPanel
+	public class ControlPanel: MarshalByRefObject
 	{
 		private Dictionary<Keys, Tuple<Player, HOTAS>> KeyBindings;
 
@@ -89,12 +90,12 @@ namespace GameObjects
 			}
 		}
 
-		public void Aim(Vector vector)
+		public void Aim(Point at)
 		{			
 			if (MouseBindings.Keys.Contains(MouseButtons.None))
 			{
 				Tuple<Player, HOTAS> t = MouseBindings[MouseButtons.None];
-				t.Item1.Aim(vector);
+				t.Item1.Aim(Vector.FromPoint(at));
 			}
 		}
 	}

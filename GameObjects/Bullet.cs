@@ -71,7 +71,7 @@ namespace GameObjects
 
 			}
 
-			foreach (Astroid ast in gameObjects.AstroidList)
+			foreach (Astroid ast in gameObjects.Astroids)
 			{
 				if (Collides(ast))
 				{
