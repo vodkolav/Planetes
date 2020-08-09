@@ -1,4 +1,5 @@
-﻿using PolygonCollision;
+﻿using Newtonsoft.Json;
+using PolygonCollision;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -6,7 +7,7 @@ using System.Windows.Forms;
 
 namespace GameObjects
 {
-	public class Player : MarshalByRefObject
+	public class Player
 	{
 		public string Name { get; set; }
 		public bool Host { get; set; }
@@ -14,12 +15,14 @@ namespace GameObjects
 		public int MaxHealth { get; set; }
 		public int Ammo { get; set; }
 		public int MaxAmmo { get; set; }
-		//public bool Fired { get; set; }
+        //public bool Fired { get; set; }
+        [JsonIgnore]
 		public Player Enemy { get; set; }
 		public Jet Jet { get; set; }
 		public List<Bullet> Bulletlist { get; set; }
 		public Vector Acceleration;
 		public bool KeyShoot { get; set; }
+		[Newtonsoft.Json.JsonIgnore]
 		public ClsGameObjects GameState { get; set; }
 		protected List<Keys> SteerKeysBindings;
 		protected Keys ShootKeyBindings;
@@ -38,6 +41,7 @@ namespace GameObjects
 			Bulletlist = new List<Bullet>();
 			//Fired = false;
 			GameState = game;
+			Acceleration = new Vector();
 			bindCommands();
 		}
 

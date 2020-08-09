@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 namespace GameObjects
 {
-	public class Jet : MarshalByRefObject
+	public class Jet
 	{
 		public Vector Pos { get => Hull.Center; }
 	

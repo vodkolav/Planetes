@@ -1,10 +1,11 @@
-﻿using PolygonCollision;
+﻿using Newtonsoft.Json;
+using PolygonCollision;
 using System;
 using System.Drawing;
 
 namespace GameObjects
 {
-	public class Bullet : MarshalByRefObject
+	public class Bullet 
 	{
 		public Vector Pos { get; set; }
 		public Vector Speed { get; set; }
@@ -12,7 +13,7 @@ namespace GameObjects
 		public bool HasHit { get; set; }
 		private Pen Pen;
 		public Player Shooter { get; private set; }
-
+		
 		public Bullet(Player player, float linearSpeed = 30)
 		{
 			Shooter = player;

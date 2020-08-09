@@ -1,4 +1,5 @@
-﻿using PolygonCollision;
+﻿using Newtonsoft.Json;
+using PolygonCollision;
 using System;
 using System.Drawing;
 
@@ -6,14 +7,17 @@ namespace GameObjects
 {
 	public enum AstType { Rubble, Ammo, Health };
 
-	public class Astroid : MarshalByRefObject
+	public class Astroid 
 	{
+		[JsonIgnore]
 		public float Size {get { return Body.R * 2; } }
 		public Circle Body { get; set; }
 		public Vector Speed { get; set; }
+		[JsonIgnore]
 		public Vector Pos { get { return Body.Pos; } set { Body.Pos = value; } }
 		public AstType Type { get; set; }
 		public bool HasHit { get; set; }
+
 		static public int Timeout { get { return 10; } }
 
 		public void TossType(Random random)
@@ -31,7 +35,7 @@ namespace GameObjects
 					break;
 			}
 		}
-
+		[JsonIgnore]
 		public Brush Color
 		{
 			get

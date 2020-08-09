@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -5,7 +6,7 @@ using System.Drawing.Drawing2D;
 namespace PolygonCollision
 {
 
-	public class Vector : MarshalByRefObject, ICloneable
+	public class Vector : ICloneable
 	{
 
 		public float X { get; set; }
@@ -47,25 +48,26 @@ namespace PolygonCollision
 		{
 			return new Vector(p.X, p.Y);
 		}
-
+		[JsonIgnore]
 		public Point AsPoint
 		{
 			get { return new Point((int)X, (int)Y); }
 		}
-
+		[JsonIgnore]
 		public float Magnitude {
 			get { return (float)Math.Sqrt(X * X + Y * Y); }
 		}
-
+	
 		public Vector Pow(float pow)
 		{
 			return new Vector((float)Math.Pow(X, pow), (float)Math.Pow(Y, pow));
 		}
-
+		[JsonIgnore]
 		public float Magnitude_X
 		{
 			get { return Math.Abs(X); }
 		}
+		[JsonIgnore]
 		public float Magnitude_Y
 		{
 			get { return Math.Abs(Y); }
@@ -96,7 +98,7 @@ namespace PolygonCollision
 		public float Dot(Vector other) {
 			return (this * other).Sum;
 		}
-
+		[JsonIgnore]
 		public float Sum
 		{
 			get { return X + Y; }

@@ -10,7 +10,7 @@ using PolygonCollision;
 namespace GameObjects
 {
 	public enum HOTAS {Up, Down, Left, Right, Shoot, Aim };
-	public class ControlPanel: MarshalByRefObject
+	public class ControlPanel
 	{
 		private Dictionary<Keys, Tuple<Player, HOTAS>> KeyBindings;
 

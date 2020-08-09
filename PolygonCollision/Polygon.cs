@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using Newtonsoft.Json;
 
 namespace PolygonCollision
 {
@@ -16,7 +17,7 @@ namespace PolygonCollision
 		public Vector translationAxis;
 	}
 
-	public class Polygon : MarshalByRefObject
+	public class Polygon
 	{
 		public List<Vector> BuildEdges()
 		{
@@ -45,7 +46,7 @@ namespace PolygonCollision
 			Vertices.Add(vertex);
 		}
 
-
+		[JsonIgnore]
 		public List<Vector> Edges { get { return BuildEdges(); } }
 
 
@@ -69,14 +70,14 @@ namespace PolygonCollision
 
 
 		public List<Vector> Vertices { get; private set; } = new List<Vector>();
-
+		[JsonIgnore]
 		public PointF[] PointFs
 		{
 			get { return Vertices.ConvertAll(new Converter<Vector, PointF>(Vector.asPointF)).ToArray(); }
 			set { Vertices = new List<PointF>(value).ConvertAll(new Converter<PointF, Vector>(Vector.FromPointF)); }
 		}
 
-
+		[JsonIgnore]
 		public Vector Center
 		{
 			get

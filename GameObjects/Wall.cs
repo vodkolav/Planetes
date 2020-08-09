@@ -1,14 +1,17 @@
-﻿using PolygonCollision;
+﻿using Newtonsoft.Json;
+using PolygonCollision;
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
 namespace GameObjects
 {
-	public class Wall : MarshalByRefObject
+	public class Wall
 	{
+		[JsonIgnore]
 		public Brush Color { get; set; }
 
+		[JsonIgnore]
 		public Polygon region { get; set; }
 
 

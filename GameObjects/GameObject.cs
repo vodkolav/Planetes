@@ -1,4 +1,5 @@
-﻿using PolygonCollision;
+﻿using Newtonsoft.Json;
+using PolygonCollision;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -10,25 +11,29 @@ using System.Windows.Forms;
 namespace GameObjects
 {
 
-	public class ClsGameObjects : MarshalByRefObject
+	public class ClsGameObjects 
 	{
 		public static int FrameInterval = 40; // default. If you want to Change it, do it from outside
+
 		//public static ClsGameObjects theObject;
-		public bool Connected { get; set; }
+
 		public bool ServerClosed { get; set; }
 		public List<Player> players { get;private set; }
 		public Player player1 { get; set; }
 		public Player player2 { get; set; }
 		public Size WinSize { get; set; }
 		//public int WinSize_y { get; set; }
+		//[JsonIgnore]
 		public List<Astroid> Astroids { get; set; }
+		[JsonIgnore]
 		public List<Wall> Walls { get; set; }
 		public bool Paused { get; set; }
+		[JsonIgnore]
 		public ControlPanel control { get; set; }
-		public bool GameOver { get; private set; } = true;
-		public Thread thrdGameLoop;
+		public bool GameOver { get; set; } = true;
+		
 		public Player Winner;
-		int timeElapsed; 
+		public int timeElapsed;
 
 		public ClsGameObjects(Size winSize)
 		{
@@ -50,10 +55,10 @@ namespace GameObjects
 			Walls.Add(new Wall(wallBrush, new Point(100, 100), new Point(200, 200), ww));
 
 			Point p1Start = new Point(100, winSize.Height / 2);
-			player1 = new Player("Player1", 100, 300, p1Start, Color.Blue, this);
+			player1 = new Player("Player1", 1000, 300, p1Start, Color.Blue, this);
 
 			Point p2Start = new Point(winSize.Width - 150, winSize.Height / 2);
-			player2 = new Player("Player2", 100, 300, p2Start, Color.Red, this);
+			player2 = new Player("Player2", 1000, 300, p2Start, Color.Red, this);
 
 			player1.Enemy = player2;
 			player2.Enemy = player1;
@@ -66,55 +71,12 @@ namespace GameObjects
 			players = new List<Player>(){ player1,	player2};
 			Astroids = new List<Astroid>();
 			//theObject = this;
-			Connected = false;
+
 			ServerClosed = false;
 			timeElapsed = 0;
 		}
 
-		public override object InitializeLifetimeService()
-		{
-			return null;
-		}
-
-		public void StartServer()
-		{
-			GameOver = false;
-
-			thrdGameLoop = new Thread(GameLoop)
-			{
-				Name = "GameLoop"
-			};
-			thrdGameLoop.Start();
-
-			//timeElapsed = 0;
-
-		}
-
-		public void EndGame(Player winner)
-		{
-			GameOver = true;
-			Winner = winner;
-		}
-
-
-		public void AbortGame()
-		{
-			GameOver = true;
-			if (thrdGameLoop != null)
-				thrdGameLoop.Abort();
-		}
-
-
-		private void GameLoop()
-		{
-			while (!GameOver)
-			{
-				Thread.Sleep(FrameInterval);
-				Frame();
-			}
-		}
-
-		private void Frame()
+		public void Frame()
 		{
 			if (Paused) return;
 			lock (this)
@@ -185,6 +147,12 @@ namespace GameObjects
 			//	//stillOpen = false;
 			//	//timer1.Enabled = false;
 			//}
+		}
+
+		public void EndGame(Player winner)
+		{
+			GameOver = true;
+			Winner = winner;
 		}
 
 		public void Draw(Graphics g)
