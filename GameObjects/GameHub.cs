@@ -28,8 +28,7 @@ namespace GameObjects
 		{
 
 			_gameServer.Connected = true;
-			Clients.All.upd(_gameServer.gameObjects);
-			Clients.All.hi("ow hello there");
+			Clients.All.upd(_gameServer.gameObjects);		
 			return base.OnConnected();
 
 		}

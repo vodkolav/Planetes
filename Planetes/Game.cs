@@ -48,11 +48,7 @@ namespace Planetes
 		}
 
 		private bool GameOver { get { return gameObjects == null ? true : gameObjects.GameOver; } }
-		 
 		
-		// network
-		public TcpChannel serverChan, clientChan;
-
 		delegate void RefreshBitmapDelegate();
 		//delegate void RefreshProgessBarDelegate();
 
@@ -72,14 +68,14 @@ namespace Planetes
             }
 			if (gametype == "joinNetworkGame")
 			{
-				joinNetworkGame("127.0.0.1");
+				joinNetworkGame($"http://localhost:8030/");
 			}
 			
 		}
 
 		public void StartLocalGame()
 		{
-			srv.StartServer();
+			srv.Start();
 			StartGraphics();
 		}
 
@@ -112,19 +108,19 @@ namespace Planetes
 			}
 			else
 			{
-				//timerDraw.Stop();
-				//try
-				//{
-				//	if (gameObjects.Winner != null)
-				//	{
-				//		MessageBox.Show(this, gameObjects.Winner.Name + " wins!", @"Game Over! ");
-				//	}
-				//}
-				//catch (Exception ex)
-    //            {
-    //                Console.WriteLine(ex.Message);
-    //            }
-			}
+                timerDraw.Stop();
+                try
+                {
+                    if (gameObjects.Winner != null)
+                    {
+                        MessageBox.Show(this, gameObjects.Winner.Name + " wins!", @"Game Over! ");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
 		}
 
 		
@@ -191,7 +187,7 @@ namespace Planetes
 		private void Game_FormClosing(object sender, FormClosingEventArgs e)
 		{
 			if (localPlayerIsHost)
-				srv.AbortGame();
+				srv.Stop();
 		}
 
 		#region Local Game
@@ -250,54 +246,26 @@ namespace Planetes
 			localGame = false;
 			localPlayerIsHost = true;
 
-			srv.Listen( url);
-			while (true)
-			{
-				//Thread.Sleep(100);
+			srv.Listen(url);
+			StartGraphics();
+		}
+
+
+
+		//public void setGameObjects(ClsGameObjects go)
+		//{
 			
-					if (srv.Connected)
-					{
-						srv.StartServer();
-						StartGraphics();
-						break;
-					}
-				
-			}
-		}
+  //          //Console.WriteLine("somethin happened");
+		//}
 
-		private void stopServer()
-		{
-			gameObjects.ServerClosed = true;
-			Thread.Sleep(5);
-			ChannelServices.UnregisterChannel(serverChan);
-			serverChan = null;
-		}
-
-		public void setGameObjects(ClsGameObjects go)
-		{
-			gameObjects = go;
-            //Console.WriteLine("somethin happened");
-		}
-
-		private async void joinNetworkGame(string IPAdress)
+		private async void joinNetworkGame(string URL)
 		{
 			Text = "Planetes Client"; // {IPAdress}
-			Conn = new HubConnection($"http://localhost:8030/");
+			Conn = new HubConnection(URL); // $"http://localhost:8030/");
 			Proxy = Conn.CreateHubProxy("GameHub");
 
-			Proxy.On<ClsGameObjects>("upd", go =>
-		    {
-			   setGameObjects(go);
-                //Console.WriteLine(go.ToString());
-		    });
-
-			Proxy.On<string>("hi", go =>
-			{
-				Console.WriteLine(go);
-			});
-
+			Proxy.On<ClsGameObjects>("UpdateModel", go => gameObjects = go);
 			await Conn.Start();
-			await Proxy.Invoke("Broadcast");
 
 			localGame = false;
 			localPlayerIsHost = false;
@@ -305,12 +273,7 @@ namespace Planetes
 			StartGraphics();
 		}
 
-		//private void disconnect()
-		//{
-		//	ChannelServices.UnregisterChannel(clientChan);
-		//	clientChan = null;
-		//}
-
+	
 		private void hostToolStripMenuItem_Click_1(object sender, EventArgs e)
 		{
 			hostNetworkGame();
@@ -344,8 +307,6 @@ namespace Planetes
 
 		}
 		#endregion
-
-
 	}
 }
 

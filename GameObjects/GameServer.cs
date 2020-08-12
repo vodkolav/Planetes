@@ -19,8 +19,10 @@ namespace GameObjects
 		public IHubContext hubContext = GlobalHost.ConnectionManager.GetHubContext<GameHub>();
 		public ClsGameObjects gameObjects;
 		IDisposable webapp;
+		ManualResetEvent _shutdownEvent = new ManualResetEvent(false);
+		ManualResetEvent _pauseEvent = new ManualResetEvent(true);
 
-        public GameServer()
+		public GameServer()
 		{
 			gameObjects = new ClsGameObjects(GameConfig.WorldSize);
 		}
@@ -33,11 +35,9 @@ namespace GameObjects
 			}
 		}
 
-		public void StartServer()
-		{
-			Console.WriteLine("Begin Game");
-			//Console.ReadLine();
-
+		public void Start()
+		{			
+			
 			gameObjects.GameOver = false;
 
 			thrdGameLoop = new Thread(GameLoop)
@@ -45,47 +45,106 @@ namespace GameObjects
 				Name = "GameLoop"
 			};
 			thrdGameLoop.Start();
+			Console.WriteLine("Fight!");
 		}
 
-		public void AbortGame()
+
+		public void Over()
 		{
+			// Signal the shutdown event
+			_shutdownEvent.Set();
+			Console.WriteLine("Game Over");
+
 			gameObjects.GameOver = true;
-			if (thrdGameLoop != null)
-				thrdGameLoop.Abort();
+			//if (thrdGameLoop != null)
+			//	thrdGameLoop.Abort();
 			webapp.Dispose();
+
+			// Make sure to resume any paused threads
+			_pauseEvent.Set();
+
+			// Wait for the thread to exit
+			thrdGameLoop.Join();
 		}
 
+
+		public void Stop()
+		{
+			// Signal the shutdown event
+			_shutdownEvent.Set();
+			Console.WriteLine("Game Aborted");
+
+			gameObjects.GameOver = true;
+			//if (thrdGameLoop != null)
+			//	thrdGameLoop.Abort();
+			webapp.Dispose();
+
+			// Make sure to resume any paused threads
+			_pauseEvent.Set();
+
+			// Wait for the thread to exit
+			thrdGameLoop.Join();
+		}
+
+		public void Pause()
+		{
+			_pauseEvent.Reset();
+			Console.WriteLine("Game paused");
+		}
+
+		public void Resume()
+		{
+			_pauseEvent.Set();
+			Console.WriteLine("Game resumed");
+		}
 
 		private async  void GameLoop()
 		{
 			while (!gameObjects.GameOver)
 			{
-				Thread.Sleep(ClsGameObjects.FrameInterval);
-				gameObjects.Frame();
-                //IHubContext hubContext = GlobalHost.ConnectionManager.GetHubContext<GameHub>();
+				_pauseEvent.WaitOne(Timeout.Infinite);
 
-                try
+				if (_shutdownEvent.WaitOne(0))
+					break;
+
+				Thread.Sleep(ClsGameObjects.FrameInterval); //this is bad. There should be timer instead
+				if (gameObjects.Frame())
+				{
+					try
+					{
+						string gobj = JsonConvert.SerializeObject(gameObjects);
+						await hubContext.Clients.All.UpdateModel(gameObjects);
+					}
+					catch (Exception e)
+					{
+						Console.WriteLine(e.Message);
+					}
+
+					Console.WriteLine(gameObjects.timeElapsed);
+				}
+				else
                 {
-					string gobj = JsonConvert.SerializeObject(gameObjects);
-					await hubContext.Clients.All.upd(gameObjects);
+					Over();
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                }
-				
-				await hubContext.Clients.All.hi("i say again" + rnd.Next(1,100).ToString());
-				//hubContext.Clients.All.addMessage("server", "ServerMessage");
-				//Console.WriteLine("Server Sending addMessage\n");
 			}
 		}
 
 		public void Listen(string url)
-		{
-			//string url = @"http://localhost:8030/";
+		{			
 			webapp = WebApp.Start<Startup>(url);
 
 			Console.WriteLine(string.Format("Server listening at {0}", url));
+
+			while (true)
+			{
+				//Thread.Sleep(100);
+
+				if (Connected)
+				{
+					Start();					
+					return;
+				}
+			}
 		}
 	}
 }

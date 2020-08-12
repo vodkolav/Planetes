@@ -19,7 +19,11 @@ namespace TestClient
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Thread.Sleep(1000);
-            Application.Run(new Game("joinNetworkGame"));
+#if DEBUG
+            Application.Run(new Game("hostNetworkGame"));
+#else
+            Application.Run(new Game());
+#endif
         }
     }
 }

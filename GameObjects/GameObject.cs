@@ -17,10 +17,11 @@ namespace GameObjects
 
 		//public static ClsGameObjects theObject;
 
-		public bool ServerClosed { get; set; }
-		public List<Player> players { get;private set; }
-		public Player player1 { get; set; }
-		public Player player2 { get; set; }
+		public List<Player> players { get;set; }
+		[JsonIgnore]
+		public Player player1 { get => players[0]; set => players[0] = value; }
+		[JsonIgnore]
+		public Player player2 { get => players[1]; set => players[1] = value; }
 		public Size WinSize { get; set; }
 		//public int WinSize_y { get; set; }
 		//[JsonIgnore]
@@ -55,10 +56,10 @@ namespace GameObjects
 			Walls.Add(new Wall(wallBrush, new Point(100, 100), new Point(200, 200), ww));
 
 			Point p1Start = new Point(100, winSize.Height / 2);
-			player1 = new Player("Player1", 1000, 300, p1Start, Color.Blue, this);
+			Player player1 = new Player("Player1", 1000, 300, p1Start, Color.Blue, this);
 
 			Point p2Start = new Point(winSize.Width - 150, winSize.Height / 2);
-			player2 = new Player("Player2", 1000, 300, p2Start, Color.Red, this);
+			Player player2 = new Player("Player2", 1000, 300, p2Start, Color.Red, this);
 
 			player1.Enemy = player2;
 			player2.Enemy = player1;
@@ -71,22 +72,17 @@ namespace GameObjects
 			players = new List<Player>(){ player1,	player2};
 			Astroids = new List<Astroid>();
 			//theObject = this;
-
-			ServerClosed = false;
 			timeElapsed = 0;
 		}
 
-		public void Frame()
+		public bool Frame()
 		{
-			if (Paused) return;
+			if (Paused) return true;
 			lock (this)
 			{
 				player1.Move();
 				player2.Move();
 			}
-
-			Console.WriteLine(player1.Jet.ToString());
-
 
 			player1.Shoot(timeElapsed);
 			player2.Shoot(timeElapsed);
@@ -137,19 +133,19 @@ namespace GameObjects
 				Player looser;
 				if ((looser = players.FirstOrDefault(p => p.isDead)) != null)
 				{
-					EndGame(looser.Enemy);
+					Over(looser.Enemy);
 				}
 
 				timeElapsed++;
+				return true;
 			}
-			//else
-			//{
-			//	//stillOpen = false;
-			//	//timer1.Enabled = false;
-			//}
-		}
+            else
+            {
+				return false;
+            }
+        }
 
-		public void EndGame(Player winner)
+		public void Over(Player winner)
 		{
 			GameOver = true;
 			Winner = winner;
@@ -198,7 +194,6 @@ namespace GameObjects
 			player1.Enemy = player2;
 			player2.Enemy = player1;
 			player2.Jet.Aim = new Vector(0, WinSize.Height / 2);
-			players[1] = player2;
 		}
 		public void ReplacePlayer1(Bot bot)
 		{
@@ -206,21 +201,6 @@ namespace GameObjects
 			player1.Enemy = player2;
 			player2.Enemy = player1;
 			player1.Jet.Aim = new Vector(0, WinSize.Height / 2);
-			players[0] = player1;
 		}
-	}
-
-	public static class RectExtension
-	{
-		public static Point Center(this Rectangle rect)
-		{
-			return new Point(rect.Location.X + rect.Size.Width / 2, rect.Location.Y + rect.Size.Height / 2);
-		}
-
-		public static Point Center(this RectangleF rect)
-		{
-			return new Point((int)(rect.Location.X + rect.Size.Width / 2), (int)(rect.Location.Y + rect.Size.Height / 2));
-		}
-	}
-
+	}	
 }

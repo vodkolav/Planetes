@@ -15,7 +15,11 @@ namespace Planetes
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+#if DEBUG
             Application.Run(new Game("hostNetworkGame"));
+#else
+            Application.Run(new Game());
+#endif
         }
     }
 }
