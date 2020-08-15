@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace GameObjects
 {
-	public class GameServer
+    public class GameServer
 	{
 		private readonly static Lazy<GameServer> _instance = new Lazy<GameServer>(() => new GameServer());
 		private Random rnd = new Random();

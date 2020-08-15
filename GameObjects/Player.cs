@@ -7,9 +7,11 @@ using System.Windows.Forms;
 
 namespace GameObjects
 {
+	public enum Action { Press, Release, Aim}
+
 	public class Player
 	{
-		public string Name { get; set; }
+		public string Name { get; set; } 
 		public bool Host { get; set; }
 		public int Health { get; set; }
 		public int MaxHealth { get; set; }
@@ -22,13 +24,24 @@ namespace GameObjects
 		public List<Bullet> Bulletlist { get; set; }
 		public Vector Acceleration;
 		public bool KeyShoot { get; set; }
-		[Newtonsoft.Json.JsonIgnore]
-		public ClsGameObjects GameState { get; set; }
-		protected List<Keys> SteerKeysBindings;
-		protected Keys ShootKeyBindings;
-		public Dictionary<HOTAS, Vector> commands { get; set; }
+		[JsonIgnore]
+		public ClsGameObjects GameState { get; set; }		
+		[JsonIgnore]
+		public Dictionary<Action, System.Action<HOTAS>> actionMapping { get; set; }
 		public bool isDead { get; private set; }
+		
+		public void Act (Tuple<Action , HOTAS> instruction)
+        {
+			actionMapping[instruction.Item1](instruction.Item2);
+        }
 
+		private void MapActions()
+        {
+			actionMapping = new Dictionary<Action, Action<HOTAS>>();
+			actionMapping.Add(Action.Press, Steer);
+			actionMapping.Add(Action.Release, Release);
+			//actionMapping.Add(Action.Aim, Aim);
+		}
 
 		public Player(string name, int health, int ammo, Point At, Color color, ClsGameObjects game)
 		{
@@ -43,6 +56,7 @@ namespace GameObjects
 			GameState = game;
 			Acceleration = new Vector();
 			bindCommands();
+			MapActions();
 		}
 
 		private void bindCommands()
@@ -143,16 +157,14 @@ namespace GameObjects
 			Jet.Acceleration = Acceleration;
 		}
 
+		public void Aim( Vector at)
+		{
+			Jet.Aim =  at;
+		}
 		public void Move()
 		{
 			Jet.Move(GameState);
 		}
-
-		public void Aim(Vector location)
-		{
-			Jet.Aim = location;
-		}
-
 		public virtual void Shoot(int timeElapsed)
 		{
 			if (KeyShoot)

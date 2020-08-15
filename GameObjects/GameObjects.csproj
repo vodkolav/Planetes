@@ -58,6 +58,7 @@
     <Compile Include="Astroid.cs" />
     <Compile Include="Bot.cs" />
     <Compile Include="Bullet.cs" />
+    <Compile Include="ConnectionMapping.cs" />
     <Compile Include="ControlPanel.cs" />
     <Compile Include="GameConfig.cs" />
     <Compile Include="GameHub.cs" />

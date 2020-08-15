@@ -41,6 +41,8 @@ namespace Planetes
 
 		private ClsGameObjects _gameObjects;
 
+		private ControlPanel Yoke;
+
 		public ClsGameObjects gameObjects
 		{
 			get { return localPlayerIsHost ? srv.gameObjects : _gameObjects; }
@@ -57,8 +59,6 @@ namespace Planetes
 			InitializeComponent();
 			SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.FixedHeight | ControlStyles.FixedWidth | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
 		}
-
-
 		
 		public Game(string gametype) : this()
 		{			
@@ -143,18 +143,15 @@ namespace Planetes
 		private void Game_KeyDown(object sender, KeyEventArgs e)
 		{
 			if (!GameOver)
-			{
-				if (localGame) // local game
-				{
-					gameObjects.control.Press(e.KeyData);
-				}
+			{		
+				Yoke.Press(e.KeyData);			
 			}
 		}
 
 		private void Game_KeyUp(object sender, KeyEventArgs e)
 		{
 			if (!GameOver)
-				gameObjects.control.Release(e.KeyData);
+				Yoke.Release(e.KeyData);
 			//gameObjects.player2.Release(e.KeyData);
 		}
 
@@ -162,7 +159,7 @@ namespace Planetes
 		private void pbxWorld_MouseMove(object sender, MouseEventArgs e)
 		{
 			if (!GameOver)
-				gameObjects.control.Aim(e.Location);
+				Yoke.Aim(e.Location);
 		}
 
 		private void pbxWorld_MouseDown(object sender, MouseEventArgs e)
@@ -171,7 +168,7 @@ namespace Planetes
 			{
 				if (localGame) // local game
 				{
-					gameObjects.control.Press(e.Button);
+					Yoke.Press(e.Button);
 				}
 			}
 		}
@@ -179,7 +176,7 @@ namespace Planetes
 		private void pbxWorld_MouseUp(object sender, MouseEventArgs e)
 		{
 			if (!GameOver)
-				gameObjects.control.Release(e.Button);
+				Yoke.Release(e.Button);
 		}
 
 		#endregion
@@ -231,10 +228,10 @@ namespace Planetes
 
 		#region Network Game
 
-		private void hostNetworkGame()
+		private async void hostNetworkGame()
 		{
 			Text = "Planetes Server";
-			string url = "http://localhost:8030";
+			string URL = "http://localhost:8030";
 			//using (WebApp.Start<Startup>(url))
 			//{
 			//	Console.WriteLine("Server running on {0}", url);
@@ -246,7 +243,20 @@ namespace Planetes
 			localGame = false;
 			localPlayerIsHost = true;
 
-			srv.Listen(url);
+			srv.Listen(URL);
+			// Server application is also client for player1
+			Conn = new HubConnection(URL);
+			Proxy = Conn.CreateHubProxy("GameHub");
+
+			Proxy.On<ClsGameObjects>("UpdateModel", go => gameObjects = go);
+			await Conn.Start();
+
+
+
+			Yoke = new ControlPanel(Proxy, gameObjects.player1);
+			Yoke.bindWASD();
+			Yoke.bindMouse(MouseButtons.Left, HOTAS.Shoot);
+
 			StartGraphics();
 		}
 
@@ -263,13 +273,18 @@ namespace Planetes
 			Text = "Planetes Client"; // {IPAdress}
 			Conn = new HubConnection(URL); // $"http://localhost:8030/");
 			Proxy = Conn.CreateHubProxy("GameHub");
-
+			
 			Proxy.On<ClsGameObjects>("UpdateModel", go => gameObjects = go);
 			await Conn.Start();
 
 			localGame = false;
 			localPlayerIsHost = false;
 			//gameObjects.Connected = true;
+			Yoke = new ControlPanel(Proxy, gameObjects.player2);
+
+			Yoke.bindWASD();
+			Yoke.bindMouse(MouseButtons.Left, HOTAS.Shoot);
+
 			StartGraphics();
 		}
 

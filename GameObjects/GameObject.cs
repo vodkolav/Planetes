@@ -64,11 +64,6 @@ namespace GameObjects
 			player1.Enemy = player2;
 			player2.Enemy = player1;
 
-			control = new ControlPanel();
-			control.bindWASDto(player1);
-			control.bindMouse(MouseButtons.Left, player1, HOTAS.Shoot);
-			control.bindARROWSto(player2);
-
 			players = new List<Player>(){ player1,	player2};
 			Astroids = new List<Astroid>();
 			//theObject = this;

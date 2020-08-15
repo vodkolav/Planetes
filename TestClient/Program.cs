@@ -20,7 +20,7 @@ namespace TestClient
             Application.SetCompatibleTextRenderingDefault(false);
             Thread.Sleep(1000);
 #if DEBUG
-            Application.Run(new Game("hostNetworkGame"));
+            Application.Run(new Game("joinNetworkGame"));
 #else
             Application.Run(new Game());
 #endif
