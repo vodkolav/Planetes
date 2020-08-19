@@ -49,7 +49,7 @@ namespace Planetes
 			set { _gameObjects = value; }
 		}
 
-		private bool GameOver { get { return gameObjects == null ? true : gameObjects.GameOver; } }
+		private bool GameOn { get { return gameObjects == null ? false : gameObjects.GameOn; } }
 		
 		delegate void RefreshBitmapDelegate();
 		//delegate void RefreshProgessBarDelegate();
@@ -102,7 +102,7 @@ namespace Planetes
 
 		public void timerDraw_Tick(object sender, EventArgs e)
 		{
-			if (!GameOver)
+			if (GameOn)
 			{
 				DrawGraphics();
 			}
@@ -142,7 +142,7 @@ namespace Planetes
 		#region Piloting
 		private void Game_KeyDown(object sender, KeyEventArgs e)
 		{
-			if (!GameOver)
+			if (GameOn)
 			{		
 				Yoke.Press(e.KeyData);			
 			}
@@ -150,7 +150,7 @@ namespace Planetes
 
 		private void Game_KeyUp(object sender, KeyEventArgs e)
 		{
-			if (!GameOver)
+			if (GameOn)
 				Yoke.Release(e.KeyData);
 			//gameObjects.player2.Release(e.KeyData);
 		}
@@ -158,24 +158,21 @@ namespace Planetes
 
 		private void pbxWorld_MouseMove(object sender, MouseEventArgs e)
 		{
-			if (!GameOver)
+			if (GameOn)
 				Yoke.Aim(e.Location);
 		}
 
 		private void pbxWorld_MouseDown(object sender, MouseEventArgs e)
 		{
-			if (!GameOver)
+			if (GameOn)
 			{
-				if (localGame) // local game
-				{
-					Yoke.Press(e.Button);
-				}
+				Yoke.Press(e.Button);
 			}
 		}
 
 		private void pbxWorld_MouseUp(object sender, MouseEventArgs e)
 		{
-			if (!GameOver)
+			if (GameOn)
 				Yoke.Release(e.Button);
 		}
 
@@ -183,6 +180,7 @@ namespace Planetes
 
 		private void Game_FormClosing(object sender, FormClosingEventArgs e)
 		{
+			//should implement proper network conections termination 
 			if (localPlayerIsHost)
 				srv.Stop();
 		}
@@ -262,13 +260,14 @@ namespace Planetes
 
 
 
-		//public void setGameObjects(ClsGameObjects go)
-		//{
+    //public void setGameObjects(ClsGameObjects go)
+    //{
 			
-  //          //Console.WriteLine("somethin happened");
-		//}
+				//gameObjects = go;			
+    //          //Console.WriteLine("somethin happened");
+    //}    
 
-		private async void joinNetworkGame(string URL)
+        private async void joinNetworkGame(string URL)
 		{
 			Text = "Planetes Client"; // {IPAdress}
 			Conn = new HubConnection(URL); // $"http://localhost:8030/");

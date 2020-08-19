@@ -143,12 +143,12 @@ namespace GameObjects
 		public void Shoot(Player player, int timeElapsed)
 		{
 			if (player.Ammo != 0 && timeElapsed > LastFired + Cooldown)
-			{				
+			{
 				LastFired = timeElapsed;
-				Bullet bullet = new Bullet(player);
+				Bullet bullet = new Bullet(pos: player.Jet.Gun, speed: Bearing * (Bullet.linearSpeed / Bearing.Magnitude), size: 5, color: Color);			
 				lock (player.GameState)
 				{
-					player.Bulletlist.Add(bullet);
+					player.Bullets.Add(bullet);
 				}
 				player.Ammo--;
 			}

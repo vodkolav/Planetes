@@ -1,0 +1,21 @@
+﻿TODO:
+
+change Steer to Press in player class
+remove unnecessary usings
+implement proper connection <> user management 
+enable HUD
+make ship prettier, add wings
+implement harpoon 
+implement proper game loop with timer and without thread sleep 
+implement pause
+create iMovable , iCollidable interfaces
+
+DONE:
+enable shooting
+
+
+BUGS:
+
+nullfeference exception in yoke if you have mouse on game window when game is starting 
+
+FIXED:

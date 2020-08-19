@@ -38,7 +38,6 @@ namespace GameObjects
 		public void Start()
 		{			
 			
-			gameObjects.GameOver = false;
 
 			thrdGameLoop = new Thread(GameLoop)
 			{
@@ -46,6 +45,7 @@ namespace GameObjects
 			};
 			thrdGameLoop.Start();
 			Console.WriteLine("Fight!");
+			gameObjects.GameOn = true;
 		}
 
 
@@ -55,7 +55,7 @@ namespace GameObjects
 			_shutdownEvent.Set();
 			Console.WriteLine("Game Over");
 
-			gameObjects.GameOver = true;
+			gameObjects.GameOn = false;
 			//if (thrdGameLoop != null)
 			//	thrdGameLoop.Abort();
 			webapp.Dispose();
@@ -74,7 +74,7 @@ namespace GameObjects
 			_shutdownEvent.Set();
 			Console.WriteLine("Game Aborted");
 
-			gameObjects.GameOver = true;
+			gameObjects.GameOn = false;
 			//if (thrdGameLoop != null)
 			//	thrdGameLoop.Abort();
 			webapp.Dispose();
@@ -100,7 +100,7 @@ namespace GameObjects
 
 		private async  void GameLoop()
 		{
-			while (!gameObjects.GameOver)
+			while (gameObjects.GameOn)
 			{
 				_pauseEvent.WaitOne(Timeout.Infinite);
 

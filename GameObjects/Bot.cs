@@ -143,9 +143,12 @@ namespace GameObjects
 
 				try
 				{
-					//bullet evasion tactic (not good yet) Where(b=> b.Pos.X + 50 > Jet.Pos.X).
+					//bullet evasion tactic (not good yet) Where(b=> b.Pos.X + 50 > Jet.Pos.X)
+					//.GameState.Bullets
+						//.Where(b=>b.Shooter == Enemy)
 
-					Bullet bulClosest = Enemy.Bulletlist.Aggregate((curMin, b) => (curMin == null || (Jet.Dist(b)) < Jet.Dist(curMin) ? b : curMin));
+					Bullet bulClosest = Bullets
+						.Aggregate((curMin, b) => (curMin == null || (Jet.Dist(b)) < Jet.Dist(curMin) ? b : curMin));
 					//Jet.Pos.Y-50 > bulClosest.Pos.Y  &&
 					if (Jet.Pos.Y < bulClosest.Pos.Y && bulClosest.Pos.Y < Jet.Pos.Y + 50)
 					{
@@ -265,7 +268,9 @@ namespace GameObjects
 				{
 					//bullet evasion tactic (not good yet)
 
-					Bullet bulClosest = GameState.player1.Bulletlist.Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
+					Bullet bulClosest = Bullets
+						//.Where(b => b.Shooter == Enemy)
+						.Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
 					//Jet.Pos.Y-50 > bulClosest.Pos.Y  &&
 					if (bulClosest.Pos.Y > Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
 					{

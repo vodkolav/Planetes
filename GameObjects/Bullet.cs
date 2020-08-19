@@ -8,19 +8,23 @@ namespace GameObjects
 	public class Bullet 
 	{
 		public Vector Pos { get; set; }
+
+		public static int linearSpeed = 30;
+
 		public Vector Speed { get; set; }
+
 		public int Size { get; set; }
-		public bool HasHit { get; set; }
-		private Pen Pen;
-		public Player Shooter { get; private set; }
-		
-		public Bullet(Player player, float linearSpeed = 30)
+
+        public Color Color { get; set; }
+
+        public bool HasHit { get; set; }		
+
+		public Bullet(Vector pos, Vector speed, int size, Color color )
 		{
-			Shooter = player;
-			Pos = player.Jet.Gun;
-			Speed = player.Jet.Bearing * (linearSpeed / player.Jet.Bearing.Magnitude);
-			Size = 5;
-			Pen = new Pen(player.Jet.Color, Size);
+			Pos = pos;
+			Speed = speed;
+			Size = size;
+			Color = color;
 			HasHit = false;
 		}
 
@@ -38,7 +42,7 @@ namespace GameObjects
 		{
 			if (!HasHit)
 			{
-				g.DrawLine(Pen, (Pos - (Speed*0.5)).AsPoint, Pos.AsPoint);
+				g.DrawLine(new Pen(Color, Size), (Pos - (Speed*0.5)).AsPoint, Pos.AsPoint);
 			}
 		}
 
@@ -56,20 +60,16 @@ namespace GameObjects
 				}
 			}
 
-			//check for collision with opponent's Jet
-			if (Shooter.Enemy.Jet.Collides(this))
-
-			//Pos.X < gameObjects.Player2.Jet.Pos.X &&
+			//check whether a bullet as way outside of screen - can remove it then
+			if (Pos.Magnitude > new Vector(gameObjects.WinSize).Magnitude * 2)			
+				
+			//Pos.X < gameObjects.Player2.Jet.Pos.X &&			
 			//	Pos.X > gameObjects.Player2.Jet.Pos.X - gameObjects.Player2.Jet.Width &&
 			//	Pos.Y > gameObjects.Player2.Jet.Pos.Y &&
 			//	Pos.Y < gameObjects.Player2.Jet.Pos.Y + gameObjects.Player2.Jet.Height)
 			{
 				HasHit = true;
-				//if (gameObjects.Player2.Health > 0)
-				Shooter.Enemy.Hit(1);
-				//else
-				//	GameOver.Show(gameObjects.Player1);
-
+				return;
 			}
 
 			foreach (Astroid ast in gameObjects.Astroids)

@@ -9,7 +9,7 @@ namespace PolygonCollision
 	public class Vector : ICloneable
 	{
 
-		public float X { get; set; }
+        public float X { get; set; }
 		public float Y { get; set; }
 
 		public Vector(float x, float y) {
@@ -40,7 +40,13 @@ namespace PolygonCollision
 			Y = 0;
 		}
 
-		static public Vector FromPoint(Point p) {
+        public Vector(Size size)
+        {
+			X = size.Width;
+			Y = size.Height;
+		}
+
+        static public Vector FromPoint(Point p) {
 			return new Vector(p.X, p.Y);
 		}
 

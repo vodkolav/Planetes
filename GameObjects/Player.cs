@@ -21,7 +21,7 @@ namespace GameObjects
         [JsonIgnore]
 		public Player Enemy { get; set; }
 		public Jet Jet { get; set; }
-		public List<Bullet> Bulletlist { get; set; }
+		public List<Bullet> Bullets { get; set; }
 		public Vector Acceleration;
 		public bool KeyShoot { get; set; }
 		[JsonIgnore]
@@ -29,19 +29,20 @@ namespace GameObjects
 		[JsonIgnore]
 		public Dictionary<Action, System.Action<HOTAS>> actionMapping { get; set; }
 		public bool isDead { get; private set; }
-		
-		public void Act (Tuple<Action , HOTAS> instruction)
-        {
+
+		public void Act(Tuple<Action, HOTAS> instruction)
+		{
 			actionMapping[instruction.Item1](instruction.Item2);
-        }
+		}
 
 		private void MapActions()
-        {
+		{
 			actionMapping = new Dictionary<Action, Action<HOTAS>>();
 			actionMapping.Add(Action.Press, Steer);
 			actionMapping.Add(Action.Release, Release);
 			//actionMapping.Add(Action.Aim, Aim);
 		}
+
 
 		public Player(string name, int health, int ammo, Point At, Color color, ClsGameObjects game)
 		{
@@ -51,22 +52,21 @@ namespace GameObjects
 			Ammo = ammo;
 			MaxAmmo = ammo;
 			Jet = new Jet(At, color);
-			Bulletlist = new List<Bullet>();
+			Bullets = new List<Bullet>();
 			//Fired = false;
 			GameState = game;
 			Acceleration = new Vector();
-			bindCommands();
 			MapActions();
 		}
-
-		private void bindCommands()
-		{
-			//commands = new Dictionary<HOTAS, Vector>();
-			//commands.Add(HOTAS.Up, new Vector(0, -1));
-			//commands.Add(HOTAS.Down, new Vector(0, 1));
-			//commands.Add(HOTAS.Left, new Vector(-1,0));
-			//commands.Add(HOTAS.Right, new Vector(1,0));
-		}
+      
+		//private void bindCommands()
+		//{
+		//	//commands = new Dictionary<HOTAS, Vector>();
+		//	//commands.Add(HOTAS.Up, new Vector(0, -1));
+		//	//commands.Add(HOTAS.Down, new Vector(0, 1));
+		//	//commands.Add(HOTAS.Left, new Vector(-1,0));
+		//	//commands.Add(HOTAS.Right, new Vector(1,0));
+		//}
 
 		public override string ToString()
 		{
@@ -164,6 +164,19 @@ namespace GameObjects
 		public void Move()
 		{
 			Jet.Move(GameState);
+
+			//check for collision with opponent's Jet
+			foreach (Bullet b in Bullets)
+			{
+				if (Enemy.Jet.Collides(b))
+				{
+					b.HasHit = true;
+					Enemy.Hit(1);
+				}
+			}
+			Bullets.ForEach(b => b.Move(GameState));
+			Bullets.RemoveAll(b => b.HasHit);
+
 		}
 		public virtual void Shoot(int timeElapsed)
 		{
@@ -178,5 +191,11 @@ namespace GameObjects
 			else
 				isDead=true;
 		}
-	}
+
+		internal void Draw(Graphics g)
+		{
+			Jet.Draw(g);
+			Bullets.ForEach(b => b.Draw(g));
+		}
+    }
 }

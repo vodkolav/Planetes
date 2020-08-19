@@ -13,7 +13,7 @@ namespace GameObjects
 
 	public class ClsGameObjects 
 	{
-		public static int FrameInterval = 40; // default. If you want to Change it, do it from outside
+		public static int FrameInterval = 30; // default. If you want to Change it, do it from outside
 
 		//public static ClsGameObjects theObject;
 
@@ -31,7 +31,7 @@ namespace GameObjects
 		public bool Paused { get; set; }
 		[JsonIgnore]
 		public ControlPanel control { get; set; }
-		public bool GameOver { get; set; } = true;
+		public bool GameOn { get; set; } = false;
 		
 		public Player Winner;
 		public int timeElapsed;
@@ -65,7 +65,7 @@ namespace GameObjects
 			player2.Enemy = player1;
 
 			players = new List<Player>(){ player1,	player2};
-			Astroids = new List<Astroid>();
+			Astroids = new List<Astroid>();			
 			//theObject = this;
 			timeElapsed = 0;
 		}
@@ -75,12 +75,12 @@ namespace GameObjects
 			if (Paused) return true;
 			lock (this)
 			{
-				player1.Move();
-				player2.Move();
+				players.ForEach(p => p.Move());
+				players.ForEach(p => p.Shoot(timeElapsed));
 			}
 
-			player1.Shoot(timeElapsed);
-			player2.Shoot(timeElapsed);
+			//player1.Shoot(timeElapsed);
+			//player2.Shoot(timeElapsed);
 
 			//pbPl1Ammo.Value = gameObjects.player1.Ammo;
 			//pbPl1Hlth.Value = gameObjects.player1.Health;
@@ -96,20 +96,8 @@ namespace GameObjects
 			//}
 			//else
 			//{
-			if (!GameOver)
-			{
-				//Move player 1 bullets
-				lock (this)
-				{
-					player1.Bulletlist.ForEach(b => b.Move(this));
-					player1.Bulletlist.RemoveAll(b => b.HasHit);
-				}
-				//Move player 2 bullets
-				lock (this)
-				{
-					player2.Bulletlist.ForEach(b => b.Move(this));
-					player2.Bulletlist.RemoveAll(b => b.HasHit);
-				}
+			if (GameOn)
+			{				
 				//Move asteroids
 				lock (this)
 				{
@@ -142,43 +130,23 @@ namespace GameObjects
 
 		public void Over(Player winner)
 		{
-			GameOver = true;
+			GameOn = false;
 			Winner = winner;
 		}
 
 		public void Draw(Graphics g)
 		{ //gameObjects = (ClsGameObjects)Activator.GetObject(typeof(ClsGameObjects), "tcp://127.0.0.1:8085/GameObjects");
+			//make it iDrawable interface
+			Walls.ForEach(w => w.Draw(g));			
 			
-			foreach (Wall w in Walls)
+			lock (this)
 			{
-				w.Draw(g);
-			}
+				players.ForEach(p=>p.Draw(g));
+			}		
 
 			lock (this)
 			{
-				player1.Jet.Draw(g);
-				player2.Jet.Draw(g);
-			}
-
-			lock (this)
-			{
-				foreach (Bullet b in player1.Bulletlist)
-				{
-					b.Draw(g);
-				}
-				foreach (Bullet b in player2.Bulletlist)
-				{
-					b.Draw(g);
-				}
-			}
-
-			lock (this)
-			{
-				foreach (Astroid ast in Astroids)
-				{
-					//make it iDrawable interface
-					ast.Draw(g);
-				}
+				Astroids.ForEach(a => a.Draw(g));				
 			}
 		}
 
