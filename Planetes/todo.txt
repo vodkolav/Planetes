@@ -1,0 +1,35 @@
+﻿TODO:
+
+change Steer to Press in player class
+implement proper connection <> user management 
+make ship prettier, add wings
+implement harpoon 
+implement proper game loop with timer and without thread.sleep 
+implement pause
+implement  recording games as movies
+create iMovable, iCollidable interfaces
+implement big world outside of screen and camera movement 
+make better map
+implement trajectory prediction 
+slap ship sprites on top of polygons?
+Implement ship collisions
+implement game configuratoion 
+fix issue with walls that can't be serialized for some reason
+implement drawing walls by hand (creating maps)
+make local game great again
+return game with bots 
+allow more than 2 players
+make pretty README.MD
+
+DONE:
+enable shooting
+enable HUD
+remove unnecessary usings
+cleanup obsolete code 
+
+
+BUGS:
+
+nullfeference exception in yoke if you have mouse on game window when game is starting 
+
+FIXED:
