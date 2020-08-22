@@ -172,7 +172,7 @@ namespace PolygonCollision
 
 			// go through each of the vertices, plus the next
 			// vertex in the list
-			int next = 0;
+			int next ;
 			for (int current = 0; current < Vertices.Count; current++)
 			{
 
@@ -200,11 +200,13 @@ namespace PolygonCollision
 		// Check if polygon A is going to collide with polygon B for the given velocity
 		public PolygonCollisionResult Collides(Polygon Other, Vector velocity)
 		{
-			PolygonCollisionResult result = new PolygonCollisionResult();
-			result.Intersect = true;
-			result.WillIntersect = true;
+            PolygonCollisionResult result = new PolygonCollisionResult
+            {
+                Intersect = true,
+                WillIntersect = true
+            };
 
-			int edgeCountA = Vertices.Count;  //because the num of edges and vertices are the same
+            int edgeCountA = Vertices.Count;  //because the num of edges and vertices are the same
 			int edgeCountB = Other.Vertices.Count;
 			float minIntervalDistance = float.PositiveInfinity;
 			Vector translationAxis = new Vector();
@@ -335,7 +337,7 @@ namespace PolygonCollision
 
 			// go through each of the Vertices, plus
 			// the next vertex in the list
-			int next = 0;
+			int next ;
 			for (int current = 0; current < Vertices.Count; current++)
 			{
 
@@ -367,8 +369,6 @@ namespace PolygonCollision
 			// otherwise, after all that, return false
 			return false;
 		}
-
-
 	}
 }
 

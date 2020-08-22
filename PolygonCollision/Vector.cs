@@ -5,11 +5,10 @@ using System.Drawing.Drawing2D;
 
 namespace PolygonCollision
 {
-
 	public class Vector : ICloneable
 	{
-
         public float X { get; set; }
+
 		public float Y { get; set; }
 
 		public Vector(float x, float y) {
@@ -52,13 +51,15 @@ namespace PolygonCollision
 
 		static public Vector FromPointF(PointF p)
 		{
-			return new Vector(p.X, p.Y);
+			return new Vector(p);
 		}
+
 		[JsonIgnore]
 		public Point AsPoint
 		{
 			get { return new Point((int)X, (int)Y); }
 		}
+
 		[JsonIgnore]
 		public float Magnitude {
 			get { return (float)Math.Sqrt(X * X + Y * Y); }
@@ -68,11 +69,13 @@ namespace PolygonCollision
 		{
 			return new Vector((float)Math.Pow(X, pow), (float)Math.Pow(Y, pow));
 		}
+
 		[JsonIgnore]
 		public float Magnitude_X
 		{
 			get { return Math.Abs(X); }
 		}
+
 		[JsonIgnore]
 		public float Magnitude_Y
 		{
@@ -80,10 +83,11 @@ namespace PolygonCollision
 		}
 
 		public void Normalize() {
-			float magnitude = Magnitude;
-			X = X / magnitude;
-			Y = Y / magnitude;
+			float magnitude = Magnitude; //don't delete this line - will result in erroneous results
+			X /= magnitude;
+			Y /= magnitude;
 		}
+
 		/// <summary>
 		/// Rotates the vector inplace 
 		/// </summary>
@@ -110,43 +114,45 @@ namespace PolygonCollision
 			return new Vector(X * cs - Y * sn, X * sn + Y * cs);
 		}
 
-		public Vector GetNormalized() {
+		public Vector GetNormalized()
+		{
 			float magnitude = Magnitude;
-
 			return new Vector(X / magnitude, Y / magnitude);
 		}
 
 		public float Dot(Vector other) {
 			return (this * other).Sum;
 		}
+
 		[JsonIgnore]
 		public float Sum
 		{
 			get { return X + Y; }
 		}
 
-		public float DistanceTo(Vector vector) {
+		public float DistanceTo(Vector vector)
+		{
 			return (float)Math.Sqrt(Math.Pow(vector.X - this.X, 2) + Math.Pow(vector.Y - this.Y, 2));
 		}
 
-		static float angle(Vector v1, Vector v2)
+		static float Angle(Vector v1, Vector v2)
 		{
-			float dot = v1.Dot(v2);      // dot product between [x1, y1] and [x2, y2]
-			float det = v1.X * v2.Y - v1.Y * v2.X;      // determinant
+			// dot product between [x1, y1] and [x2, y2]
+			float dot = v1.Dot(v2);
+			// determinant
+			float det = v1.X * v2.Y - v1.Y * v2.X;      
 			float angle = (float)(Math.Atan2(det, dot) * 57.2958);
-			//Console.WriteLine("X:{0}| Y:{1} | Angle:{2})", v2.x, v2.y, angle);
 			return angle;
 		}
 
-
 		public float Angle()
 		{
-				return angle(this, new Vector(1, 0));
+				return Angle(this, new Vector(1, 0));
 		}
 
 		public float Angle( Vector other)
 		{
-			return angle(this,other);
+			return Angle(this,other);
 		}
 
 
@@ -239,15 +245,13 @@ namespace PolygonCollision
 		/// <param name="l2">point 2 of line </param>
 		/// <returns></returns>
 		public bool Collides(Vector l1, Vector l2)
-		//float x1, float y1, float x2, float y2, float px, float py)
 		{
-
 			// get distance from the point to the two ends of the line
-			float d1 = (this - l1).Magnitude; //dist(px, py, x1, y1);
-			float d2 = (this - l2).Magnitude; //dist(px, py, x2, y2);
+			float d1 = (this - l1).Magnitude; 
+			float d2 = (this - l2).Magnitude; 
 
 			// get the length of the line
-			float lineLen = (l1 - l2).Magnitude; // dist(x1, y1, x2, y2);
+			float lineLen = (l1 - l2).Magnitude; 
 
 			// since floats are so minutely accurate, add
 			// a little buffer zone that will give collision

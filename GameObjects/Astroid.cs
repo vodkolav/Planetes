@@ -52,10 +52,10 @@ namespace GameObjects
 			}
 		}
 
-		public Astroid(int winSize_x, int winSize_y)
+		public Astroid(Size winSize)
 		{
 			Random random = new Random();
-			Body = new Circle(new Vector(random.Next(winSize_x), random.Next(winSize_y)),	random.Next(10) + 5);
+			Body = new Circle(new Vector(random.Next(winSize.Width), random.Next(winSize.Height)),	random.Next(10) + 5);
 			int linearSpeed = random.Next(1, 4) + 1;
 			double Angle = Math.PI/180 * random.Next(360);
 			Vector mult = new Vector((float)Math.Cos(Angle), (float)Math.Sin(Angle));
@@ -93,50 +93,8 @@ namespace GameObjects
 					p.Hit((int)Size);
 			}
 		}
-
-
-		//if (
-		//	//Pos_x + Size > gameObjects.player1.Jet.Pos_x
-		//	//&& Pos_x - Size < gameObjects.player1.Jet.Pos_x + gameObjects.player1.Jet.Width
-		//	//&& Pos_y - Size < gameObjects.player1.Jet.Pos_y + gameObjects.player1.Jet.Height
-		//	//&& Pos_y + Size > gameObjects.player1.Jet.Pos_y)
-		//{
-		//	HasHit = true;
-		//	if (Type == AstType.Ammo)
-		//	{
-		//		gameObjects.player1.Recharge(Size);
-		//	}
-		//	else if (Type == AstType.Health)
-		//	{
-		//		gameObjects.player1.Heal(1);
-		//	}
-		//	else if (gameObjects.player1.Health > 0)
-		//		gameObjects.player1.Health--;
-		//	else
-		//		GameOver.Show(gameObjects.player2);
-		//}
-		//if (Pos_x + Size > gameObjects.player2.Jet.Pos_x - gameObjects.player2.Jet.Width - gameObjects.player2.Jet.Cockpit_size.Width
-		//	&& Pos_x - Size < gameObjects.player2.Jet.Pos_x + gameObjects.player2.Jet.Width
-		//	&& Pos_y - Size < gameObjects.player2.Jet.Pos_y + gameObjects.player2.Jet.Height
-		//	&& Pos_y + Size > gameObjects.player2.Jet.Pos_y)
-		//{
-		//	HasHit = true;
-		//	if (Type == AstType.Ammo)
-		//	{
-		//		gameObjects.player2.Recharge(Size);
-		//	}
-		//	else if (Type == AstType.Health)
-		//	{
-		//		gameObjects.player2.Heal(1);
-		//	}
-		//	else if (gameObjects.player2.Health > 0)
-		//		gameObjects.player2.Health--;
-		//	else
-		//		GameOver.Show(gameObjects.player1);
-		//}
-
-
-		public void Move(ClsGameObjects gameObjects)
+		
+		public void Move(GameState gameObjects)
 		{
 			Collides(gameObjects.player1);
 			Collides(gameObjects.player2);

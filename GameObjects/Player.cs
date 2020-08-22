@@ -25,7 +25,7 @@ namespace GameObjects
 		public Vector Acceleration;
 		public bool KeyShoot { get; set; }
 		[JsonIgnore]
-		public ClsGameObjects GameState { get; set; }		
+		public GameState GameState { get; set; }		
 		[JsonIgnore]
 		public Dictionary<Action, System.Action<HOTAS>> actionMapping { get; set; }
 		public bool isDead { get; private set; }
@@ -37,14 +37,15 @@ namespace GameObjects
 
 		private void MapActions()
 		{
-			actionMapping = new Dictionary<Action, Action<HOTAS>>();
-			actionMapping.Add(Action.Press, Steer);
-			actionMapping.Add(Action.Release, Release);
-			//actionMapping.Add(Action.Aim, Aim);
-		}
+            actionMapping = new Dictionary<Action, Action<HOTAS>>
+            {
+                { Action.Press, Steer },
+                { Action.Release, Release }
+            };
+        }
 
 
-		public Player(string name, int health, int ammo, Point At, Color color, ClsGameObjects game)
+		public Player(string name, int health, int ammo, Point At, Color color, GameState game)
 		{
 			Name = name;
 			Health = health;

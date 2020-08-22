@@ -21,8 +21,7 @@ namespace GameObjects
         {
             lock (_connections)
             {
-                HashSet<string> connections;
-                if (!_connections.TryGetValue(key, out connections))
+                if (!_connections.TryGetValue(key, out HashSet<string> connections))
                 {
                     connections = new HashSet<string>();
                     _connections.Add(key, connections);
@@ -37,12 +36,10 @@ namespace GameObjects
 
         public IEnumerable<string> GetConnections(T key)
         {
-            HashSet<string> connections;
-            if (_connections.TryGetValue(key, out connections))
+            if (_connections.TryGetValue(key, out HashSet<string> connections))
             {
                 return connections;
             }
-
             return Enumerable.Empty<string>();
         }
 
@@ -50,8 +47,7 @@ namespace GameObjects
         {
             lock (_connections)
             {
-                HashSet<string> connections;
-                if (!_connections.TryGetValue(key, out connections))
+                if (!_connections.TryGetValue(key, out HashSet<string> connections))
                 {
                     return;
                 }

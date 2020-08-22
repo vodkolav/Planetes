@@ -748,10 +748,12 @@ namespace IPAddressControlLib
       {
          if ( null != FieldChangedEvent )
          {
-            FieldChangedEventArgs args = new FieldChangedEventArgs();
-            args.FieldIndex = e.FieldIndex;
-            args.Text = e.Text;
-            FieldChangedEvent( this, args );
+                FieldChangedEventArgs args = new FieldChangedEventArgs
+                {
+                    FieldIndex = e.FieldIndex,
+                    Text = e.Text
+                };
+                FieldChangedEvent( this, args );
          }
 
          OnTextChanged( EventArgs.Empty );
@@ -797,36 +799,35 @@ namespace IPAddressControlLib
          OnMouseMove( e );
       }
 
-      private void Parse( String text )
-      {
-         Clear();
+        private void Parse(String text)
+        {
+            Clear();
 
-         if ( null == text )
-         {
-            return;
-         }
-
-         int textIndex = 0;
-
-         int index = 0;
-
-         for ( index = 0; index < _dotControls.Length; ++index )
-         {
-            int findIndex = text.IndexOf( _dotControls[index].Text, textIndex, StringComparison.Ordinal );
-
-            if ( findIndex >= 0 )
+            if (null == text)
             {
-               _fieldControls[index].Text = text.Substring( textIndex, findIndex - textIndex );
-               textIndex = findIndex + _dotControls[index].Text.Length;
+                return;
             }
-            else
-            {
-               break;
-            }
-         }
 
-         _fieldControls[index].Text = text.Substring( textIndex );
-      }
+            int textIndex = 0;
+
+            int index;
+            for (index = 0; index < _dotControls.Length; ++index)
+            {
+                int findIndex = text.IndexOf(_dotControls[index].Text, textIndex, StringComparison.Ordinal);
+
+                if (findIndex >= 0)
+                {
+                    _fieldControls[index].Text = text.Substring(textIndex, findIndex - textIndex);
+                    textIndex = findIndex + _dotControls[index].Text.Length;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            _fieldControls[index].Text = text.Substring(textIndex);
+        }
 
       // a hack to remove an FxCop warning
       private void ResetBackColorChanged()

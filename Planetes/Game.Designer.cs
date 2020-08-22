@@ -146,7 +146,7 @@
             this.joinToolStripMenuItem.Name = "joinToolStripMenuItem";
             this.joinToolStripMenuItem.Size = new System.Drawing.Size(99, 22);
             this.joinToolStripMenuItem.Text = "Join";
-            this.joinToolStripMenuItem.Click += new System.EventHandler(this.joinToolStripMenuItem_Click_1);
+            this.joinToolStripMenuItem.Click += new System.EventHandler(this.JoinToolStripMenuItem_Click_1);
             // 
             // hudRight
             // 

@@ -5,7 +5,7 @@ remove unnecessary usings
 implement proper connection <> user management 
 make ship prettier, add wings
 implement harpoon 
-implement proper game loop with timer and without thread sleep 
+implement proper game loop with timer and without thread.sleep 
 implement pause
 implement  recording games as movies
 create iMovable , iCollidable interfaces
@@ -15,6 +15,9 @@ implement trajectory prediction
 slap ship sprites on top of polygons?
 Implement ship collisions
 implement game cofiguratoion 
+fix issue with walls that can't be serialized for some reason
+implement drawing walls 
+make local game great again
 
 DONE:
 enable shooting

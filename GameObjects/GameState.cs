@@ -10,39 +10,40 @@ using System.Windows.Forms;
 
 namespace GameObjects
 {
-
-	public class ClsGameObjects 
+	public class GameState 
 	{		
 		public static TimeSpan FrameInterval = new TimeSpan(0, 0, 0, 0, 15); // default. If you want to Change it, do it from outside
 
-		//public static ClsGameObjects theObject;
+		public bool GameOn { get; set; } = false;
 
+		public bool Paused { get; set; }
+		
+		public int frameNum;
+		public Size WinSize { get; set; }
+
+		public Player Winner;
+		
 		public List<Player> players { get;set; }
+
 		[JsonIgnore]
 		public Player player1 { get => players[0]; set => players[0] = value; }
+
 		[JsonIgnore]
-		public Player player2 { get => players[1]; set => players[1] = value; }
-		public Size WinSize { get; set; }
-		//public int WinSize_y { get; set; }
-		//[JsonIgnore]
+		public Player player2 { get => players[1]; set => players[1] = value; }	
+
 		public List<Astroid> Astroids { get; set; }
+
 		[JsonIgnore]
 		public List<Wall> Walls { get; set; }
-		public bool Paused { get; set; }
+
 		[JsonIgnore]
 		public ControlPanel control { get; set; }
-		public bool GameOn { get; set; } = false;
-		
-		public Player Winner;
-		public int frameNum;
 
-		public ClsGameObjects(Size winSize)
+		public GameState(Size winSize)
 		{
-
 			WinSize = winSize;
-			//WinSize_y = winSize_y;		
 
-			Walls =  new Map(winSize).LoadDefault2(Brushes.Magenta);
+			Walls =  new Map(winSize).LoadDefault2();
 
 			Point p1Start = new Point(100, winSize.Height / 2);
 			Player player1 = new Player("Player1", 1000, 300, p1Start, Color.Blue, this);
@@ -55,7 +56,6 @@ namespace GameObjects
 
 			players = new List<Player>(){ player1,	player2};
 			Astroids = new List<Astroid>();			
-			//theObject = this;
 			frameNum = 0;
 		}
 
@@ -68,23 +68,6 @@ namespace GameObjects
 				players.ForEach(p => p.Shoot(frameNum));
 			}
 
-			//player1.Shoot(timeElapsed);
-			//player2.Shoot(timeElapsed);
-
-			//pbPl1Ammo.Value = gameObjects.player1.Ammo;
-			//pbPl1Hlth.Value = gameObjects.player1.Health;
-			//pbPl2Ammo.Value = gameObjects.player2.Ammo;
-			//pbPl2Hlth.Value = gameObjects.player2.Health;
-			//if (!localGame && !localPlayerIsHost)
-			//{
-			//	if (gameObjects.ServerClosed)
-			//	{
-			//		disconnect();
-			//		Close();
-			//	}
-			//}
-			//else
-			//{
 			if (GameOn)
 			{				
 				//Move asteroids
@@ -96,7 +79,7 @@ namespace GameObjects
 				//Spawn asteroid after timeout
 				if (frameNum % Astroid.Timeout == 0)
 				{
-					Astroid astroid = new Astroid(WinSize.Width, WinSize.Height);
+					Astroid astroid = new Astroid(WinSize);
 					lock (this)
 					{
 						Astroids.Add(astroid);
@@ -124,7 +107,7 @@ namespace GameObjects
 		}
 
 		public void Draw(Graphics g)
-		{ //gameObjects = (ClsGameObjects)Activator.GetObject(typeof(ClsGameObjects), "tcp://127.0.0.1:8085/GameObjects");
+		{ 
 			//make it iDrawable interface
 			Walls.ForEach(w => w.Draw(g));			
 			

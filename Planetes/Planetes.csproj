@@ -119,6 +119,7 @@
     <Compile Include="Game.Designer.cs">
       <DependentUpon>Game.cs</DependentUpon>
     </Compile>
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HUD.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -176,10 +177,6 @@
     <ProjectReference Include="..\IPAddressControlLib\IPAddressControlLib.csproj">
       <Project>{259C297E-A054-4EB4-88A3-8BB1F37506C5}</Project>
       <Name>IPAddressControlLib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Networking\Networking.csproj">
-      <Project>{50F700F1-1A12-4BE6-9AFB-1D0543A0AF70}</Project>
-      <Name>Networking</Name>
     </ProjectReference>
     <ProjectReference Include="..\PolygonCollision\PolygonCollision.csproj">
       <Project>{4AF31DBD-DEA0-426B-BB0C-545051127F6E}</Project>

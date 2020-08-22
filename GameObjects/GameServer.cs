@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.AspNet.SignalR;
+﻿using Microsoft.AspNet.SignalR;
 using Microsoft.Owin.Hosting;
-using Newtonsoft.Json;
+using System;
+using System.Threading;
 
 namespace GameObjects
 {
@@ -17,14 +12,14 @@ namespace GameObjects
 		public Thread thrdGameLoop;
 		public bool Connected { get; set; } = false;
 		public IHubContext hubContext = GlobalHost.ConnectionManager.GetHubContext<GameHub>();
-		public ClsGameObjects gameObjects;
+		public GameState gameObjects;
 		IDisposable webapp;
 		ManualResetEvent _shutdownEvent = new ManualResetEvent(false);
 		ManualResetEvent _pauseEvent = new ManualResetEvent(true);
 
 		public GameServer()
 		{
-			gameObjects = new ClsGameObjects(GameConfig.WorldSize);
+			gameObjects = new GameState(GameConfig.WorldSize);
 		}
 
 		public static GameServer Instance
@@ -103,7 +98,7 @@ namespace GameObjects
 						Console.WriteLine(e.Message);
 					}
 					tdiff = DateTime.UtcNow - dt;
-					Thread.Sleep((ClsGameObjects.FrameInterval - tdiff).Duration()); //this is bad. There should be timer instead
+					Thread.Sleep((GameState.FrameInterval - tdiff).Duration()); //this is bad. There should be timer instead
 					Console.WriteLine(gameObjects.frameNum + "| " + tdiff.ToString());
 				}
 				else

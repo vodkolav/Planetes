@@ -1,30 +1,28 @@
-﻿using System;
+﻿using Microsoft.AspNet.SignalR.Client;
+using PolygonCollision;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.AspNet.SignalR.Client;
-using PolygonCollision;
 
 namespace GameObjects
 {
-	public enum HOTAS {Up, Down, Left, Right, Shoot, Aim };
+    public enum HOTAS {Up, Down, Left, Right, Shoot, Aim };
 	public class ControlPanel
 	{
 		private Dictionary<Keys, HOTAS> KeyBindings;
 
 		private Dictionary<MouseButtons, HOTAS> MouseBindings;
 
-		private Player _player { get; set; }
+		private Player Player { get; set; }
 
-		IHubProxy _Proxy;
+        private IHubProxy Proxy { get ; set ; }
 
 		public ControlPanel(IHubProxy Proxy, Player player)
 		{
-			_player = player;
-			_Proxy = Proxy;
+			Player = player;
+			this.Proxy = Proxy;
 			KeyBindings = new Dictionary<Keys, HOTAS>();
 			MouseBindings = new Dictionary<MouseButtons, HOTAS>();
 		}
@@ -58,15 +56,12 @@ namespace GameObjects
 			bindKey(Keys.Enter, HOTAS.Shoot);
 		}
 
-
-
-
 		public void Press(Keys key)
 		{
 			if (KeyBindings.Keys.Contains(key))
 			{
-				HOTAS instruction = KeyBindings[key];				
-				_Proxy.Invoke("Command", new object[] { _player.Name, new Tuple<Action, object>(Action.Press, instruction) });
+				HOTAS instruction = KeyBindings[key];
+				Proxy.Invoke("Command", new object[] { Player.Name, new Tuple<Action, object>(Action.Press, instruction) });
 			}
 		}
 		public void Release(Keys key)
@@ -74,7 +69,7 @@ namespace GameObjects
 			if (KeyBindings.Keys.Contains(key))
 			{
 				HOTAS instruction = KeyBindings[key];
-				_Proxy.Invoke("Command", new object[] { _player.Name, new Tuple<Action, object>(Action.Release, instruction) });
+				Proxy.Invoke("Command", new object[] { Player.Name, new Tuple<Action, object>(Action.Release, instruction) });
 			}
 		}
 
@@ -83,7 +78,7 @@ namespace GameObjects
 			if (MouseBindings.Keys.Contains(button))
 			{
 				HOTAS instruction = MouseBindings[button];
-				_Proxy.Invoke("Command", new object[] { _player.Name, new Tuple<Action, object>(Action.Press, instruction) });
+				Proxy.Invoke("Command", new object[] { Player.Name, new Tuple<Action, object>(Action.Press, instruction) });
 			}
 		}
 
@@ -92,7 +87,7 @@ namespace GameObjects
 			if (MouseBindings.Keys.Contains(button))
 			{
 				HOTAS instruction = MouseBindings[button];
-				_Proxy.Invoke("Command", new object[] { _player.Name, new Tuple<Action, object>(Action.Release, instruction) });
+				Proxy.Invoke("Command", new object[] { Player.Name, new Tuple<Action, object>(Action.Release, instruction) });
 			}
 		}
 
@@ -100,14 +95,14 @@ namespace GameObjects
 		{			
 			if (MouseBindings.Keys.Contains(MouseButtons.None))
 			{
-				_Proxy.Invoke("Aim", new object[] { _player.Name, new Tuple<Action, Vector>(Action.Aim, Vector.FromPoint(at))});
+				Proxy.Invoke("Aim", new object[] { Player.Name, new Tuple<Action, Vector>(Action.Aim, Vector.FromPoint(at))});
 
 			}
 		}
 
 		public void StopGame()
 		{
-			_Proxy.Invoke("Over");
+			Proxy.Invoke("Over");
 		}
 	}
 }

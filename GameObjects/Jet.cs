@@ -112,7 +112,7 @@ namespace GameObjects
 			return Hull.Collides(b.Pos) || Cockpit.Collides(b.Pos);
 		}
 		
-		public void Move(ClsGameObjects gO)
+		public void Move(GameState gO)
 		{
 			Speed += Acceleration * Thrust;
 			
@@ -137,7 +137,7 @@ namespace GameObjects
 		
 		public void Bounce(Vector normal)
 		{
-			Speed = Speed - 2 * Speed.Dot(normal) * normal;			
+			Speed -= 2 * Speed.Dot(normal) * normal;			
 		}
 		
 		public void Shoot(Player player, int timeElapsed)

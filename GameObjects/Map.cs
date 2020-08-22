@@ -40,11 +40,13 @@ namespace GameObjects
             Walls.Add(new Wall(new Point(100, 100), new Point(200, 200), wallBrush, wallWidth));
             return Walls;
         }
-        public List<Wall> LoadDefault2(Brush wallBrush, int wallWidth = 20)
+        public List<Wall> LoadDefault2()
         {
-            //wallBrush = Brushes.Magenta;
+            int wallWidth = 20;
+            Brush wallBrush = Brushes.Magenta;
             int ww = wallWidth;
 
+            //create edge of screen walls 
             Point nw = new Point(0, 0);
             Point ne = new Point(winSize.Width, 0 );
             Point se = new Point(winSize.Width, winSize.Height);
@@ -56,6 +58,7 @@ namespace GameObjects
             Walls.Add(new Wall(se,sw, wallBrush));
             Walls.Add(new Wall(sw,nw, wallBrush));
 
+            //create corner diagonal walls 
             int sh = 100; //shift
 
             Point nww = new Point(0, 0 + sh);

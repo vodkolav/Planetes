@@ -1,11 +1,9 @@
-﻿using Newtonsoft.Json;
-using PolygonCollision;
-using System;
+﻿using PolygonCollision;
 using System.Drawing;
 
 namespace GameObjects
 {
-	public class Bullet 
+    public class Bullet 
 	{
 		public Vector Pos { get; set; }
 
@@ -31,11 +29,6 @@ namespace GameObjects
 		public bool Collides(Astroid a)
 		{
 			return (Pos - a.Pos).Magnitude < a.Size ;
-			 
-			//Pos.X < a.Pos.X &&
-			//	Pos.X > a.Pos.X - a.Size * 2 &&
-			//	Pos.Y > a.Pos.Y &&
-			//	Pos.Y < a.Pos.Y + a.Size * 2;
 		}
 
 		public void Draw(Graphics g)
@@ -46,14 +39,12 @@ namespace GameObjects
 			}
 		}
 
-		public void Move(ClsGameObjects gameObjects)
+		public void Move(GameState gameObjects)
 		{
 			//check for collision with wall
 			foreach (Wall w in gameObjects.Walls)
 			{
 				if (w.region.Collides(Pos))
-
-				//Pos.X > gameObjects.WinSize_x)
 				{
 					HasHit = true;
 					return;
@@ -61,12 +52,7 @@ namespace GameObjects
 			}
 
 			//check whether a bullet as way outside of screen - can remove it then
-			if (Pos.Magnitude > new Vector(gameObjects.WinSize).Magnitude * 2)			
-				
-			//Pos.X < gameObjects.Player2.Jet.Pos.X &&			
-			//	Pos.X > gameObjects.Player2.Jet.Pos.X - gameObjects.Player2.Jet.Width &&
-			//	Pos.Y > gameObjects.Player2.Jet.Pos.Y &&
-			//	Pos.Y < gameObjects.Player2.Jet.Pos.Y + gameObjects.Player2.Jet.Height)
+			if (Pos.Magnitude > new Vector(gameObjects.WinSize).Magnitude * 2)	
 			{
 				HasHit = true;
 				return;
@@ -84,9 +70,9 @@ namespace GameObjects
 			Offset(Speed);
 		}
 
-		public void Offset(Vector destination)
+		public void Offset(Vector by)
 		{
-			Pos = Pos + destination;
+			Pos += by;
 		}
 	}
 }
