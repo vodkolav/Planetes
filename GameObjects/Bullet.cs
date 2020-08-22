@@ -9,7 +9,7 @@ namespace GameObjects
 	{
 		public Vector Pos { get; set; }
 
-		public static int linearSpeed = 30;
+		public static int linearSpeed = 20;
 
 		public Vector Speed { get; set; }
 

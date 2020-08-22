@@ -15,9 +15,15 @@ namespace GameObjects
 	{
 		protected List<HOTAS> directions = new List<HOTAS> { HOTAS.Up, HOTAS.Down };
 
-		public int ReactionSlowDown { get; private set; } = 10;
+		int SlowDownCoefficient 
+		{
+			set { ReactionInterval = new TimeSpan(0, 0, 0, 0, (int)ClsGameObjects.FrameInterval.TotalMilliseconds * value); }
+		}
 
-		public Bot(string name, int health, int ammo,Point At, Color color, ClsGameObjects game)
+		public TimeSpan ReactionInterval { get; private set; }			
+		
+
+        public Bot(string name, int health, int ammo,Point At, Color color, ClsGameObjects game)
 			: base(name, health, ammo, At,color, game)
 		{
 			Name = GetType().FullName + " " + color.ToString();
@@ -74,7 +80,7 @@ namespace GameObjects
 			HOTAS direction = directions[0];
 			while (true)
 			{
-				Thread.Sleep(ClsGameObjects.FrameInterval* ReactionSlowDown);
+				Thread.Sleep(ReactionInterval);
 
 				if (count == 5)
 				{
@@ -203,7 +209,7 @@ namespace GameObjects
 				}
 
 				//timeElapsed += ClsGameObjects.FrameRate;
-				Thread.Sleep(ClsGameObjects.FrameInterval * ReactionSlowDown);
+				Thread.Sleep(ReactionInterval);
 			}
 		}
 	}
@@ -322,7 +328,7 @@ namespace GameObjects
 					Release(HOTAS.Shoot);
 				}
 				//timeElapsed += ClsGameObjects.FrameRate;
-				Thread.Sleep(ClsGameObjects.FrameInterval * ReactionSlowDown);
+				Thread.Sleep(ReactionInterval);
 			}
 		}
 	}

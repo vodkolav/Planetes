@@ -45,7 +45,8 @@ namespace Planetes
 
 		public ClsGameObjects gameObjects
 		{
-			get { return localPlayerIsHost ? srv.gameObjects : _gameObjects; }
+			//get { return localPlayerIsHost ? srv.gameObjects : _gameObjects; }
+			get { return  _gameObjects; }
 			set { _gameObjects = value; }
 		}
 
@@ -68,7 +69,7 @@ namespace Planetes
             }
 			if (gametype == "joinNetworkGame")
 			{
-				joinNetworkGame($"http://localhost:8030/");
+				joinNetworkGame($"http://127.0.0.1:8030/", "Player2" );
 			}
 			
 		}
@@ -86,9 +87,9 @@ namespace Planetes
 			g = Graphics.FromImage(bmp);
 			g.SmoothingMode = SmoothingMode.AntiAlias;
 			pbxWorld.Image = bmp;
-			//hudLeft.bind(gameObjects, gameObjects.player1);
-			//hudRight.bind(gameObjects, gameObjects.player2);
-			timerDraw.Interval = ClsGameObjects.FrameInterval;
+			hudLeft.bind(this, gameObjects.player1);
+			hudRight.bind(this, gameObjects.player2);
+			timerDraw.Interval = (int)(ClsGameObjects.FrameInterval.TotalMilliseconds*0.5);
 			timerDraw.Start();
 			//timeElapsed = 0;
 
@@ -129,8 +130,8 @@ namespace Planetes
 		public void DrawGraphics()
 		{			
 			g.FillRectangle(Brushes.Black, new Rectangle(0, 0, pbxWorld.Width, pbxWorld.Height));			
-			//hudLeft.Draw();
-			//hudRight.Draw();
+			hudLeft.Draw();
+			hudRight.Draw();
 			gameObjects.Draw(g);
 			pbxWorld.Image = bmp;
 			if (pbxWorld != null)
@@ -180,9 +181,11 @@ namespace Planetes
 
 		private void Game_FormClosing(object sender, FormClosingEventArgs e)
 		{
+			if (GameOn)
+				Yoke.StopGame();
 			//should implement proper network conections termination 
-			if (localPlayerIsHost)
-				srv.Stop();
+			//if (localPlayerIsHost)
+			//	srv.Stop();
 		}
 
 		#region Local Game
@@ -226,10 +229,10 @@ namespace Planetes
 
 		#region Network Game
 
-		private async void hostNetworkGame()
+		private void hostNetworkGame()
 		{
-			Text = "Planetes Server";
-			string URL = "http://localhost:8030";
+			
+			string URL = "http://127.0.0.1:8030";
 			//using (WebApp.Start<Startup>(url))
 			//{
 			//	Console.WriteLine("Server running on {0}", url);
@@ -243,19 +246,21 @@ namespace Planetes
 
 			srv.Listen(URL);
 			// Server application is also client for player1
-			Conn = new HubConnection(URL);
-			Proxy = Conn.CreateHubProxy("GameHub");
+			joinNetworkGame(URL, "Player1");
+			Text += " (Server)";
+			//Conn = new HubConnection(URL);
+			//Proxy = Conn.CreateHubProxy("GameHub");
 
-			Proxy.On<ClsGameObjects>("UpdateModel", go => gameObjects = go);
-			await Conn.Start();
+			//Proxy.On<ClsGameObjects>("UpdateModel", go => gameObjects = go);
+			//await Conn.Start();
 
 
 
-			Yoke = new ControlPanel(Proxy, gameObjects.player1);
-			Yoke.bindWASD();
-			Yoke.bindMouse(MouseButtons.Left, HOTAS.Shoot);
+			//Yoke = new ControlPanel(Proxy, gameObjects.player1);
+			//Yoke.bindWASD();
+			//Yoke.bindMouse(MouseButtons.Left, HOTAS.Shoot);
 
-			StartGraphics();
+			//StartGraphics();
 		}
 
 
@@ -267,23 +272,26 @@ namespace Planetes
     //          //Console.WriteLine("somethin happened");
     //}    
 
-        private async void joinNetworkGame(string URL)
+        private async void joinNetworkGame(string URL, string asPlayer)
 		{
-			Text = "Planetes Client"; // {IPAdress}
+			
 			Conn = new HubConnection(URL); // $"http://localhost:8030/");
 			Proxy = Conn.CreateHubProxy("GameHub");
 			
 			Proxy.On<ClsGameObjects>("UpdateModel", go => gameObjects = go);
 			await Conn.Start();
-
+			while (gameObjects == null)
+            {
+                Console.WriteLine("Waiting for game data");
+            }
 			localGame = false;
 			localPlayerIsHost = false;
 			//gameObjects.Connected = true;
-			Yoke = new ControlPanel(Proxy, gameObjects.player2);
+			Yoke = new ControlPanel(Proxy, gameObjects.players.Single(p=>p.Name == asPlayer));
 
 			Yoke.bindWASD();
 			Yoke.bindMouse(MouseButtons.Left, HOTAS.Shoot);
-
+			Text = "Planetes: " + asPlayer; // {IPAdress}
 			StartGraphics();
 		}
 
@@ -295,14 +303,14 @@ namespace Planetes
 
 		private void joinToolStripMenuItem_Click_1(object sender, EventArgs e)
 		{
-			VerbindungsDialog vd = new VerbindungsDialog();
+			IpConnectionDialog vd = new IpConnectionDialog();
 			if (vd.ShowDialog() == DialogResult.OK)
 				try
 				{
-					if (vd.Controls[3].Text == "...")
-						joinNetworkGame("127.0.0.1");
+					if (vd.IP == "...")
+						joinNetworkGame($"http://127.0.0.1:8030/", "Player2");
 					else
-						joinNetworkGame(vd.Controls[3].Text);
+						joinNetworkGame(vd.URL, "Player2");
 				}
 				catch (Exception ex)
 				{

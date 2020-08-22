@@ -49,30 +49,11 @@ namespace GameObjects
 		}
 
 
-		public void Over()
+		public void Stop(string message = "Game aborted")
 		{
 			// Signal the shutdown event
 			_shutdownEvent.Set();
-			Console.WriteLine("Game Over");
-
-			gameObjects.GameOn = false;
-			//if (thrdGameLoop != null)
-			//	thrdGameLoop.Abort();
-			webapp.Dispose();
-
-			// Make sure to resume any paused threads
-			_pauseEvent.Set();
-
-			// Wait for the thread to exit
-			thrdGameLoop.Join();
-		}
-
-
-		public void Stop()
-		{
-			// Signal the shutdown event
-			_shutdownEvent.Set();
-			Console.WriteLine("Game Aborted");
+			Console.WriteLine(message);
 
 			gameObjects.GameOn = false;
 			//if (thrdGameLoop != null)
@@ -100,32 +81,36 @@ namespace GameObjects
 
 		private async  void GameLoop()
 		{
+			DateTime dt;// = DateTime.UtcNow;
+			TimeSpan tdiff;
 			while (gameObjects.GameOn)
 			{
 				_pauseEvent.WaitOne(Timeout.Infinite);
 
 				if (_shutdownEvent.WaitOne(0))
 					break;
-
-				Thread.Sleep(ClsGameObjects.FrameInterval); //this is bad. There should be timer instead
+				
+				dt = DateTime.UtcNow;				
 				if (gameObjects.Frame())
 				{
 					try
 					{
-						string gobj = JsonConvert.SerializeObject(gameObjects);
+						//string gobj = JsonConvert.SerializeObject(gameObjects); only for debugging - to check what got serialized
 						await hubContext.Clients.All.UpdateModel(gameObjects);
 					}
 					catch (Exception e)
 					{
 						Console.WriteLine(e.Message);
 					}
-
-					Console.WriteLine(gameObjects.timeElapsed);
+					tdiff = DateTime.UtcNow - dt;
+					Thread.Sleep((ClsGameObjects.FrameInterval - tdiff).Duration()); //this is bad. There should be timer instead
+					Console.WriteLine(gameObjects.frameNum + "| " + tdiff.ToString());
 				}
 				else
                 {
-					Over();
+					Stop();
                 }
+				
 			}
 		}
 

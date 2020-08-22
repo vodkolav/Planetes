@@ -15,7 +15,7 @@ namespace GameObjects
 		public Polygon region { get; set; }
 
 
-		public Wall(Brush color, Point location, Size size)
+		public Wall(Point location, Size size, Brush color)
 		{
 			//Rectangle rectangle = new Rectangle(location, size);
 			//region = new Region(rectangle);
@@ -33,27 +33,30 @@ namespace GameObjects
 			Color = color;
 		}
 
-		public Wall(Brush color, Point from, Point to, int width = 5)
+		public Wall(Point from, Point to, Brush color, int width = 20)
 		{
 			region = Construct(from, to, width);
 
 			Color = color;
 		}
 
-		private Polygon Construct(Point from, Point to, int width)
+		private Polygon Construct(Point from, Point to, int w)
 		{
-			Vector A = new Vector(from);
-			Vector B = new Vector(to);
+			Vector F = new Vector(from);
+			Vector T = new Vector(to);
 
-			double alp = B.Angle(A);
+			float alp = (T - F).Angle(new Vector(1,0));
 
-			Vector shift = width / 2 * new Vector((float)(Math.Cos(Math.PI / 2.0 - alp)), (float)(-Math.Sin(Math.PI / 2.0 - alp)));
+			Vector UP = new Vector(0, -w / 2).Rotated(-alp);
+			Vector DN = new Vector(0, w / 2).Rotated(-alp);
+
+			//Vector shift = width / 2 * new Vector((float)(Math.Cos(Math.PI / 2.0 - alp)), (float)(-Math.Sin(Math.PI / 2.0 - alp)));
 			Polygon p = new Polygon();
 
-			p.AddVertex(A + shift);
-			p.AddVertex(B + shift);
-			p.AddVertex(B - shift);
-			p.AddVertex(A - shift);
+			p.AddVertex(F + UP);
+			p.AddVertex(T + UP);
+			p.AddVertex(T + DN);
+			p.AddVertex(F + DN);
 			return p;
 		}
 

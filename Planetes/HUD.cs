@@ -14,38 +14,39 @@ namespace Planetes
 {
 	public partial class HUD : UserControl
 	{
-		ClsGameObjects GO;
-		Player player;
+		Game GAME;
+		string player;
 
 		public HUD()
 		{			
 			InitializeComponent();
 		}
-		public void bind(ClsGameObjects gO, Player p)
+		public void bind(Game game, Player p)
 		{
-			GO = gO;
-			player = p;
-			pbAmmo.Maximum = player.MaxAmmo;
-			pbHlth.Maximum = player.MaxHealth;
+			GAME = game;
+			player = p.Name;
+			pbAmmo.Maximum = p.MaxAmmo;
+			pbHlth.Maximum = p.MaxHealth;
 			Visible = true;
-			BackColor = player.Jet.Color;
+			BackColor = p.Jet.Color;
 		}
 
 		public void Draw()
 		{
-			lock (GO)
+			Player playerstate = GAME.gameObjects.players.Single(p => p.Name == player);
+			lock (GAME.gameObjects)
 			{
-				lblSpeedX.Text = ((int)player.Jet.Speed.X).ToString();
-				lblSpeedY.Text = ((int)player.Jet.Speed.Y).ToString();
+				lblSpeedX.Text = ((int)playerstate.Jet.Speed.X).ToString();
+				lblSpeedY.Text = ((int)playerstate.Jet.Speed.Y).ToString();
 
-				Vector acc = (Vector)player.Jet.Acceleration.Clone();
+				Vector acc = (Vector)playerstate.Jet.Acceleration.Clone();
 				lblAccX.Text = acc.X.ToString();
 				lblAccY.Text = acc.Y.ToString();
 
-				pbHlth.Value = player.Health;
-				lblHealth.Text = "Health: " + player.Health;
-				pbAmmo.Value = player.Ammo;
-				lblAmmo.Text = "Ammo: " + player.Ammo;
+				pbHlth.Value = playerstate.Health;
+				lblHealth.Text = "Health: " + playerstate.Health;
+				pbAmmo.Value = playerstate.Ammo;
+				lblAmmo.Text = "Ammo: " + playerstate.Ammo;
 			}
 		}
 	}

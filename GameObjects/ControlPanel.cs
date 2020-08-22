@@ -104,5 +104,10 @@ namespace GameObjects
 
 			}
 		}
+
+		public void StopGame()
+		{
+			_Proxy.Invoke("Over");
+		}
 	}
 }

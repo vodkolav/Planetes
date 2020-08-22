@@ -22,7 +22,7 @@ namespace GameObjects
 
 		public void TossType(Random random)
 		{
-			switch (random.Next(5))
+			switch (random.Next(10))
 			{
 				case (1):
 					Type = AstType.Ammo;
@@ -56,17 +56,12 @@ namespace GameObjects
 		{
 			Random random = new Random();
 			Body = new Circle(new Vector(random.Next(winSize_x), random.Next(winSize_y)),	random.Next(10) + 5);
-			int linearSpeed = random.Next(1, 5) + 1;
+			int linearSpeed = random.Next(1, 4) + 1;
 			double Angle = Math.PI/180 * random.Next(360);
 			Vector mult = new Vector((float)Math.Cos(Angle), (float)Math.Sin(Angle));
 			Speed = mult * linearSpeed;
 			TossType(random);
 			HasHit = false;
-		}
-
-		public void SayHello(Graphics g)
-		{
-			Console.WriteLine("hello");
 		}
 
 		public void Draw(Graphics g)

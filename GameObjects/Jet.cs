@@ -71,7 +71,7 @@ namespace GameObjects
 			//Pos_x = start.X;
 			//Pos_y = start.Y;
 			Color = color;
-			Thrust = 0.5f;
+			Thrust = 0.05f;
 			Cooldown = 3;
 		}
 		

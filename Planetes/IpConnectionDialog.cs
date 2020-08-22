@@ -9,10 +9,12 @@ using System.Windows.Forms;
 
 namespace Planetes
 {
-    public partial class VerbindungsDialog : Form
+    public partial class IpConnectionDialog : Form
     {
-        public VerbindungsDialog()
+        public IpConnectionDialog(string ip = "127.0.0.1", string port = "8030")
         {
+            ipAddressControl1.Text = ip;
+            tbxport.Text = port;
             InitializeComponent();
         }
 
@@ -26,7 +28,15 @@ namespace Planetes
             DialogResult = DialogResult.OK;
         }
 
+        public string IP
+        { get { return ipAddressControl1.Text; } }
 
-
+        public string URL
+        {
+            get
+            {
+                return "http://" + ipAddressControl1.Text +":" +  tbxport.Text;
+            }
+        }
     }
 }

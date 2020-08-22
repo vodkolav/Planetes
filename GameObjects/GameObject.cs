@@ -12,8 +12,8 @@ namespace GameObjects
 {
 
 	public class ClsGameObjects 
-	{
-		public static int FrameInterval = 30; // default. If you want to Change it, do it from outside
+	{		
+		public static TimeSpan FrameInterval = new TimeSpan(0, 0, 0, 0, 15); // default. If you want to Change it, do it from outside
 
 		//public static ClsGameObjects theObject;
 
@@ -34,26 +34,15 @@ namespace GameObjects
 		public bool GameOn { get; set; } = false;
 		
 		public Player Winner;
-		public int timeElapsed;
+		public int frameNum;
 
 		public ClsGameObjects(Size winSize)
 		{
 
 			WinSize = winSize;
-			//WinSize_y = winSize_y;
+			//WinSize_y = winSize_y;		
 
-			Walls = new List<Wall>();
-			Brush wallBrush = Brushes.Magenta;
-			int ww = 20; //wallwidth
-
-			Walls.Add(new Wall(wallBrush, new Point(0, 0), new Point(winSize.Width, 0)));
-			Walls.Add(new Wall(wallBrush, new Point(0, 0), new Size(ww, winSize.Height)));
-			Walls.Add(new Wall(wallBrush, new Point(0, winSize.Height - ww), new Size(winSize.Width, ww)));
-			Walls.Add(new Wall(wallBrush, new Point(winSize.Width - ww, 0), new Size(ww, winSize.Height)));
-
-			Walls.Add(new Wall(wallBrush, new Point(winSize.Width/2, 100), new Size(ww, 100)));
-
-			Walls.Add(new Wall(wallBrush, new Point(100, 100), new Point(200, 200), ww));
+			Walls =  new Map(winSize).LoadDefault2(Brushes.Magenta);
 
 			Point p1Start = new Point(100, winSize.Height / 2);
 			Player player1 = new Player("Player1", 1000, 300, p1Start, Color.Blue, this);
@@ -67,7 +56,7 @@ namespace GameObjects
 			players = new List<Player>(){ player1,	player2};
 			Astroids = new List<Astroid>();			
 			//theObject = this;
-			timeElapsed = 0;
+			frameNum = 0;
 		}
 
 		public bool Frame()
@@ -76,7 +65,7 @@ namespace GameObjects
 			lock (this)
 			{
 				players.ForEach(p => p.Move());
-				players.ForEach(p => p.Shoot(timeElapsed));
+				players.ForEach(p => p.Shoot(frameNum));
 			}
 
 			//player1.Shoot(timeElapsed);
@@ -105,7 +94,7 @@ namespace GameObjects
 					Astroids.RemoveAll(c => c.HasHit);
 				}
 				//Spawn asteroid after timeout
-				if (timeElapsed % Astroid.Timeout == 0)
+				if (frameNum % Astroid.Timeout == 0)
 				{
 					Astroid astroid = new Astroid(WinSize.Width, WinSize.Height);
 					lock (this)
@@ -119,7 +108,7 @@ namespace GameObjects
 					Over(looser.Enemy);
 				}
 
-				timeElapsed++;
+				frameNum++;
 				return true;
 			}
             else

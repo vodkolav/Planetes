@@ -84,7 +84,11 @@ namespace PolygonCollision
 			X = X / magnitude;
 			Y = Y / magnitude;
 		}
-
+		/// <summary>
+		/// Rotates the vector inplace 
+		/// </summary>
+		/// <param name="angle"></param>
+		/// <param name="at"></param>
 		public void RotateAt(float angle, Vector at)
 		{
 			Matrix myMatrix = new Matrix();
@@ -93,6 +97,17 @@ namespace PolygonCollision
 			PointF[] p = new PointF[] { AsPoint };
 			myMatrix.TransformPoints(p);
 			FromPointF(p[0]);
+		}
+
+		/// <summary>
+		/// returns rotated version of angle 
+		/// </summary>		
+		public Vector Rotated(float angle)
+		{
+			double theta = angle * Math.PI / 180 ;
+			float cs = (float)Math.Cos(theta);
+			float sn = (float)Math.Sin(theta);
+			return new Vector(X * cs - Y * sn, X * sn + Y * cs);
 		}
 
 		public Vector GetNormalized() {

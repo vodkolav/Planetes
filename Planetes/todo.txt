@@ -3,15 +3,22 @@
 change Steer to Press in player class
 remove unnecessary usings
 implement proper connection <> user management 
-enable HUD
 make ship prettier, add wings
 implement harpoon 
 implement proper game loop with timer and without thread sleep 
 implement pause
+implement  recording games as movies
 create iMovable , iCollidable interfaces
+implement big world outside of screen and camera movement 
+make better map
+implement trajectory prediction 
+slap ship sprites on top of polygons?
+Implement ship collisions
+implement game cofiguratoion 
 
 DONE:
 enable shooting
+enable HUD
 
 
 BUGS:

@@ -38,14 +38,12 @@ namespace GameObjects
 			_gameServer.gameObjects.players.Single(p => p.Name == who).Aim(command.Item2);						
 		}
 
-		public async  void Broadcast()
-        {
-			//Context.User.Identity.Name
-            Clients.All.hi();
-            await Clients.All.upd(_gameServer.gameObjects);
-        }
+		public void Over()
+		{
+			_gameServer.Stop();
+		}
 
-        public override Task OnConnected()
+		public override Task OnConnected()
 		{
 			//groundwork for proper connections implementation  
 			//string name = Context.User.Identity.Name;
