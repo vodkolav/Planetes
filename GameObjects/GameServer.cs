@@ -2,6 +2,7 @@
 using Microsoft.Owin.Hosting;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace GameObjects
 {
@@ -117,7 +118,8 @@ namespace GameObjects
 
 			while (true)
 			{
-				//Thread.Sleep(100);
+				//Thread.Sleep(0);
+				Task.Delay(1);
 
 				if (Connected)
 				{

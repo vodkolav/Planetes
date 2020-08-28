@@ -185,32 +185,40 @@ namespace Planetes
 			string URL = "http://127.0.0.1:8030";
 
 			Srv = GameServer.Instance;
-
+		
 			Srv.Listen(URL);
 
 			// Server application is also client for player1.
-			//It will join game only after player to connects and Listen() returns
+			//It will join game only after player2 connects and Listen() returns
+			joinNetworkGame(URL, "Player1");	
 			Text += " (Server)";
-			joinNetworkGame(URL, "Player1");			
 		}  
 
         private async void joinNetworkGame(string URL, string asPlayer)
-		{			
-			Conn = new HubConnection(URL); 
-			Proxy = Conn.CreateHubProxy("GameHub");
-			
-			Proxy.On<GameState>("UpdateModel", go => gameObjects = go);
-			await Conn.Start();
-			while (gameObjects == null)
-            {
-                Console.WriteLine("Waiting for game data");
-            }
-			Yoke = new ControlPanel(Proxy, gameObjects.players.Single(p=>p.Name == asPlayer));
+		{
+			try
+			{				
+				Text = "Planetes: " + asPlayer ;
+				Conn = new HubConnection(URL);
+				Proxy = Conn.CreateHubProxy("GameHub");
 
-			Yoke.bindWASD();
-			Yoke.bindMouse(MouseButtons.Left, HOTAS.Shoot);
-			Text = "Planetes: " + asPlayer; 
-			StartGraphics();
+				Proxy.On<GameState>("UpdateModel", go => gameObjects = go);
+				await Conn.Start();
+				while (gameObjects == null)
+				{
+					Console.WriteLine("Waiting for game data");
+				}
+				Yoke = new ControlPanel(Proxy, gameObjects.players.Single(p => p.Name == asPlayer));
+
+				Yoke.bindWASD();
+				Yoke.bindMouse(MouseButtons.Left, HOTAS.Shoot);
+
+				StartGraphics();
+			}
+			catch (Exception e)
+			{
+                Console.WriteLine(e.Message);
+			}
 		}
 
 	
