@@ -15,13 +15,13 @@ namespace GameObjects
 
 		private Dictionary<MouseButtons, HOTAS> MouseBindings;
 
-		private Player Player { get; set; }
+		private int PlayerID { get; set; }
 
         private IHubProxy Proxy { get ; set ; }
 
-		public ControlPanel(IHubProxy Proxy, Player player)
+		public ControlPanel(IHubProxy Proxy, int playerid)
 		{
-			Player = player;
+			PlayerID = playerid;
 			this.Proxy = Proxy;
 			KeyBindings = new Dictionary<Keys, HOTAS>();
 			MouseBindings = new Dictionary<MouseButtons, HOTAS>();
@@ -61,7 +61,7 @@ namespace GameObjects
 			if (KeyBindings.Keys.Contains(key))
 			{
 				HOTAS instruction = KeyBindings[key];
-				Proxy.Invoke("Command", new object[] { Player.Name, new Tuple<Action, object>(Action.Press, instruction) });
+				Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, object>(Action.Press, instruction) });
 			}
 		}
 		public void Release(Keys key)
@@ -69,7 +69,7 @@ namespace GameObjects
 			if (KeyBindings.Keys.Contains(key))
 			{
 				HOTAS instruction = KeyBindings[key];
-				Proxy.Invoke("Command", new object[] { Player.Name, new Tuple<Action, object>(Action.Release, instruction) });
+				Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, object>(Action.Release, instruction) });
 			}
 		}
 
@@ -78,7 +78,7 @@ namespace GameObjects
 			if (MouseBindings.Keys.Contains(button))
 			{
 				HOTAS instruction = MouseBindings[button];
-				Proxy.Invoke("Command", new object[] { Player.Name, new Tuple<Action, object>(Action.Press, instruction) });
+				Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, object>(Action.Press, instruction) });
 			}
 		}
 
@@ -87,7 +87,7 @@ namespace GameObjects
 			if (MouseBindings.Keys.Contains(button))
 			{
 				HOTAS instruction = MouseBindings[button];
-				Proxy.Invoke("Command", new object[] { Player.Name, new Tuple<Action, object>(Action.Release, instruction) });
+				Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, object>(Action.Release, instruction) });
 			}
 		}
 
@@ -95,7 +95,7 @@ namespace GameObjects
 		{			
 			if (MouseBindings.Keys.Contains(MouseButtons.None))
 			{
-				Proxy.Invoke("Aim", new object[] { Player.Name, new Tuple<Action, Vector>(Action.Aim, Vector.FromPoint(at))});
+				Proxy.Invoke("Aim", new object[] { PlayerID, new Tuple<Action, Vector>(Action.Aim, Vector.FromPoint(at))});
 
 			}
 		}

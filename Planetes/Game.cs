@@ -4,6 +4,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Planetes
@@ -20,15 +21,18 @@ namespace Planetes
 
 		public HubConnection Conn { get; set; }
 
-        private ControlPanel Yoke { get; set; }
+		public int PlayerId { get; set; }
 
-		public GameState gameObjects { get; set; }
+		private ControlPanel Yoke { get; set; }
 
-        private bool GameOn { get { return gameObjects != null && gameObjects.GameOn; } }
+        public GameState gameObjects { get; set; }
+
+ 		public Lobby L { get; set; }       
+		private bool GameOn { get { return gameObjects != null && gameObjects.GameOn; } }
 		
 		delegate void RefreshBitmapDelegate();
 		//delegate void RefreshProgessBarDelegate();
-
+		
 		public Game()
 		{
 			InitializeComponent();
@@ -50,48 +54,32 @@ namespace Planetes
 
 		public void StartLocalGame()
 		{
-			Srv.Start();
-			StartGraphics();
-		}
+            Srv.Start();
+            StartGraphics();
+        }
 
 		public void StartGraphics()
-		{ 
+		{
 			Bmp = new Bitmap(pbxWorld.Width, pbxWorld.Height);
 			G = Graphics.FromImage(Bmp);
 			G.SmoothingMode = SmoothingMode.AntiAlias;
 			pbxWorld.Image = Bmp;
-			hudLeft.bind(this, gameObjects.player1);
-			hudRight.bind(this, gameObjects.player2);
-			timerDraw.Interval = (int)(GameState.FrameInterval.TotalMilliseconds*0.5);
+			hudLeft.bind(this, gameObjects.players[0]);
+			hudRight.bind(this, gameObjects.players[1]);
+			timerDraw.Interval = (int)(GameState.FrameInterval.TotalMilliseconds * 0.5);
 			timerDraw.Start();
-		}		
-		
+		}
 		public void timerDraw_Tick(object sender, EventArgs e)
 		{
 			if (GameOn)
 			{
 				DrawGraphics();
-			}
-			else
-			{
-                timerDraw.Stop();
-                try
-                {
-                    if (gameObjects.Winner != null)
-                    {
-                        MessageBox.Show(this, gameObjects.Winner.Name + " wins!", @"Game Over! ");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
-            }
-		}		
+			}			
+		}
 
 		public void DrawGraphics()
-		{			
-			G.FillRectangle(Brushes.Black, new Rectangle(0, 0, pbxWorld.Width, pbxWorld.Height));			
+		{
+			G.FillRectangle(Brushes.Black, new Rectangle(0, 0, pbxWorld.Width, pbxWorld.Height));
 			hudLeft.Draw();
 			hudRight.Draw();
 			gameObjects.Draw(G);
@@ -100,7 +88,7 @@ namespace Planetes
 				pbxWorld.Invoke(new RefreshBitmapDelegate(pbxWorld.Refresh));
 
 		}
-			
+
 
 		#region Piloting
 		private void Game_KeyDown(object sender, KeyEventArgs e)
@@ -120,9 +108,9 @@ namespace Planetes
 
 		private void pbxWorld_MouseMove(object sender, MouseEventArgs e)
 		{
-			if (GameOn)
-				Yoke.Aim(e.Location);
-		}
+            if (GameOn)
+                Yoke.Aim(e.Location);
+        }
 
 		private void pbxWorld_MouseDown(object sender, MouseEventArgs e)
 		{
@@ -157,23 +145,22 @@ namespace Planetes
 
 		private void humanVsBotToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			Srv = GameServer.Instance;
-			Point p2Start = new Point(gameObjects.WinSize.Width - 100, gameObjects.WinSize.Height / 2);
-			gameObjects.ReplacePlayer2(new Bot4("Bot4", 100, 300, p2Start, Color.Orange, gameObjects));
-			StartLocalGame();
+			throw new NotImplementedException();
+			//Srv = GameServer.Instance;
+			//Point p2Start = new Point(gameObjects.WinSize.Width - 100, gameObjects.WinSize.Height / 2);
+			//gameObjects.ReplacePlayer2(new Bot4("Bot4", 100, 300, p2Start, Color.Orange, gameObjects));
+			//StartLocalGame();
 		}
 
 		private void botVsBotToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			Srv =  GameServer.Instance;
-
-			Point p1Start = new Point(100, gameObjects.WinSize.Height / 2);
-			gameObjects.ReplacePlayer1(new Bot4("Bot41", 200, 300, p1Start, Color.Green, gameObjects));
-
-			Point p2Start = new Point(gameObjects.WinSize.Width - 100, gameObjects.WinSize.Height / 2);
-			gameObjects.ReplacePlayer2(new Bot4("Bot4", 200, 300, p2Start, Color.Orange, gameObjects));
-
-			StartLocalGame();
+			throw new NotImplementedException();
+			//Srv =  GameServer.Instance;
+			//Point p1Start = new Point(100, gameObjects.WinSize.Height / 2);
+			//gameObjects.ReplacePlayer1(new Bot4("Bot41", 200, 300, p1Start, Color.Green, gameObjects));
+			//Point p2Start = new Point(gameObjects.WinSize.Width - 100, gameObjects.WinSize.Height / 2);
+			//gameObjects.ReplacePlayer2(new Bot4("Bot4", 200, 300, p2Start, Color.Orange, gameObjects));
+			//StartLocalGame();
 		}
 
 		#endregion
@@ -185,43 +172,91 @@ namespace Planetes
 			string URL = "http://127.0.0.1:8030";
 
 			Srv = GameServer.Instance;
-		
+					
 			Srv.Listen(URL);
-
+			Text += " (Server)";			
 			// Server application is also client for player1.
-			//It will join game only after player2 connects and Listen() returns
-			joinNetworkGame(URL, "Player1");	
-			Text += " (Server)";
+			joinNetworkGame(URL, "Player1");
+
 		}  
 
-        private async void joinNetworkGame(string URL, string asPlayer)
+	
+
+	private async void joinNetworkGame(string URL, string PlayerName)
 		{
 			try
-			{				
-				Text = "Planetes: " + asPlayer ;
+			{
+				PlayerId = new Random().Next(1_000_000, 9_999_999); //GetHashCode();
+				Text += "Planetes: " + PlayerId;
+				L = new Lobby(Text);
 				Conn = new HubConnection(URL);
 				Proxy = Conn.CreateHubProxy("GameHub");
-
-				Proxy.On<GameState>("UpdateModel", go => gameObjects = go);
+				Proxy.On<GameState>("UpdateModel", updateGameState);
+				Proxy.On<GameState>("UpdateLobby", (go) => UpdateLobby(go));
+				Proxy.On<string>("Notify", Notify);
+				Proxy.On("Start", Start);
 				await Conn.Start();
-				while (gameObjects == null)
+				await Proxy.Invoke<GameState>("JoinLobby", new object[] { PlayerId, PlayerName });
+				
+				if (L.ShowDialog(this) == DialogResult.OK)
 				{
-					Console.WriteLine("Waiting for game data");
+					await Proxy.Invoke("Start");
 				}
-				Yoke = new ControlPanel(Proxy, gameObjects.players.Single(p => p.Name == asPlayer));
-
-				Yoke.bindWASD();
-				Yoke.bindMouse(MouseButtons.Left, HOTAS.Shoot);
-
-				StartGraphics();
 			}
 			catch (Exception e)
 			{
-                Console.WriteLine(e.Message);
+				Console.WriteLine(e.Message);
 			}
 		}
 
-	
+		public void updateGameState(GameState go)
+		{
+			gameObjects = go;
+			Console.WriteLine("frameNum: " + gameObjects.frameNum);// + "| " + tdiff.ToString()
+		}
+
+		public void UpdateLobby(GameState go)
+		{
+			L.UpdateLobby(go);
+		}
+
+		public void Notify(string message)
+		{
+			Action<string> actNotify = new Action<string>(Notify);
+			if (InvokeRequired)
+			{
+				Invoke(actNotify, new object[] { message });
+			}
+			else
+			{
+				MessageBox.Show(message);
+			}
+		}
+
+		private void Start()
+		{
+			if (InvokeRequired)
+			{
+				Invoke(new System.Action(Start));
+			}
+			else
+			{
+				try
+				{
+					Yoke = new ControlPanel(Proxy, PlayerId);
+					Yoke.bindWASD();
+					Yoke.bindMouse(MouseButtons.Left, HOTAS.Shoot);				
+					StartGraphics();
+					L.Close();
+				}
+				catch (Exception e)
+				{
+					Console.WriteLine(e.Message);
+				}
+			}
+		}
+
+		
 		private void hostToolStripMenuItem_Click_1(object sender, EventArgs e)
 		{
 			hostNetworkGame();

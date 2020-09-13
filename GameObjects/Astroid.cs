@@ -96,9 +96,8 @@ namespace GameObjects
 		
 		public void Move(GameState gameObjects)
 		{
-			Collides(gameObjects.player1);
-			Collides(gameObjects.player2);
-
+			gameObjects.players.ForEach(Collides);
+			
 			//Asteroid is out of screen
 			if (Pos.X + Size > gameObjects.WinSize.Width || Pos.X < 0 || Pos.Y > gameObjects.WinSize.Height || Pos.Y < 0)
 			{

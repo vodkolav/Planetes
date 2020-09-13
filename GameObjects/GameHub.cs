@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
@@ -9,11 +7,9 @@ using PolygonCollision;
 
 namespace GameObjects
 {
-	[HubName("GameHub")]
+    [HubName("GameHub")]
 	public class GameHub : Hub
-	{	
-		//groundwork for proper connections and users implementation 
-		//private readonly static ConnectionMapping<string> _connections = new ConnectionMapping<string>();
+	{				
 		GameServer _gameServer;
 
 		public GameHub(GameServer srv)
@@ -21,21 +17,20 @@ namespace GameObjects
 			_gameServer = srv;
 		}
 
-		public void Command(string who, Tuple<Action, HOTAS> command)
+	public void Command(int who, Tuple<Action, HOTAS> command)
 		{
-			//string name = Context.User.Identity.Name;
 
-			_gameServer.gameObjects.players.Single(p => p.Name == who).Act(command);
+			_gameServer.gameObjects.players.Single(p => p.ID == who).Act(command);
 
 			//foreach (var connectionId in _connections.GetConnections(who))
 			//{
 			//	Clients.Client(connectionId).addChatMessage(name + ": " + message);
 			//}
-		}
+		}	
 
-		public void Aim(string who, Tuple<Action, Vector> command)
+		public void Aim(int who, Tuple<Action, Vector> command)
 		{
-			_gameServer.gameObjects.players.Single(p => p.Name == who).Aim(command.Item2);						
+			_gameServer.gameObjects.players.Single(p => p.ID == who).Aim(command.Item2);						
 		}
 
 		public void Over()
@@ -43,13 +38,22 @@ namespace GameObjects
 			_gameServer.Stop();
 		}
 
+		public void JoinLobby(int playerID, string PlayerName)
+		{
+			_gameServer.Join(playerID, Context.ConnectionId, PlayerName);
+			Clients.All.UpdateModel(_gameServer.gameObjects);
+		}
+		public void Start()
+		{
+			_gameServer.Start();
+		}
+
 		public override Task OnConnected()
 		{
-			//groundwork for proper connections implementation  
-			//string name = Context.User.Identity.Name;
-			//_connections.Add(name, Context.ConnectionId);
-
-			_gameServer.Connected = true;
+            //groundwork for proper connections implementation
+            //string name = Context.User.Identity.Name;
+            //_connections.Add(name, Context.ConnectionId);
+			           
 			Clients.All.UpdateModel(_gameServer.gameObjects);		
 			return base.OnConnected();
 

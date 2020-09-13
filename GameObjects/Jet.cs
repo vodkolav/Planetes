@@ -91,13 +91,18 @@ namespace GameObjects
 
 		public float Dist(Astroid a)
 		{
-			return (Pos - a.Pos).Magnitude;
+			return Pos.Dist(a.Pos);
 		}
 
 		public float Dist(Bullet b)
 		{
-			Vector diff = b.Pos - Pos;
-			return diff.Magnitude;
+			return Pos.Dist(b.Pos);
+		}
+
+		public float Dist(Jet j)
+		{
+			return Pos.Dist(j.Pos);
+
 		}
 
 		// In some cases Asteroids don't collide when they should 

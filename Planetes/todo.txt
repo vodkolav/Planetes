@@ -9,7 +9,7 @@ Features:
 	implement game configuration 
 	implement drawing walls by hand (creating maps)
 	make pretty README.MD
-
+	make polygon collision calculation on GPU?
 Architecture:
 
 	implement proper game loop with timer and without thread.sleep
@@ -27,17 +27,17 @@ Gameplay:
 	implement harpoon 
 	implement ship collisions
 
+	change $safeprojectname$ (appears in task manager) to PLaneetes
 
 DONE:
-enable shooting
-enable HUD
-remove unnecessary usings
-cleanup obsolete code 
+	enable shooting
+	enable HUD
+	remove unnecessary usings
+	cleanup obsolete code 
 
 
 BUGS:
-
-nullreference exception in yoke if you have mouse on game window when game is starting 
-walls can't be serialized for some reason
-
+	nullreference exception in yoke if you have mouse on game window when game is starting 
+	walls can't be serialized for some reason
+	If during debugging I stay in break mode for a bit more time then signalR disconnects with exception
 FIXED:

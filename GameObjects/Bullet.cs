@@ -15,9 +15,11 @@ namespace GameObjects
 
         public Color Color { get; set; }
 
-        public bool HasHit { get; set; }		
+        public bool HasHit { get; set; }
 
-		public Bullet(Vector pos, Vector speed, int size, Color color )
+		public int Power { get; set; } = 1;
+
+        public Bullet(Vector pos, Vector speed, int size, Color color )
 		{
 			Pos = pos;
 			Speed = speed;

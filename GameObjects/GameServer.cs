@@ -11,8 +11,7 @@ namespace GameObjects
 		private readonly static Lazy<GameServer> _instance = new Lazy<GameServer>(() => new GameServer());
 		private Random rnd = new Random();
 		public Thread thrdGameLoop;
-		public bool Connected { get; set; } = false;
-		public IHubContext hubContext = GlobalHost.ConnectionManager.GetHubContext<GameHub>();
+		public IHubContext hubContext;
 		public GameState gameObjects;
 		IDisposable webapp;
 		ManualResetEvent _shutdownEvent = new ManualResetEvent(false);
@@ -20,10 +19,32 @@ namespace GameObjects
 
 		public GameServer()
 		{
-			gameObjects = new GameState(GameConfig.WorldSize);
+			gameObjects = new GameState(GameConfig.WorldSize);			
+			hubContext = GlobalHost.ConnectionManager.GetHubContext<GameHub>();
 		}
 
-		public static GameServer Instance
+		public void Join(int playerID, string ConnectionID, string PlayerName)
+		{			
+			Player newplayer = new Player(playerID, ConnectionID, PlayerName, gameObjects);		    
+			gameObjects.players.Add(newplayer);
+			//string gobj = JsonConvert.SerializeObject(gameObjects); //only for debugging - to check what got serialized
+			hubContext.Clients.All.UpdateLobby(gameObjects);			
+		}
+
+		public void DispatchMessages()
+        {
+			if (gameObjects.messageQ.Count != 0)
+			{
+				foreach (var mes in gameObjects.messageQ.GetConsumingEnumerable())
+				{
+					string to = mes.Item1;
+					string mess = mes.Item2;
+					hubContext.Clients.Client(to).Notify(mess);
+				}
+			}
+		}
+
+        public static GameServer Instance
 		{
 			get
 			{
@@ -32,9 +53,8 @@ namespace GameObjects
 		}
 
 		public void Start()
-		{			
-			
-
+		{
+			InitWarringParties();
 			thrdGameLoop = new Thread(GameLoop)
 			{
 				Name = "GameLoop"
@@ -42,10 +62,25 @@ namespace GameObjects
 			thrdGameLoop.Start();
 			Console.WriteLine("Fight!");
 			gameObjects.GameOn = true;
+			hubContext.Clients.All.Start();
 		}
 
+		/// <summary>
+		/// Define enemies for each player
+		/// </summary>
+        private void InitWarringParties()
+        {			
+			//simplest case: Free-For-All (All-Against-All)
+			foreach (Player p1 in gameObjects.players)
+			{
+				foreach(Player p2 in gameObjects.players)
+                {
+					p1.FeudWith(p2);
+                }				
+			}
+        }
 
-		public void Stop(string message = "Game aborted")
+        public void Stop(string message = "Game aborted")
 		{
 			// Signal the shutdown event
 			_shutdownEvent.Set();
@@ -77,7 +112,7 @@ namespace GameObjects
 
 		private async  void GameLoop()
 		{
-			DateTime dt;// = DateTime.UtcNow;
+			DateTime dt;// maybe replace this with stopwatch
 			TimeSpan tdiff;
 			while (gameObjects.GameOn)
 			{
@@ -93,6 +128,7 @@ namespace GameObjects
 					{
 						//string gobj = JsonConvert.SerializeObject(gameObjects); only for debugging - to check what got serialized
 						await hubContext.Clients.All.UpdateModel(gameObjects);
+						Task.Run( DispatchMessages);
 					}
 					catch (Exception e)
 					{
@@ -100,33 +136,20 @@ namespace GameObjects
 					}
 					tdiff = DateTime.UtcNow - dt;
 					Thread.Sleep((GameState.FrameInterval - tdiff).Duration()); //this is bad. There should be timer instead
-					Console.WriteLine(gameObjects.frameNum + "| " + tdiff.ToString());
+					Console.WriteLine("frameNum: " + gameObjects.frameNum);// + "| " + tdiff.ToString()
 				}
 				else
                 {
 					Stop();
-                }
-				
+                }				
 			}
 		}
-
+		
 		public void Listen(string url)
 		{			
 			webapp = WebApp.Start<Startup>(url);
 
-			Console.WriteLine(string.Format("Server listening at {0}", url));
-
-			while (true)
-			{
-				//Thread.Sleep(0);
-				Task.Delay(1);
-
-				if (Connected)
-				{
-					Start();					
-					return;
-				}
-			}
+			Console.WriteLine(string.Format("Lobby open at {0}", url));
 		}
 	}
 }

@@ -1,17 +1,15 @@
-﻿using PolygonCollision;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading;
-using System.Windows.Forms;
 
 namespace GameObjects
 {
-	/// <summary>
-	/// Most basic bot
-	/// </summary>
-	public class Bot : Player
+    /// <summary>
+    /// Most basic bot
+    /// </summary>
+    public class Bot : Player
 	{
 		protected List<HOTAS> directions = new List<HOTAS> { HOTAS.Up, HOTAS.Down };
 
@@ -23,8 +21,8 @@ namespace GameObjects
 		public TimeSpan ReactionInterval { get; private set; }			
 		
 
-        public Bot(string name, int health, int ammo,Point At, Color color, GameState game)
-			: base(name, health, ammo, At,color, game)
+        public Bot(int id, string connectionid, string name, int health, int ammo,Point At, Color color, GameState game)
+			: base(id, connectionid, name, health, ammo, At,color, game)
 		{
 			Name = GetType().FullName + " " + color.ToString();
             Thread t = new Thread(Play)
@@ -47,8 +45,8 @@ namespace GameObjects
 		/// <param name="winSize_y"></param>
 		/// <param name="game"></param>
 		/// <param name="timer"></param>
-		public Bot(string name, int health, int ammo,Point At, Color color, GameState game, System.Windows.Forms.Timer timer)
-			: base(name, health, ammo,  At,color, game)
+		public Bot(int id, string connectionid, string name, int health, int ammo,Point At, Color color, GameState game, System.Windows.Forms.Timer timer)
+			: base(id , connectionid, name, health, ammo,  At,color, game)
 		{		
 			GameState = game;
 			timer.Tick += new System.EventHandler(Play);
@@ -97,12 +95,12 @@ namespace GameObjects
 	public class Bot4 : Bot
 	{
 		int messagenum = 0;
-		public Bot4(string name, int health, int ammo, Point At, Color color, GameState game)
-			: base(name, health, ammo, At,color,  game)
+		public Bot4(int id, string connectionid, string name, int health, int ammo, Point At, Color color, GameState game)
+			: base(id, connectionid, name, health, ammo, At,color,  game)
 		{ }
 
-		public Bot4(string name, int health, int ammo, Point At, Color color,GameState game, System.Windows.Forms.Timer timer)
-			: base(name, health, ammo, At,color,   game, timer)
+		public Bot4(int id, string connectionid, string name, int health, int ammo, Point At, Color color,GameState game, System.Windows.Forms.Timer timer)
+			: base( id,  connectionid, name, health, ammo, At,color,   game, timer)
 		{ }
 
 		protected override void Play()
@@ -180,15 +178,17 @@ namespace GameObjects
 
 
 				//aiming at opponent tactic
+				
+				Player EnemyClosest = Enemies.Aggregate((curMin, x) => curMin == null || (Jet.Dist(x.Jet)) < Jet.Dist(curMin.Jet) ? x : curMin);
 
-				Aim(Enemy.Jet.Pos);
-				if (Jet.Pos.Y < Enemy.Jet.Pos.Y - 50)
+
+				Aim(EnemyClosest.Jet.Pos);
+				if (Jet.Pos.Y < EnemyClosest.Jet.Pos.Y - 50)
 				{
-					//Jet.Move(Keys.Down);
 					
 					Steer(HOTAS.Down);
 				}
-				else if (Jet.Pos.Y > Enemy.Jet.Pos.Y + 50)
+				else if (Jet.Pos.Y > EnemyClosest.Jet.Pos.Y + 50)
 				{
 					Steer(HOTAS.Up);
 				}
@@ -198,7 +198,7 @@ namespace GameObjects
 				}
 
 				//shoot at opponent tactic
-				if ((Jet.Pos - Enemy.Jet.Pos).Magnitude < 300)
+				if ((Jet.Pos - EnemyClosest.Jet.Pos).Magnitude < 300)
 				{
 					//BotShoot(timeElapsed);
 					Steer(HOTAS.Shoot);
@@ -218,17 +218,17 @@ namespace GameObjects
 	public class Bot3 : Bot
 	{
 
-		public Bot3(string name, int health, int ammo, Point At, Color color, GameState game)
-			: base(name, health, ammo, At,  color, game)
-		{ }
+        public Bot3(int id, string connectionid, string name, int health, int ammo, Point At, Color color, GameState game)
+            : base( id, connectionid, name, health, ammo, At, color, game)
+        { }
 
-		public Bot3(string name, int health, int ammo, Point At, Color color, GameState game, System.Windows.Forms.Timer timer)
-			: base(name, health, ammo,  At, color, game, timer)
-		{ }
+        public Bot3(int id, string connectionid, string name, int health, int ammo, Point At, Color color, GameState game, System.Windows.Forms.Timer timer)
+            : base( id, connectionid, name, health, ammo, At, color, game, timer)
+        { }
 
-		
 
-		protected override void Play()
+
+        protected override void Play()
 		{
 			//int timeElapsed = 0;
 
@@ -296,12 +296,12 @@ namespace GameObjects
 
 
 				//aiming at opponent tactic
-				if (Jet.Pos.Y - GameState.player1.Jet.Pos.Y < -20)
+				if (Jet.Pos.Y - GameState.players[0].Jet.Pos.Y < -20)
 				{
 					//Jet.Move(Keys.Down);
 					Steer(HOTAS.Down);
 				}
-				else if (Jet.Pos.Y - GameState.player1.Jet.Pos.Y > 20)
+				else if (Jet.Pos.Y - GameState.players[0].Jet.Pos.Y > 20)
 				{
 					Steer(HOTAS.Up);
 				}
@@ -312,7 +312,7 @@ namespace GameObjects
 				}
 
 				//shoot at opponent tactic
-				if (Math.Abs(Jet.Pos.Y - GameState.player1.Jet.Pos.Y) < 20)
+				if (Math.Abs(Jet.Pos.Y - GameState.players[0].Jet.Pos.Y) < 20)
 				{
 					//BotShoot(timeElapsed);
 					Steer(HOTAS.Shoot);
@@ -330,8 +330,8 @@ namespace GameObjects
 	public class Bot2 : Bot
 	{
 
-		public Bot2(string name, int health, int ammo, Point At, Color color, ref GameState game)
-			: base(name, health, ammo, At, color, game)
+		public Bot2(int id, string connectionid, string name, int health, int ammo, Point At, Color color, ref GameState game)
+			: base( id,  connectionid, name, health, ammo, At, color, game)
 		{ }
 
 
@@ -343,7 +343,7 @@ namespace GameObjects
 			{
 
 				//Console.WriteLine(gamenow.GetHashCode());
-				if (Jet.Pos.Y < GameState.player1.Jet.Pos.Y)
+				if (Jet.Pos.Y < GameState.players[0].Jet.Pos.Y)
 				{
 					Jet.Move(GameState);// (Keys.Down);									
 				}
@@ -352,7 +352,7 @@ namespace GameObjects
 					Jet.Move(GameState);// Keys.Up);					
 				}
 
-				if (Jet.Pos.Y - GameState.player1.Jet.Pos.Y < 50)
+				if (Jet.Pos.Y - GameState.players[0].Jet.Pos.Y < 50)
 				{
 					Jet.Shoot(this, timeElapsed);
 				}
@@ -367,8 +367,8 @@ namespace GameObjects
 
 	public class Bot1 : Bot
 	{
-		public Bot1(string name, int health, int ammo, Point At, Color color, GameState game)
-			: base(name, health, ammo,  At, color, game)
+		public Bot1(int id, string connectionid, string name, int health, int ammo, Point At, Color color, GameState game)
+			: base( id,  connectionid, name, health, ammo,  At, color, game)
 		{ }
 
 

@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿
+using System;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Planetes;
 
@@ -19,8 +17,9 @@ namespace TestClient
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Thread.Sleep(1000);
+            bool autoconnect = false;
 #if DEBUG
-            Application.Run(new Game("joinNetworkGame"));
+            Application.Run( autoconnect ? new Game("joinNetworkGame") : new Game());
 #else
             Application.Run(new Game());
 #endif

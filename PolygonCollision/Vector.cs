@@ -130,9 +130,9 @@ namespace PolygonCollision
 			get { return X + Y; }
 		}
 
-		public float DistanceTo(Vector vector)
+		public float Dist(Vector other)
 		{
-			return (float)Math.Sqrt(Math.Pow(vector.X - this.X, 2) + Math.Pow(vector.Y - this.Y, 2));
+			return (this - other).Magnitude;
 		}
 
 		static float Angle(Vector v1, Vector v2)

@@ -3,15 +3,16 @@ using PolygonCollision;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Windows.Forms;
 
 namespace GameObjects
 {
-	public enum Action { Press, Release, Aim}
+    public enum Action { Press, Release, Aim}
 
 	public class Player
 	{
-		public string Name { get; set; } 
+        public int ID { get; set; }
+        public string ConnectionID { get; set; }
+        public string Name { get; set; } 
 		public bool Host { get; set; }
 		public int Health { get; set; }
 		public int MaxHealth { get; set; }
@@ -19,16 +20,16 @@ namespace GameObjects
 		public int MaxAmmo { get; set; }
         //public bool Fired { get; set; }
         [JsonIgnore]
-		public Player Enemy { get; set; }
+		public List<Player> Enemies { get; set; }
 		public Jet Jet { get; set; }
 		public List<Bullet> Bullets { get; set; }
 		public Vector Acceleration;
 		public bool KeyShoot { get; set; }
 		[JsonIgnore]
-		public GameState GameState { get; set; }		
+		public GameState GameState { get; set; }		//probably required only for Bots - check later
 		[JsonIgnore]
-		public Dictionary<Action, System.Action<HOTAS>> actionMapping { get; set; }
-		public bool isDead { get; private set; }
+		public Dictionary<Action, Action<HOTAS>> actionMapping { get; set; }
+		public bool isAlive { get; private set; } = true;
 
 		public void Act(Tuple<Action, HOTAS> instruction)
 		{
@@ -44,9 +45,15 @@ namespace GameObjects
             };
         }
 
+        public Player()
+        {
 
-		public Player(string name, int health, int ammo, Point At, Color color, GameState game)
+        }
+
+		public Player(int id, string connectionid, string name, int health, int ammo, Point At, Color color, GameState game)
 		{
+			ID = id;
+			ConnectionID = connectionid;
 			Name = name;
 			Health = health;
 			MaxHealth = health;
@@ -54,12 +61,20 @@ namespace GameObjects
 			MaxAmmo = ammo;
 			Jet = new Jet(At, color);
 			Bullets = new List<Bullet>();
+			Enemies = new List<Player>();
 			//Fired = false;
 			GameState = game;
 			Acceleration = new Vector();
 			MapActions();
 		}
       
+		public Player(int id, string connectionid,  string playername, GameState game) : 
+			this(id, connectionid, playername, health: GameConfig.StartingHP,
+				 GameConfig.StartingAmmo, GameConfig.TossPoint, GameConfig.TossColor,  game)
+        {	
+
+		}
+
 		//private void bindCommands()
 		//{
 		//	//commands = new Dictionary<HOTAS, Vector>();
@@ -71,7 +86,23 @@ namespace GameObjects
 
 		public override string ToString()
 		{
-			return "player1";
+			return Name;
+		}
+
+		public void FeudWith(Player enemy)
+		{
+			if (enemy != this)
+			{
+				if (!Enemies.Contains(enemy))
+				{
+					Enemies.Add(enemy);
+				}
+
+				if (!enemy.Enemies.Contains(this))
+				{
+					enemy.Enemies.Add(this);
+				}
+			}
 		}
 
 		public void Recharge(int amount)
@@ -166,13 +197,17 @@ namespace GameObjects
 		{
 			Jet.Move(GameState);
 
-			//check for collision with opponent's Jet
+			//check wheteher we've hit some enemies
 			foreach (Bullet b in Bullets)
-			{
-				if (Enemy.Jet.Collides(b))
+			{				
+				foreach (Player e in Enemies)
 				{
-					b.HasHit = true;
-					Enemy.Hit(1);
+					if (e.Jet.Collides(b))
+					{
+						b.HasHit = true;
+						e.Hit(b.Power);
+						break;
+					}
 				}
 			}
 			Bullets.ForEach(b => b.Move(GameState));
@@ -190,7 +225,8 @@ namespace GameObjects
 			if (Health > points)
 				Health-= points;
 			else
-				isDead=true;
+				isAlive=false;
+			
 		}
 
 		internal void Draw(Graphics g)

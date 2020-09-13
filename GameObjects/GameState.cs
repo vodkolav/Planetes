@@ -1,16 +1,13 @@
 ﻿using Newtonsoft.Json;
-using PolygonCollision;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Threading;
-using System.Windows.Forms;
 
 namespace GameObjects
 {
-	public class GameState 
+    public class GameState 
 	{		
 		public static TimeSpan FrameInterval = new TimeSpan(0, 0, 0, 0, 15); // default. If you want to Change it, do it from outside
 
@@ -22,40 +19,25 @@ namespace GameObjects
 		public Size WinSize { get; set; }
 
 		public Player Winner;
-		
+		[JsonIgnore]
+		public BlockingCollection<Tuple<string, string>> messageQ { get; set; }
+		//the Tuple holds: int ids of players to send message to and string the message
 		public List<Player> players { get;set; }
-
-		[JsonIgnore]
-		public Player player1 { get => players[0]; set => players[0] = value; }
-
-		[JsonIgnore]
-		public Player player2 { get => players[1]; set => players[1] = value; }	
 
 		public List<Astroid> Astroids { get; set; }
 
 		[JsonIgnore]
 		public List<Wall> Walls { get; set; }
 
-		[JsonIgnore]
-		public ControlPanel control { get; set; }
-
 		public GameState(Size winSize)
 		{
 			WinSize = winSize;
 
 			Walls =  new Map(winSize).LoadDefault2();
-
-			Point p1Start = new Point(100, winSize.Height / 2);
-			Player player1 = new Player("Player1", 1000, 300, p1Start, Color.Blue, this);
-
-			Point p2Start = new Point(winSize.Width - 150, winSize.Height / 2);
-			Player player2 = new Player("Player2", 1000, 300, p2Start, Color.Red, this);
-
-			player1.Enemy = player2;
-			player2.Enemy = player1;
-
-			players = new List<Player>(){ player1,	player2};
-			Astroids = new List<Astroid>();			
+			players = new List<Player>();
+			Astroids = new List<Astroid>();
+			messageQ = new BlockingCollection<Tuple<string, string>>();
+			
 			frameNum = 0;
 		}
 
@@ -66,10 +48,16 @@ namespace GameObjects
 			{
 				players.ForEach(p => p.Move());
 				players.ForEach(p => p.Shoot(frameNum));
+				//purge loosers
+				Player looser;
+				if ((looser = players.FirstOrDefault(p => !p.isAlive)) != null)
+				{
+					Over(looser);
+				}
 			}
 
 			if (GameOn)
-			{				
+			{
 				//Move asteroids
 				lock (this)
 				{
@@ -85,12 +73,7 @@ namespace GameObjects
 						Astroids.Add(astroid);
 					}
 				}
-				Player looser;
-				if ((looser = players.FirstOrDefault(p => p.isDead)) != null)
-				{
-					Over(looser.Enemy);
-				}
-
+				
 				frameNum++;
 				return true;
 			}
@@ -100,10 +83,10 @@ namespace GameObjects
             }
         }
 
-		public void Over(Player winner)
+		public void Over(Player loser)
 		{
-			GameOn = false;
-			Winner = winner;
+			messageQ.Add(new Tuple<string, string>(loser.ConnectionID, "YOU DIED"));
+			players.Remove(loser); //when a player is killed - moving mouse along his client makes the game slow - must fix it
 		}
 
 		public void Draw(Graphics g)
@@ -120,22 +103,6 @@ namespace GameObjects
 			{
 				Astroids.ForEach(a => a.Draw(g));				
 			}
-		}
-
-
-		public void ReplacePlayer2(Bot bot)
-		{
-			player2 = bot;
-			player1.Enemy = player2;
-			player2.Enemy = player1;
-			player2.Jet.Aim = new Vector(0, WinSize.Height / 2);
-		}
-		public void ReplacePlayer1(Bot bot)
-		{
-			player1 = bot;
-			player1.Enemy = player2;
-			player2.Enemy = player1;
-			player1.Jet.Aim = new Vector(0, WinSize.Height / 2);
 		}
 	}	
 }
