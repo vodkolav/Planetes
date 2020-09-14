@@ -56,6 +56,13 @@ namespace GameObjects
 			bindKey(Keys.Enter, HOTAS.Shoot);
 		}
 
+		public void unbind()
+        {
+			KeyBindings.Clear();
+			MouseBindings.Clear();
+        }
+
+
 		public void Press(Keys key)
 		{
 			if (KeyBindings.Keys.Contains(key))

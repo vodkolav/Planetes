@@ -7,13 +7,13 @@ using System.Drawing;
 namespace GameObjects
 {
     public enum Action { Press, Release, Aim}
-
+	public enum Notification { DeathNotice, Message }
 	public class Player
 	{
         public int ID { get; set; }
         public string ConnectionID { get; set; }
         public string Name { get; set; } 
-		public bool Host { get; set; }
+		public Color Color { get { return Jet.Color; } }
 		public int Health { get; set; }
 		public int MaxHealth { get; set; }
 		public int Ammo { get; set; }

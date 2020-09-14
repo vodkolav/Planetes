@@ -10,20 +10,8 @@ namespace GameObjects
 	public class Jet
 	{
 		public Vector Pos { get => Hull.Center; }
-	
-		private Vector _speed;
 
-		public Vector Speed
-		{
-			get { return _speed; }
-			private set
-			{
-				if (value.Magnitude_X <= 15 && value.Magnitude_Y <=15)
-				{					
-					_speed = value;
-				}
-			}
-		}
+        public Vector Speed { get; set; }	
 
 		public Vector Acceleration { get; set; }
 
@@ -119,8 +107,13 @@ namespace GameObjects
 		
 		public void Move(GameState gO)
 		{
-			Speed += Acceleration * Thrust;
-			
+			//Physics Police
+			Vector  newSpeed = Speed + Acceleration * Thrust;
+			if (newSpeed.Magnitude_X <= GameConfig.Lightspeed && newSpeed.Magnitude_Y <= GameConfig.Lightspeed)
+			{
+				Speed = newSpeed;
+			}
+						
 			PolygonCollisionResult r;
 			foreach(Wall w in gO.Walls)
 			{

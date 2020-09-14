@@ -2,16 +2,19 @@
 Features:
 	implement proper connection <-> user management and Game Lobby
 	implement more than 2 players	
+	make HUDs for all the players, not just 2
 	implement pause
 	implement game with bots 
 	make local game great again?
 	implement recording games as movies/GIFs
 	implement game configuration 
-	implement drawing walls by hand (creating maps)
+	implement drawing walls by hand (map editor)
 	make pretty README.MD
 	make polygon collision calculation on GPU?
-Architecture:
 
+Architecture:
+	make separate client class to decouple the logic from UI
+	make UI in WPF, beacuse GDI+ is horrible for animation
 	implement proper game loop with timer and without thread.sleep
 	change Steer to Press in player class
 	create iMovable, iCollidable interfaces
@@ -21,13 +24,14 @@ Visual:
 	slap ship sprites on top of polygons?
 	make better maps
 	implement big world outside of screen and camera movement 
+	change $safeprojectname$ (appears in task manager) to Planetes
 
 Gameplay:
 	implement trajectory prediction 
 	implement harpoon 
 	implement ship collisions
 
-	change $safeprojectname$ (appears in task manager) to PLaneetes
+	
 
 DONE:
 	enable shooting

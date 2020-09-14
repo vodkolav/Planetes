@@ -57,10 +57,12 @@ namespace Planetes
             }
         }
 
-        private void btnCancel_Click(object sender, EventArgs e)
+        private async void btnCancel_Click(object sender, EventArgs e)
         {
+            await ((Game)Owner).LeaveLobby();
             Console.WriteLine("oops");
             DialogResult = DialogResult.Ignore;
+            Close();
         }
 
         //purge these later
@@ -72,6 +74,11 @@ namespace Planetes
         private void playerBindingSource_DataSourceChanged(object sender, EventArgs e)
         {
             Console.WriteLine("DataSourceChanged");
+        }
+
+        private void dgvwPlayers_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            //will be needed further so that players will be able to update their name in lobby
         }
     }
 }

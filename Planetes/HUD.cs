@@ -1,5 +1,6 @@
 ﻿using GameObjects;
 using PolygonCollision;
+using System;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -18,6 +19,7 @@ namespace Planetes
 		{
 			GAME = game;
 			playerID = p.ID;
+			lblName.Text = p.Name;
 			pbAmmo.Maximum = p.MaxAmmo;
 			pbHlth.Maximum = p.MaxHealth;
 			Visible = true;
@@ -26,22 +28,28 @@ namespace Planetes
 
 		public void Draw()
 		{
-			Player playerstate = GAME.gameObjects.players.SingleOrDefault(p => p.ID == playerID);
-			if (playerstate != null)
-				lock (GAME.gameObjects)
-				{
-					lblSpeedX.Text = ((int)playerstate.Jet.Speed.X).ToString();
-					lblSpeedY.Text = ((int)playerstate.Jet.Speed.Y).ToString();
+			try
+			{
+				Player playerstate = GAME.gameObjects.players.SingleOrDefault(p => p.ID == playerID);
+				if (playerstate != null)
+					lock (GAME.gameObjects)
+					{
+						lblSpeedX.Text = playerstate.Jet.Speed.X.ToString("N2");
+						lblSpeedY.Text = playerstate.Jet.Speed.Y.ToString("N2");
 
-					Vector acc = (Vector)playerstate.Jet.Acceleration.Clone();
-					lblAccX.Text = acc.X.ToString();
-					lblAccY.Text = acc.Y.ToString();
+						lblAccX.Text = playerstate.Jet.Acceleration.X.ToString("N2");
+						lblAccY.Text = playerstate.Jet.Acceleration.Y.ToString("N2");
 
-					pbHlth.Value = playerstate.Health;
-					lblHealth.Text = "Health: " + playerstate.Health;
-					pbAmmo.Value = playerstate.Ammo;
-					lblAmmo.Text = "Ammo: " + playerstate.Ammo;
-				}
+						pbHlth.Value = playerstate.Health;
+						lblHealth.Text = "Health: " + playerstate.Health;
+						pbAmmo.Value = playerstate.Ammo;
+						lblAmmo.Text = "Ammo: " + playerstate.Ammo;
+					}
+			}
+			catch(Exception e)
+			{
+                Console.WriteLine(e.Message);
+			}
 		}
-	}
+    }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNet.SignalR;
 using Microsoft.Owin.Hosting;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,23 +24,33 @@ namespace GameObjects
 			hubContext = GlobalHost.ConnectionManager.GetHubContext<GameHub>();
 		}
 
-		public void Join(int playerID, string ConnectionID, string PlayerName)
-		{			
+		public void Join(int playerID, string ConnectionID)
+		{
+			string PlayerName = "Player" + gameObjects.players.Count + 1;
 			Player newplayer = new Player(playerID, ConnectionID, PlayerName, gameObjects);		    
 			gameObjects.players.Add(newplayer);
 			//string gobj = JsonConvert.SerializeObject(gameObjects); //only for debugging - to check what got serialized
 			hubContext.Clients.All.UpdateLobby(gameObjects);			
 		}
 
-		public void DispatchMessages()
+        internal void Leave(int playerID)
+        {
+			Player pl = gameObjects.players.Single(p => p.ID == playerID);
+			GameConfig.ReturnColor(pl.Color);
+			gameObjects.players.Remove(pl);
+			hubContext.Clients.All.UpdateLobby(gameObjects);
+		}
+
+        public void DispatchMessages()
         {
 			if (gameObjects.messageQ.Count != 0)
 			{
 				foreach (var mes in gameObjects.messageQ.GetConsumingEnumerable())
 				{
 					string to = mes.Item1;
-					string mess = mes.Item2;
-					hubContext.Clients.Client(to).Notify(mess);
+					Notification type = mes.Item2;
+					string mess = mes.Item3;
+					hubContext.Clients.Client(to).Notify(type, mess);
 				}
 			}
 		}
@@ -128,7 +139,7 @@ namespace GameObjects
 					{
 						//string gobj = JsonConvert.SerializeObject(gameObjects); only for debugging - to check what got serialized
 						await hubContext.Clients.All.UpdateModel(gameObjects);
-						Task.Run( DispatchMessages);
+                        _ = Task.Run(DispatchMessages);
 					}
 					catch (Exception e)
 					{

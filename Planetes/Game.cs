@@ -47,7 +47,7 @@ namespace Planetes
             }
 			if (gametype == "joinNetworkGame")
 			{
-				joinNetworkGame($"http://127.0.0.1:8030/", "Player2" );
+				joinNetworkGame($"http://127.0.0.1:8030/" );
 			}
 			
 		}
@@ -64,12 +64,35 @@ namespace Planetes
 			G = Graphics.FromImage(Bmp);
 			G.SmoothingMode = SmoothingMode.AntiAlias;
 			pbxWorld.Image = Bmp;
-			hudLeft.bind(this, gameObjects.players[0]);
-			hudRight.bind(this, gameObjects.players[1]);
+
+			bindHUDS(gameObjects);
 			timerDraw.Interval = (int)(GameState.FrameInterval.TotalMilliseconds * 0.5);
 			timerDraw.Start();
 		}
-		public void timerDraw_Tick(object sender, EventArgs e)
+
+		public void bindHUDS(GameState gameObjects)
+        {
+			foreach(Player p in gameObjects.players)
+            {
+				if (p.ID == PlayerId)
+				{
+					hudLeft.bind(this, p);
+				}
+				else
+				{
+					HUD newHUD = new HUD();
+					newHUD.bind(this, p);
+					flpOtherPlayers.Controls.Add(newHUD);
+				}
+            }
+        }
+
+        internal async Task LeaveLobby()
+        {
+			await Proxy.Invoke<GameState>("LeaveLobby", new object[] { PlayerId });
+		}
+
+        public void timerDraw_Tick(object sender, EventArgs e)
 		{
 			if (GameOn)
 			{
@@ -81,7 +104,10 @@ namespace Planetes
 		{
 			G.FillRectangle(Brushes.Black, new Rectangle(0, 0, pbxWorld.Width, pbxWorld.Height));
 			hudLeft.Draw();
-			hudRight.Draw();
+			foreach ( Control c in flpOtherPlayers.Controls)
+            {
+				((HUD)c).Draw();
+            }			
 			gameObjects.Draw(G);
 			pbxWorld.Image = Bmp;
 			if (pbxWorld != null)
@@ -176,13 +202,13 @@ namespace Planetes
 			Srv.Listen(URL);
 			Text += " (Server)";			
 			// Server application is also client for player1.
-			joinNetworkGame(URL, "Player1");
+			joinNetworkGame(URL);
 
 		}  
 
 	
 
-	private async void joinNetworkGame(string URL, string PlayerName)
+	private async void joinNetworkGame(string URL)
 		{
 			try
 			{
@@ -193,10 +219,10 @@ namespace Planetes
 				Proxy = Conn.CreateHubProxy("GameHub");
 				Proxy.On<GameState>("UpdateModel", updateGameState);
 				Proxy.On<GameState>("UpdateLobby", (go) => UpdateLobby(go));
-				Proxy.On<string>("Notify", Notify);
+				Proxy.On<Notification, string>("Notify", Notify);
 				Proxy.On("Start", Start);
 				await Conn.Start();
-				await Proxy.Invoke<GameState>("JoinLobby", new object[] { PlayerId, PlayerName });
+				await Proxy.Invoke<GameState>("JoinLobby", new object[] { PlayerId });
 				
 				if (L.ShowDialog(this) == DialogResult.OK)
 				{
@@ -220,18 +246,32 @@ namespace Planetes
 			L.UpdateLobby(go);
 		}
 
-		public void Notify(string message)
+		public void Notify(Notification type,  string message)
 		{
-			Action<string> actNotify = new Action<string>(Notify);
 			if (InvokeRequired)
 			{
-				Invoke(actNotify, new object[] { message });
+				Invoke(new Action<Notification, string>(Notify), new object[] { type, message });
 			}
 			else
 			{
-				MessageBox.Show(message);
+				switch(type)
+                {
+					case Notification.DeathNotice:
+                        {
+							Yoke.unbind();
+							new BillBoard().Show(this);
+							break;
+                        }
+					case Notification.Message:
+						{
+							MessageBox.Show(message);
+							break;
+						}
+				}
+				
 			}
 		}
+
 
 		private void Start()
 		{
@@ -269,9 +309,9 @@ namespace Planetes
 				try
 				{
 					if (vd.IP == "...")
-						joinNetworkGame($"http://127.0.0.1:8030/", "Player2");
+						joinNetworkGame($"http://127.0.0.1:8030/");
 					else
-						joinNetworkGame(vd.URL, "Player2");
+						joinNetworkGame(vd.URL);
 				}
 				catch (Exception ex)
 				{
@@ -289,8 +329,8 @@ namespace Planetes
 		{
 
 		}
-		#endregion
-	}
+        #endregion
+    }
 }
 
 

@@ -41,15 +41,20 @@
             this.NetworkGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.hostToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.joinToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.hudRight = new Planetes.HUD();
-            this.hudLeft = new Planetes.HUD();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.flpOtherPlayers = new System.Windows.Forms.FlowLayoutPanel();
+            this.hudLeft = new Planetes.HUD();
             ((System.ComponentModel.ISupportInitialize)(this.pbxWorld)).BeginInit();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
+            this.splitContainer2.Panel1.SuspendLayout();
+            this.splitContainer2.Panel2.SuspendLayout();
+            this.splitContainer2.SuspendLayout();
             this.SuspendLayout();
             // 
             // pbxWorld
@@ -148,32 +153,11 @@
             this.joinToolStripMenuItem.Text = "Join";
             this.joinToolStripMenuItem.Click += new System.EventHandler(this.JoinToolStripMenuItem_Click);
             // 
-            // hudRight
-            // 
-            this.hudRight.Dock = System.Windows.Forms.DockStyle.Right;
-            this.hudRight.Location = new System.Drawing.Point(1260, 0);
-            this.hudRight.MaximumSize = new System.Drawing.Size(340, 140);
-            this.hudRight.MinimumSize = new System.Drawing.Size(340, 140);
-            this.hudRight.Name = "hudRight";
-            this.hudRight.Size = new System.Drawing.Size(340, 140);
-            this.hudRight.TabIndex = 7;
-            this.hudRight.Visible = false;
-            // 
-            // hudLeft
-            // 
-            this.hudLeft.Dock = System.Windows.Forms.DockStyle.Left;
-            this.hudLeft.Location = new System.Drawing.Point(0, 0);
-            this.hudLeft.MaximumSize = new System.Drawing.Size(340, 140);
-            this.hudLeft.MinimumSize = new System.Drawing.Size(340, 140);
-            this.hudLeft.Name = "hudLeft";
-            this.hudLeft.Size = new System.Drawing.Size(340, 140);
-            this.hudLeft.TabIndex = 6;
-            this.hudLeft.Visible = false;
-            // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
+            this.splitContainer1.IsSplitterFixed = true;
             this.splitContainer1.Location = new System.Drawing.Point(0, 25);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
@@ -184,11 +168,46 @@
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.hudLeft);
-            this.splitContainer1.Panel2.Controls.Add(this.hudRight);
+            this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
             this.splitContainer1.Size = new System.Drawing.Size(1600, 936);
             this.splitContainer1.SplitterDistance = 776;
             this.splitContainer1.TabIndex = 8;
+            // 
+            // splitContainer2
+            // 
+            this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
+            this.splitContainer2.IsSplitterFixed = true;
+            this.splitContainer2.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer2.Name = "splitContainer2";
+            // 
+            // splitContainer2.Panel1
+            // 
+            this.splitContainer2.Panel1.Controls.Add(this.hudLeft);
+            // 
+            // splitContainer2.Panel2
+            // 
+            this.splitContainer2.Panel2.Controls.Add(this.flpOtherPlayers);
+            this.splitContainer2.Size = new System.Drawing.Size(1600, 156);
+            this.splitContainer2.SplitterDistance = 221;
+            this.splitContainer2.TabIndex = 8;
+            // 
+            // flpOtherPlayers
+            // 
+            this.flpOtherPlayers.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flpOtherPlayers.Location = new System.Drawing.Point(0, 0);
+            this.flpOtherPlayers.Name = "flpOtherPlayers";
+            this.flpOtherPlayers.Size = new System.Drawing.Size(1375, 156);
+            this.flpOtherPlayers.TabIndex = 0;
+            // 
+            // hudLeft
+            // 
+            this.hudLeft.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.hudLeft.Location = new System.Drawing.Point(0, 0);
+            this.hudLeft.Name = "hudLeft";
+            this.hudLeft.Size = new System.Drawing.Size(221, 156);
+            this.hudLeft.TabIndex = 6;
+            this.hudLeft.Visible = false;
             // 
             // Game
             // 
@@ -215,6 +234,10 @@
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
+            this.splitContainer2.Panel1.ResumeLayout(false);
+            this.splitContainer2.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
+            this.splitContainer2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -230,13 +253,14 @@
         private System.Windows.Forms.ToolStripMenuItem NetworkGameToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem hostToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem joinToolStripMenuItem;
-	private System.Windows.Forms.ToolStripMenuItem humanVsHumanToolStripMenuItem;
-	private System.Windows.Forms.ToolStripMenuItem humanVsBotToolStripMenuItem;
+	    private System.Windows.Forms.ToolStripMenuItem humanVsHumanToolStripMenuItem;
+	    private System.Windows.Forms.ToolStripMenuItem humanVsBotToolStripMenuItem;
 		private HUD hudLeft;
-		private HUD hudRight;
 		private System.Windows.Forms.ToolStripMenuItem botVsBotToolStripMenuItem;
 		private System.Windows.Forms.SplitContainer splitContainer1;
-	}
+        private System.Windows.Forms.SplitContainer splitContainer2;
+        private System.Windows.Forms.FlowLayoutPanel flpOtherPlayers;
+    }
 }
 
 

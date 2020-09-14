@@ -38,11 +38,19 @@ namespace GameObjects
 			_gameServer.Stop();
 		}
 
-		public void JoinLobby(int playerID, string PlayerName)
+		public void JoinLobby(int playerID)
 		{
-			_gameServer.Join(playerID, Context.ConnectionId, PlayerName);
+			_gameServer.Join(playerID, Context.ConnectionId);
 			Clients.All.UpdateModel(_gameServer.gameObjects);
 		}
+
+		
+		public void LeaveLobby(int playerID)
+		{
+			_gameServer.Leave(playerID);
+			//Clients.All.UpdateModel(_gameServer.gameObjects);
+		}
+
 		public void Start()
 		{
 			_gameServer.Start();

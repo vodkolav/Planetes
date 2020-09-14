@@ -20,7 +20,7 @@ namespace GameObjects
 
 		public Player Winner;
 		[JsonIgnore]
-		public BlockingCollection<Tuple<string, string>> messageQ { get; set; }
+		public BlockingCollection<Tuple<string, Notification, string>> messageQ { get; set; }
 		//the Tuple holds: int ids of players to send message to and string the message
 		public List<Player> players { get;set; }
 
@@ -36,7 +36,7 @@ namespace GameObjects
 			Walls =  new Map(winSize).LoadDefault2();
 			players = new List<Player>();
 			Astroids = new List<Astroid>();
-			messageQ = new BlockingCollection<Tuple<string, string>>();
+			messageQ = new BlockingCollection<Tuple<string, Notification, string>>();
 			
 			frameNum = 0;
 		}
@@ -82,10 +82,10 @@ namespace GameObjects
 				return false;
             }
         }
-
+		
 		public void Over(Player loser)
 		{
-			messageQ.Add(new Tuple<string, string>(loser.ConnectionID, "YOU DIED"));
+			messageQ.Add(new Tuple<string, Notification, string>(loser.ConnectionID, Notification.DeathNotice, "YOU DIED"));
 			players.Remove(loser); //when a player is killed - moving mouse along his client makes the game slow - must fix it
 		}
 
