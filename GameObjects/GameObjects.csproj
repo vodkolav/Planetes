@@ -60,7 +60,9 @@
     <Compile Include="Bullet.cs" />
     <Compile Include="ConnectionMapping.cs" />
     <Compile Include="ControlPanel.cs" />
+    <Compile Include="GameClient.cs" />
     <Compile Include="GameConfig.cs" />
+    <Compile Include="IUI.cs" />
     <Compile Include="GameHub.cs" />
     <Compile Include="GameState.cs" />
     <Compile Include="GameServer.cs" />

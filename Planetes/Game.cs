@@ -1,172 +1,163 @@
 ﻿using GameObjects;
-using Microsoft.AspNet.SignalR.Client;
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Planetes
 {
-    public partial class Game : Form
-	{ 
-		public Bitmap Bmp { get; set; }
+	public partial class Game : Form, IUI
+	{
+		public GameClient C { get; set; }
+
+		public Bitmap B { get; set; }
 
 		public Graphics G { get; set; }
 
-		public GameServer Srv { get; set; }
+		public Ilobby L { get; set; }
 
-		public IHubProxy Proxy { get; set; }
-
-		public HubConnection Conn { get; set; }
-
-		public int PlayerId { get; set; }
-
-		private ControlPanel Yoke { get; set; }
-
-        public GameState gameObjects { get; set; }
-
- 		public Lobby L { get; set; }       
-		private bool GameOn { get { return gameObjects != null && gameObjects.GameOn; } }
-		
-		delegate void RefreshBitmapDelegate();
-		//delegate void RefreshProgessBarDelegate();
-		
 		public Game()
 		{
 			InitializeComponent();
-			SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.FixedHeight | ControlStyles.FixedWidth | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
-		}
-		
-		public Game(string gametype) : this()
-		{			
-			if  (gametype == "hostNetworkGame")
-            {
-				hostNetworkGame();
-            }
-			if (gametype == "joinNetworkGame")
-			{
-				joinNetworkGame($"http://127.0.0.1:8030/" );
-			}
-			
+			SetStyle(ControlStyles.OptimizedDoubleBuffer |
+					 ControlStyles.FixedHeight |
+					 ControlStyles.FixedWidth |
+					 ControlStyles.AllPaintingInWmPaint |
+					 ControlStyles.UserPaint, true);
+			C = new GameClient(this);
+			L = new Lobby(this);
 		}
 
-		public void StartLocalGame()
+		public Game(string AutoStartgametype) : this()
 		{
-            Srv.Start();
-            StartGraphics();
-        }
+			Show();
+			if (AutoStartgametype == "hostNetworkGame")
+			{
+				Text += " (Server)";
+				_ = hostNetworkGame();
+			}
+			if (AutoStartgametype == "joinNetworkGame")
+			{
+				Text += " (Client)";
+				C.joinNetworkGame($"http://127.0.0.1:8030/");
+			}
+			Text += "Planetes: " + C.PlayerId;
+		}
+
 
 		public void StartGraphics()
 		{
-			Bmp = new Bitmap(pbxWorld.Width, pbxWorld.Height);
-			G = Graphics.FromImage(Bmp);
+			B = new Bitmap(pbxWorld.Width, pbxWorld.Height);
+			G = Graphics.FromImage(B);
 			G.SmoothingMode = SmoothingMode.AntiAlias;
-			pbxWorld.Image = Bmp;
+			pbxWorld.Image = B;
 
-			bindHUDS(gameObjects);
-			timerDraw.Interval = (int)(GameState.FrameInterval.TotalMilliseconds * 0.5);
+			bindHUDS(C.gameObjects);
+			timerDraw.Interval = (int)(GameState.FrameInterval.TotalMilliseconds * 0.25);
 			timerDraw.Start();
 		}
 
 		public void bindHUDS(GameState gameObjects)
-        {
-			foreach(Player p in gameObjects.players)
-            {
-				if (p.ID == PlayerId)
+		{
+			foreach (Player p in gameObjects.players)
+			{
+				if (p.ID == C.PlayerId)
 				{
-					hudLeft.bind(this, p);
+					hudLeft.bind(C, p);
 				}
 				else
 				{
 					HUD newHUD = new HUD();
-					newHUD.bind(this, p);
+					newHUD.bind(C, p);
 					flpOtherPlayers.Controls.Add(newHUD);
 				}
-            }
-        }
-
-        internal async Task LeaveLobby()
-        {
-			await Proxy.Invoke<GameState>("LeaveLobby", new object[] { PlayerId });
+			}
 		}
 
-        public void timerDraw_Tick(object sender, EventArgs e)
+		public async Task LeaveLobby()
 		{
-			if (GameOn)
+			await C.LeaveLobby();
+		}
+
+		public void timerDraw_Tick(object sender, EventArgs e)
+		{
+			if (C.GameOn)
 			{
 				DrawGraphics();
-			}			
+			}
 		}
 
 		public void DrawGraphics()
 		{
+			//should replace this with buffered image of the map
 			G.FillRectangle(Brushes.Black, new Rectangle(0, 0, pbxWorld.Width, pbxWorld.Height));
 			hudLeft.Draw();
-			foreach ( Control c in flpOtherPlayers.Controls)
-            {
+			foreach (Control c in flpOtherPlayers.Controls)
+			{
 				((HUD)c).Draw();
-            }			
-			gameObjects.Draw(G);
-			pbxWorld.Image = Bmp;
+			}
+			C.gameObjects.Draw(G);
+			pbxWorld.Image = B;
 			if (pbxWorld != null)
-				pbxWorld.Invoke(new RefreshBitmapDelegate(pbxWorld.Refresh));
+				pbxWorld.Invoke(new System.Action(pbxWorld.Refresh));
 
 		}
+
+
 
 
 		#region Piloting
 		private void Game_KeyDown(object sender, KeyEventArgs e)
 		{
-			if (GameOn)
-			{		
-				Yoke.Press(e.KeyData);			
+			if (C.GameOn)
+			{
+				C.Yoke.Press(e.KeyData);
 			}
 		}
 
 		private void Game_KeyUp(object sender, KeyEventArgs e)
 		{
-			if (GameOn)
-				Yoke.Release(e.KeyData);
+			if (C.GameOn)
+				C.Yoke.Release(e.KeyData);
 		}
 
 
 		private void pbxWorld_MouseMove(object sender, MouseEventArgs e)
 		{
-            if (GameOn)
-                Yoke.Aim(e.Location);
-        }
+			if (C.GameOn)
+				C.Yoke.Aim(e.Location);
+		}
 
 		private void pbxWorld_MouseDown(object sender, MouseEventArgs e)
 		{
-			if (GameOn)
+			if (C.GameOn)
 			{
-				Yoke.Press(e.Button);
+				C.Yoke.Press(e.Button);
 			}
 		}
 
 		private void pbxWorld_MouseUp(object sender, MouseEventArgs e)
 		{
-			if (GameOn)
-				Yoke.Release(e.Button);
+			if (C.GameOn)
+				C.Yoke.Release(e.Button);
 		}
-
-		#endregion
 
 		private void Game_FormClosing(object sender, FormClosingEventArgs e)
 		{
-			if (GameOn)
-				Yoke.StopGame();
+			if (C.GameOn)
+				C.Yoke.StopGame();
 			//should implement proper network conections termination 
 		}
+		#endregion
 
 		#region Local Game
 
 		private void humanVsHumanToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			Srv = GameServer.Instance;
-			StartLocalGame();
+			throw new NotImplementedException();
+			//Srv = GameServer.Instance;
+			//StartLocalGame();
 		}
 
 		private void humanVsBotToolStripMenuItem_Click(object sender, EventArgs e)
@@ -193,125 +184,67 @@ namespace Planetes
 
 		#region Network Game
 
-		private void hostNetworkGame()
-		{			
-			string URL = "http://127.0.0.1:8030";
-
-			Srv = GameServer.Instance;
-					
-			Srv.Listen(URL);
-			Text += " (Server)";			
+		public async Task hostNetworkGame()
+		{
+			string URL = C.hostNetworkGame();
 			// Server application is also client for player1.
-			joinNetworkGame(URL);
+			await joinNetworkGame(URL);
 
-		}  
+		}
 
-	
 
-	private async void joinNetworkGame(string URL)
+
+		public async Task joinNetworkGame(string URL)
 		{
-			try
+			C.joinNetworkGame(URL);
+			bool GameStarted = L.OpenLobby_WaitForGuestsAndBegin();
+
+			if (GameStarted)
 			{
-				PlayerId = new Random().Next(1_000_000, 9_999_999); //GetHashCode();
-				Text += "Planetes: " + PlayerId;
-				L = new Lobby(Text);
-				Conn = new HubConnection(URL);
-				Proxy = Conn.CreateHubProxy("GameHub");
-				Proxy.On<GameState>("UpdateModel", updateGameState);
-				Proxy.On<GameState>("UpdateLobby", (go) => UpdateLobby(go));
-				Proxy.On<Notification, string>("Notify", Notify);
-				Proxy.On("Start", Start);
-				await Conn.Start();
-				await Proxy.Invoke<GameState>("JoinLobby", new object[] { PlayerId });
-				
-				if (L.ShowDialog(this) == DialogResult.OK)
-				{
-					await Proxy.Invoke("Start");
-				}
+				await C.StartServer();
 			}
-			catch (Exception e)
+			else
 			{
-				Console.WriteLine(e.Message);
+				C.TerminateServer();
 			}
 		}
 
-		public void updateGameState(GameState go)
+		public void Notify(string message)
 		{
-			gameObjects = go;
-			Console.WriteLine("frameNum: " + gameObjects.frameNum);// + "| " + tdiff.ToString()
+			//should make a separate, non-blocking notification window.
+			MessageBox.Show(message);
 		}
 
-		public void UpdateLobby(GameState go)
+		void IUI.AnnounceDeath()
+		{
+			new BillBoard().Show(this, "Tough luck");
+		}
+
+		void IUI.CloseLobby()
+		{
+			L.Close();
+		}
+
+		void IUI.UpdateLobby(GameState go)
 		{
 			L.UpdateLobby(go);
 		}
 
-		public void Notify(Notification type,  string message)
+		private async void hostToolStripMenuItem_Click_1(object sender, EventArgs e)
 		{
-			if (InvokeRequired)
-			{
-				Invoke(new Action<Notification, string>(Notify), new object[] { type, message });
-			}
-			else
-			{
-				switch(type)
-                {
-					case Notification.DeathNotice:
-                        {
-							Yoke.unbind();
-							new BillBoard().Show(this);
-							break;
-                        }
-					case Notification.Message:
-						{
-							MessageBox.Show(message);
-							break;
-						}
-				}
-				
-			}
+			await hostNetworkGame();
 		}
 
-
-		private void Start()
-		{
-			if (InvokeRequired)
-			{
-				Invoke(new System.Action(Start));
-			}
-			else
-			{
-				try
-				{
-					Yoke = new ControlPanel(Proxy, PlayerId);
-					Yoke.bindWASD();
-					Yoke.bindMouse(MouseButtons.Left, HOTAS.Shoot);				
-					StartGraphics();
-					L.Close();
-				}
-				catch (Exception e)
-				{
-					Console.WriteLine(e.Message);
-				}
-			}
-		}
-
-		
-		private void hostToolStripMenuItem_Click_1(object sender, EventArgs e)
-		{
-			hostNetworkGame();
-		}
-
-		private void JoinToolStripMenuItem_Click(object sender, EventArgs e)
+		private async void JoinToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			IpConnectionDialog vd = new IpConnectionDialog();
 			if (vd.ShowDialog() == DialogResult.OK)
 				try
 				{
 					if (vd.IP == "...")
-						joinNetworkGame($"http://127.0.0.1:8030/");
+						await joinNetworkGame($"http://127.0.0.1:8030/");
 					else
-						joinNetworkGame(vd.URL);
+						await joinNetworkGame(vd.URL);
 				}
 				catch (Exception ex)
 				{
@@ -329,8 +262,9 @@ namespace Planetes
 		{
 
 		}
-        #endregion
-    }
+
+		#endregion
+	}
 }
 
 

@@ -32,9 +32,9 @@ namespace GameObjects
 			KeyBindings.Add(key, action);
 		}
 
-		public void bindMouse(MouseButtons btn, HOTAS action)
+		public void bindMouse()
 		{
-			MouseBindings.Add(btn, action);
+			MouseBindings.Add(MouseButtons.Left, HOTAS.Shoot);
 			MouseBindings.Add(MouseButtons.None, HOTAS.Aim);
 		}
 

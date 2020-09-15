@@ -1,8 +1,5 @@
 ﻿TODO:
 Features:
-	implement proper connection <-> user management and Game Lobby
-	implement more than 2 players	
-	make HUDs for all the players, not just 2
 	implement pause
 	implement game with bots 
 	make local game great again?
@@ -13,7 +10,7 @@ Features:
 	make polygon collision calculation on GPU?
 
 Architecture:
-	make separate client class to decouple the logic from UI
+	Pull out server class from client class
 	make UI in WPF, beacuse GDI+ is horrible for animation
 	implement proper game loop with timer and without thread.sleep
 	change Steer to Press in player class
@@ -30,18 +27,23 @@ Gameplay:
 	implement trajectory prediction 
 	implement harpoon 
 	implement ship collisions
-
 	
+
 
 DONE:
 	enable shooting
 	enable HUD
 	remove unnecessary usings
 	cleanup obsolete code 
-
+	make separate client class to decouple the logic from UI
+	implement proper connection <-> user management and Game Lobby
+	implement more than 2 players	
+	make HUDs for all the players, not just 2
 
 BUGS:
 	nullreference exception in yoke if you have mouse on game window when game is starting 
 	walls can't be serialized for some reason
 	If during debugging I stay in break mode for a bit more time then signalR disconnects with exception
+
 FIXED:
+	:(

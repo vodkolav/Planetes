@@ -5,23 +5,24 @@ using System.Windows.Forms;
 
 namespace Planetes
 {
-    public partial class Lobby : Form
+    public partial class Lobby : Form, Ilobby
     {
         BindingList<Player> players;
-        
+
         public Lobby()
         {
             InitializeComponent();
             DialogResult = DialogResult.Ignore;
         }
 
-        public Lobby(string smth):this()
+        public Lobby(Form owner) : this()
         {
-            Text += " " + smth;           
+            Owner = owner;
+            Text = owner.Text;
         }
 
         public void UpdateLobby(GameState state)
-        {           
+        {
             if (InvokeRequired)
             {
                 Invoke(new Action<GameState>(UpdateLobby), new object[] { state });
@@ -37,7 +38,6 @@ namespace Planetes
         }
 
 
-        public GameState State { get; set; }
 
         private void gameServerBindingSource_CurrentChanged(object sender, EventArgs e)
         {
@@ -48,7 +48,7 @@ namespace Planetes
         {
             if (players.Count < 2)
             {
-                MessageBox.Show("It takes two to tango");
+                MessageBox.Show("It takes two to tango", "Wait a second!");
             }
             else
             {
@@ -67,8 +67,8 @@ namespace Planetes
 
         //purge these later
         private void playerBindingSource_ListChanged(object sender, ListChangedEventArgs e)
-        {           
-            Console.WriteLine("ListChanged"); 
+        {
+            Console.WriteLine("ListChanged");
         }
 
         private void playerBindingSource_DataSourceChanged(object sender, EventArgs e)
@@ -79,6 +79,15 @@ namespace Planetes
         private void dgvwPlayers_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
             //will be needed further so that players will be able to update their name in lobby
+        }
+
+        bool Ilobby.OpenLobby_WaitForGuestsAndBegin()
+        {
+            if (ShowDialog(Owner) == DialogResult.OK)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

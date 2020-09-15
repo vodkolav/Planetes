@@ -1,5 +1,4 @@
 ﻿using GameObjects;
-using PolygonCollision;
 using System;
 using System.Linq;
 using System.Windows.Forms;
@@ -8,16 +7,16 @@ namespace Planetes
 {
 	public partial class HUD : UserControl
 	{
-		Game GAME;
+		GameClient C;
 		int playerID;
 
 		public HUD()
 		{
 			InitializeComponent();
 		}
-		public void bind(Game game, Player p)
+		public void bind(GameClient game, Player p)
 		{
-			GAME = game;
+			C = game;
 			playerID = p.ID;
 			lblName.Text = p.Name;
 			pbAmmo.Maximum = p.MaxAmmo;
@@ -30,9 +29,9 @@ namespace Planetes
 		{
 			try
 			{
-				Player playerstate = GAME.gameObjects.players.SingleOrDefault(p => p.ID == playerID);
+				Player playerstate = C.gameObjects.players.SingleOrDefault(p => p.ID == playerID);
 				if (playerstate != null)
-					lock (GAME.gameObjects)
+					lock (C.gameObjects)
 					{
 						lblSpeedX.Text = playerstate.Jet.Speed.X.ToString("N2");
 						lblSpeedY.Text = playerstate.Jet.Speed.Y.ToString("N2");
