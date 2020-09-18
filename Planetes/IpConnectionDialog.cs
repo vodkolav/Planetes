@@ -29,7 +29,7 @@ namespace Planetes
         {
             get
             {
-                return "http://" + ipAddressControl1.Text +":" +  tbxport.Text;
+                return "http://" + ipAddressControl1.Text + ":" + tbxport.Text;
             }
         }
     }

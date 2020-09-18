@@ -14,20 +14,22 @@ namespace GameObjects
 
         public static int StartingAmmo { get { return 1000; } }
 
-        public static ConcurrentBag<Color> _colors = new ConcurrentBag<Color>() { Color.Blue , Color.Red, Color.Green, Color.Yellow, Color.Magenta, Color.Cyan, Color.White, Color.Orange };
-     
-        public static Color TossColor {
-            get {
+        public static ConcurrentBag<Color> _colors = new ConcurrentBag<Color>() { Color.Blue, Color.Red, Color.Green, Color.Yellow, Color.Magenta, Color.Cyan, Color.White, Color.Orange };
+
+        public static Color TossColor
+        {
+            get
+            {
                 Color b;
-                if(_colors.TryTake(out b))
+                if (_colors.TryTake(out b))
                 {
                     return b;
                 }
                 else
                 {
                     throw new ArgumentOutOfRangeException("colors", "no more colors to define for player");
-                } 
-            } 
+                }
+            }
         }
         internal static void ReturnColor(Color color)
         {
@@ -38,9 +40,9 @@ namespace GameObjects
             get
             {
                 Random r = new Random();
-                int x = r.Next(WallWidth*3, WorldSize.Width - WallWidth*3);
-                int y = r.Next(WallWidth*3, WorldSize.Height - WallWidth*3);
-                return new Point(x,y);
+                int x = r.Next(WallWidth * 3, WorldSize.Width - WallWidth * 3);
+                int y = r.Next(WallWidth * 3, WorldSize.Height - WallWidth * 3);
+                return new Point(x, y);
             }
         }
 

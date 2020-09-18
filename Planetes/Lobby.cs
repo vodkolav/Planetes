@@ -46,14 +46,23 @@ namespace Planetes
 
         private void btnStart_Click(object sender, EventArgs e)
         {
-            if (players.Count < 2)
+            if (((Game)Owner).isServer)
             {
-                MessageBox.Show("It takes two to tango", "Wait a second!");
+                if (players.Count < 2)
+                {
+                    MessageBox.Show("It takes two to tango", "Wait a second!");
+                }
+                else
+                {
+                    DialogResult = DialogResult.OK;
+                    Close();
+                }
             }
             else
             {
-                DialogResult = DialogResult.OK;
-                Close();
+                string mess = "Only the host can start the game";
+                MessageBox.Show(mess);
+                Console.WriteLine(mess);
             }
         }
 

@@ -7,18 +7,18 @@ namespace GameObjects
     {
         string Text { get; set; }
 
-        bool InvokeRequired { get;}    
-        
-        Ilobby L { get; set; }     
-        
+        bool InvokeRequired { get; }
+
+        Ilobby L { get; set; }
+
         void StartGraphics();
 
         void DrawGraphics();
 
         void bindHUDS(GameState gameObjects);
 
-        void Notify(string message);     
-        
+        void Notify(string message);
+
         void AnnounceDeath();
 
         Task LeaveLobby();
@@ -26,7 +26,7 @@ namespace GameObjects
         void CloseLobby();
 
         object Invoke(Delegate method, params object[] args);
-        
+
         void UpdateLobby(GameState go);
     }
 

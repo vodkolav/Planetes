@@ -125,7 +125,6 @@
     <Compile Include="Game.Designer.cs">
       <DependentUpon>Game.cs</DependentUpon>
     </Compile>
-    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HUD.cs">
       <SubType>UserControl</SubType>
     </Compile>

@@ -1,8 +1,8 @@
 ﻿
+using Planetes;
 using System;
 using System.Threading;
 using System.Windows.Forms;
-using Planetes;
 
 namespace TestClient
 {
@@ -19,7 +19,7 @@ namespace TestClient
             Thread.Sleep(1000);
             bool autoconnect = false;
 #if DEBUG
-            Application.Run( autoconnect ? new Game("joinNetworkGame") : new Game());
+            Application.Run(autoconnect ? new Game("joinNetworkGame") : new Game());
 #else
             Application.Run(new Game());
 #endif
