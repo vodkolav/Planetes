@@ -7,9 +7,9 @@ namespace Planetes
     {
         public IpConnectionDialog(string ip = "127.0.0.1", string port = "8030")
         {
+            InitializeComponent();
             ipAddressControl1.Text = ip;
             tbxport.Text = port;
-            InitializeComponent();
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -29,7 +29,7 @@ namespace Planetes
         {
             get
             {
-                return "http://" + ipAddressControl1.Text +":" +  tbxport.Text;
+                return "http://" + ipAddressControl1.Text + ":" + tbxport.Text;
             }
         }
     }

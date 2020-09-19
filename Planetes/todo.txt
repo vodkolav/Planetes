@@ -1,35 +1,49 @@
 ﻿TODO:
+Features:
+	implement pause
+	implement game with bots 
+	make local game great again?
+	implement recording games as movies/GIFs
+	implement game configuration 
+	implement drawing walls by hand (map editor)
+	make pretty README.MD
+	make polygon collision calculation on GPU?
 
-change Steer to Press in player class
-implement proper connection <> user management 
-make ship prettier, add wings
-implement harpoon 
-implement proper game loop with timer and without thread.sleep 
-implement pause
-implement  recording games as movies
-create iMovable, iCollidable interfaces
-implement big world outside of screen and camera movement 
-make better map
-implement trajectory prediction 
-slap ship sprites on top of polygons?
-Implement ship collisions
-implement game configuratoion 
-fix issue with walls that can't be serialized for some reason
-implement drawing walls by hand (creating maps)
-make local game great again
-return game with bots 
-allow more than 2 players
-make pretty README.MD
+Architecture:
+	Pull out server class from client class
+	make UI in WPF, beacuse GDI+ is horrible for animation
+	implement proper game loop with timer and without thread.sleep
+	change Steer to Press in player class
+	create iMovable, iCollidable interfaces
+
+Visual:
+	make ship prettier, add wings
+	slap ship sprites on top of polygons?
+	make better maps
+	implement big world outside of screen and camera movement 
+	change $safeprojectname$ (appears in task manager) to Planetes
+
+Gameplay:
+	implement trajectory prediction 
+	implement harpoon 
+	implement ship collisions
+	
+
 
 DONE:
-enable shooting
-enable HUD
-remove unnecessary usings
-cleanup obsolete code 
-
+	enable shooting
+	enable HUD
+	remove unnecessary usings
+	cleanup obsolete code 
+	make separate client class to decouple the logic from UI
+	implement proper connection <-> user management and Game Lobby
+	implement more than 2 players	
+	make HUDs for all the players, not just 2
 
 BUGS:
-
-nullfeference exception in yoke if you have mouse on game window when game is starting 
+	nullreference exception in yoke if you have mouse on game window when game is starting 
+	walls can't be serialized for some reason
+	If during debugging I stay in break mode for a bit more time then signalR disconnects with exception
 
 FIXED:
+	:(
