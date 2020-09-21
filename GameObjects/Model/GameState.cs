@@ -52,7 +52,7 @@ namespace GameObjects
                 Player looser;
                 if ((looser = players.FirstOrDefault(p => !p.isAlive)) != null)
                 {
-                    Over(looser);
+                    Purge(looser);
                 }
             }
 
@@ -83,10 +83,11 @@ namespace GameObjects
             }
         }
 
-        public void Over(Player loser)
+        public void Purge(Player loser)
         {
             messageQ.Add(new Tuple<string, Notification, string>(loser.ConnectionID, Notification.DeathNotice, "YOU DIED"));
-            players.Remove(loser); //when a player is killed - moving mouse along his client makes the game slow - must fix it
+            players.Remove(loser); 
+            players.ForEach(p => p.Enemies.Remove(loser));// if I don't remove a dead player from all other players enemies lists, for the bullets the dead one still exists 
         }
 
         public void Draw(Graphics g)

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNet.SignalR;
 using Microsoft.Owin.Cors;
 using Owin;
+using System;
 
 namespace GameObjects
 {
@@ -12,7 +13,8 @@ namespace GameObjects
             GlobalHost.DependencyResolver.Register(
             typeof(GameHub),
             () => new GameHub(GameServer.Instance));
-            app.MapSignalR(); // "/signalr", new HubConfiguration());
+            GlobalHost.Configuration.ConnectionTimeout = TimeSpan.FromSeconds(400);
+            app.MapSignalR();
         }
     }
 }

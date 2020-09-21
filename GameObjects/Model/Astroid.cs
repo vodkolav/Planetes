@@ -18,7 +18,7 @@ namespace GameObjects
         public AstType Type { get; set; }
         public bool HasHit { get; set; }
 
-        static public int Timeout { get { return 10; } }
+        static public int Timeout { get { return GameConfig.AsteroidTimeout; } }
 
         public void TossType(Random random)
         {

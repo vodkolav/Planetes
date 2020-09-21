@@ -98,5 +98,10 @@ namespace Planetes
             }
             return false;
         }
+
+        private void btnAddBot_Click(object sender, EventArgs e)
+        {
+            ((Game)Owner).AddBot();
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using GameObjects;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Threading.Tasks;
@@ -12,6 +13,8 @@ namespace Planetes
         internal bool isServer { get => C.Srv != null; }
 
         public GameClient C { get; set; }
+
+        public List<Bot> Bots { get; set; }
 
         public Bitmap B { get; set; }
 
@@ -29,6 +32,7 @@ namespace Planetes
                      ControlStyles.UserPaint, true);
             C = new GameClient(this);
             L = new Lobby(this);
+            Bots = new List<Bot>();
         }
 
         public Game(string AutoStartgametype) : this()
@@ -94,16 +98,26 @@ namespace Planetes
         {
             //should replace this with buffered image of the map
             G.FillRectangle(Brushes.Black, new Rectangle(0, 0, pbxWorld.Width, pbxWorld.Height));
-            hudLeft.Draw();
-            foreach (Control c in flpOtherPlayers.Controls)
-            {
-                ((HUD)c).Draw();
-            }
             C.gameObjects.Draw(G);
             pbxWorld.Image = B;
             if (pbxWorld != null)
                 pbxWorld.Invoke(new System.Action(pbxWorld.Refresh));
+            hudLeft.Draw();
+            foreach (Control c in flpOtherPlayers.Controls)
+            {
+                ((HUD)c).Draw();
+            }       
+        }
 
+        public void AddBot()
+        {
+            DummyPlug Rei = new DummyPlug();
+            Bot DMYSYS = new Bot1(Rei);
+            DMYSYS.joinNetworkGame(C.Srv.URL);
+            //DMYSYS.Me.Name = "Rei";
+            //DMYSYS.Me.Jet.Color = Color.White;
+            //DMYSYS.UpdateMe();
+            Bots.Add(DMYSYS);
         }
 
 

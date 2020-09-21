@@ -8,6 +8,8 @@ namespace GameObjects
 {
     public enum Action { Press, Release, Aim }
     public enum Notification { DeathNotice, Message }
+
+    [JsonObject(IsReference = true)]
     public class Player
     {
         public int ID { get; set; }
@@ -17,16 +19,15 @@ namespace GameObjects
         public int Health { get; set; }
         public int MaxHealth { get; set; }
         public int Ammo { get; set; }
-        public int MaxAmmo { get; set; }
-        //public bool Fired { get; set; }
-        [JsonIgnore]
+        public int MaxAmmo { get; set; }        
+
         public List<Player> Enemies { get; set; }
         public Jet Jet { get; set; }
         public List<Bullet> Bullets { get; set; }
         public Vector Acceleration;
         public bool KeyShoot { get; set; }
         [JsonIgnore]
-        public GameState GameState { get; set; }        //probably required only for Bots - check later
+        public GameState gameState { get; set; }
         [JsonIgnore]
         public Dictionary<Action, Action<HOTAS>> actionMapping { get; set; }
         public bool isAlive { get; private set; } = true;
@@ -62,8 +63,7 @@ namespace GameObjects
             Jet = new Jet(At, color);
             Bullets = new List<Bullet>();
             Enemies = new List<Player>();
-            //Fired = false;
-            GameState = game;
+            gameState = game;
             Acceleration = new Vector();
             MapActions();
         }
@@ -195,7 +195,7 @@ namespace GameObjects
         }
         public void Move()
         {
-            Jet.Move(GameState);
+            Jet.Move(gameState);
 
             //check wheteher we've hit some enemies
             foreach (Bullet b in Bullets)
@@ -210,7 +210,7 @@ namespace GameObjects
                     }
                 }
             }
-            Bullets.ForEach(b => b.Move(GameState));
+            Bullets.ForEach(b => b.Move(gameState));
             Bullets.RemoveAll(b => b.HasHit);
 
         }

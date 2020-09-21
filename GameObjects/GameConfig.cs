@@ -47,6 +47,8 @@ namespace GameObjects
         }
 
         public static float Lightspeed { get { return 20; } }
+
+        public static int AsteroidTimeout { get { return 50; } }
     }
 
 }

@@ -140,7 +140,7 @@ namespace GameObjects
             {
                 LastFired = timeElapsed;
                 Bullet bullet = new Bullet(pos: player.Jet.Gun, speed: Bearing * (Bullet.linearSpeed / Bearing.Magnitude), size: 5, color: Color);
-                lock (player.GameState)
+                lock (player.gameState)
                 {
                     player.Bullets.Add(bullet);
                 }

@@ -1,17 +1,24 @@
-﻿using System;
+﻿using PolygonCollision;
+using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace GameObjects
 {
     /// <summary>
-    /// Most basic bot
+    /// Baseline for all Bots. 
     /// </summary>
-    public class Bot : Player
+    public abstract class Bot : GameClient 
     {
+        protected Thread computer;
+
+        protected Dictionary<string, object> memory;
+
         protected List<HOTAS> directions = new List<HOTAS> { HOTAS.Up, HOTAS.Down };
+        protected Jet Jet { get { return Me.Jet; } }
+
 
         int SlowDownCoefficient
         {
@@ -21,195 +28,233 @@ namespace GameObjects
         public TimeSpan ReactionInterval { get; private set; }
 
 
-        public Bot(int id, string connectionid, string name, int health, int ammo, Point At, Color color, GameState game)
-            : base(id, connectionid, name, health, ammo, At, color, game)
+        public Bot(IUI game) : base(game)
         {
-            Name = GetType().FullName + " " + color.ToString();
-            Thread t = new Thread(Play)
-            {
+            computer = new Thread(BotLoop)
+            { 
                 Name = "BotThread",
                 IsBackground = true
             };
-            SlowDownCoefficient = 10;
-            t.Start();
         }
 
-
-        /// <summary>
-        /// attempt to link bot movement to primary game timer. does not work well
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="health"></param>
-        /// <param name="ammo"></param>
-        /// <param name="winSize_x"></param>
-        /// <param name="winSize_y"></param>
-        /// <param name="game"></param>
-        /// <param name="timer"></param>
-        public Bot(int id, string connectionid, string name, int health, int ammo, Point At, Color color, GameState game, System.Windows.Forms.Timer timer)
-            : base(id, connectionid, name, health, ammo, At, color, game)
+        public override sealed void Start()
         {
-            GameState = game;
-            timer.Tick += new System.EventHandler(Play);
+            base.Start();
+            computer.Start();
+        }
+
+        #region Utility functions
+
+        protected virtual Player ClosestEnemy
+        {
+            get
+            {
+                if (Me != null)
+                {
+                    return Me.Enemies.Aggregate((curMin, x) => curMin == null || (Jet.Dist(x.Jet)) < Jet.Dist(curMin.Jet) ? x : curMin);
+                }
+                else
+                { return null; }
+            }
+        }
+
+        public Astroid ClosestAsteroid
+        {
+            get
+            {
+                return gameObjects.Astroids.Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
+            }
         }
 
 
-        protected virtual HOTAS pickOther(HOTAS k)
+        protected virtual HOTAS pickOpposite(HOTAS k)
         {
             return directions.Where(c => c.CompareTo(k) != 0).Single();
         }
 
-
-        /// <summary>
-        /// attempt to link bot movement to primary game timer. does not work well
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        protected virtual void Play(object sender, EventArgs e)
+        protected virtual bool ToggleShoot(bool amShooting)
         {
-            Play();
+            if (amShooting)
+            {
+                Release(HOTAS.Shoot);
+            }
+            else
+            {
+                Press(HOTAS.Shoot);
+            }
+            return !amShooting;
         }
 
-        /// <summary>
-        /// basic logic for simplest bot. just move one up, shoot, one down, shoot, etc
-        /// </summary>
-        protected virtual void Play()
+        #endregion
+
+        public void Press(HOTAS h)
         {
-            int count = 0;
-            HOTAS direction = directions[0];
-            while (true)
+            Yoke.Press(h);
+        }
+
+        public void Release(HOTAS h)
+        {
+            Yoke.Release(h);
+        }
+
+        public void Aim(Vector at)
+        {
+            Yoke.Do(HOTAS.Aim, at);
+        }
+
+        
+        private async void BotLoop()
+        {
+            try
             {
-                Thread.Sleep(ReactionInterval);
-
-                if (count == 5)
-                {
-                    count = 0;
-                    direction = pickOther(direction);
-                    Steer(direction);
-                    Steer(HOTAS.Shoot);
-
+                memory = new Dictionary<string, object>();
+                Prepare();
+                while (Me != null)
+                {                    
+                    FrameReact();
+                    await Task.Delay(2000);
                 }
-                count++;
+                Console.WriteLine("A BOT HAS DIED");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
             }
         }
+
+        protected sealed override void Die()
+        {
+            computer.Join();
+            base.Die();
+        }
+
+        protected virtual void Prepare()
+        {
+            memory["count"] = 0;
+            memory["direction"] = directions[0];
+            memory["amShooting"] = true;
+        }
+
+
+        /// <summary>
+        /// basic logic for simplest bot. 
+        /// just move up for 5 frames, start shoot, 5 frmaes down, stop shoot, etc...
+        /// </summary>
+        protected virtual void FrameReact()
+        {
+            int count = (int)memory["count"];
+            HOTAS direction = (HOTAS)memory["direction"];
+            bool amShooting = (bool)memory["amShooting"];
+
+            if (count == 5)
+            {
+                count = 0;
+                direction = pickOpposite(direction);
+                Press(direction);
+                amShooting = ToggleShoot(amShooting);
+            }
+            count++;
+
+            memory["count"] = count;
+            memory["direction"] = direction;
+            memory["amShooting"] = amShooting;
+        }
     }
+
+
+
     public class Bot4 : Bot
     {
-        int messagenum = 0;
-        public Bot4(int id, string connectionid, string name, int health, int ammo, Point At, Color color, GameState game)
-            : base(id, connectionid, name, health, ammo, At, color, game)
+        public Bot4(IUI game) : base(game)
         { }
 
-        public Bot4(int id, string connectionid, string name, int health, int ammo, Point At, Color color, GameState game, System.Windows.Forms.Timer timer)
-            : base(id, connectionid, name, health, ammo, At, color, game, timer)
-        { }
-
-        protected override void Play()
+        protected override void FrameReact()
         {
-            //int timeElapsed = 0;
-
 
             //todo:
             // make bot catch ammo and health crates
             // smarter maneuvring between asteroids and bullets
 
 
-            while (true)
+            //double astavg = gamenow.AstroidList.Where(a => a.Pos.Y + 50 < Jet.Pos.Y && a.Pos.Y - 50 > Jet.Pos.Y).Select(c => c.Pos.X).Average();
+            //int astClosest = gamenow.AstroidList.Min(a => Jet.Dist(a));
+
+            try
             {
+                //asteroid evasion tactic
+                Astroid astClosest = gameObjects.Astroids.Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
 
-                //double astavg = gamenow.AstroidList.Where(a => a.Pos.Y + 50 < Jet.Pos.Y && a.Pos.Y - 50 > Jet.Pos.Y).Select(c => c.Pos.X).Average();
-                //int astClosest = gamenow.AstroidList.Min(a => Jet.Dist(a));
-
-                try
+                if (astClosest.Pos.X - astClosest.Size * 10 < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X && astClosest.Type == AstType.Rubble)
                 {
-                    //asteroid evasion tactic
-                    Astroid astClosest = GameState.Astroids.Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
-
-                    if (astClosest.Pos.X - astClosest.Size * 10 < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X && astClosest.Type == AstType.Rubble)
-                    {
-                        //Jet.Move(Keys.Left);
-                        Steer(HOTAS.Left);
-                    }
-                    else if (astClosest.Pos.X < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X + astClosest.Size * 10 && astClosest.Type == AstType.Rubble)
-                    {
-                        //Jet.Move(Keys.Right);
-                        Steer(HOTAS.Right);
-                    }
-                    else
-                    {
-                        Release(HOTAS.Right);
-                    }
+                    Press(HOTAS.Left);
                 }
-                catch (Exception e)
+                else if (astClosest.Pos.X < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X + astClosest.Size * 10 && astClosest.Type == AstType.Rubble)
                 {
-                    Console.WriteLine(messagenum++ + e.Message);
+                    Press(HOTAS.Right);
                 }
-
-
-                try
+                else
                 {
-                    //bullet evasion tactic (not good yet) Where(b=> b.Pos.X + 50 > Jet.Pos.X)
-                    //.GameState.Bullets
-                    //.Where(b=>b.Shooter == Enemy)
-
-                    Bullet bulClosest = Bullets
-                        .Aggregate((curMin, b) => (curMin == null || (Jet.Dist(b)) < Jet.Dist(curMin) ? b : curMin));
-                    //Jet.Pos.Y-50 > bulClosest.Pos.Y  &&
-                    if (Jet.Pos.Y < bulClosest.Pos.Y && bulClosest.Pos.Y < Jet.Pos.Y + 50)
-                    {
-                        Steer(HOTAS.Down);
-                        //Jet.Move(Keys.Up);
-                        //Jet.Move(Keys.Up);
-                    }//Jet.Pos.Y + 50 < bulClosest.Pos.Y  &&
-                    else if (Jet.Pos.Y - 50 < bulClosest.Pos.Y && bulClosest.Pos.Y <= Jet.Pos.Y)
-                    {
-                        Steer(HOTAS.Up);
-                        //Jet.Move(Keys.Down);
-                        //Jet.Move(Keys.Down);
-                    }
-                    else
-                    {
-                        Release(HOTAS.Up);
-                    }
+                    Release(HOTAS.Right);
                 }
-                catch (Exception e)
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+
+            try
+            {
+                //bullet evasion tactic (not good yet) Where(b=> b.Pos.X + 50 > Jet.Pos.X)
+
+                //this is wrong - I dont need to evade my own bullets
+                Bullet bulClosest = Me.Bullets
+                    .Aggregate((curMin, b) => (curMin == null || (Jet.Dist(b)) < Jet.Dist(curMin) ? b : curMin));
+                if (Jet.Pos.Y < bulClosest.Pos.Y && bulClosest.Pos.Y < Jet.Pos.Y + 50)
                 {
-                    Console.WriteLine(messagenum++ + e.Message);
+                    Press(HOTAS.Down);
                 }
-
-
-                //aiming at opponent tactic
-
-                Player EnemyClosest = Enemies.Aggregate((curMin, x) => curMin == null || (Jet.Dist(x.Jet)) < Jet.Dist(curMin.Jet) ? x : curMin);
-
-
-                Aim(EnemyClosest.Jet.Pos);
-                if (Jet.Pos.Y < EnemyClosest.Jet.Pos.Y - 50)
+                else if (Jet.Pos.Y - 50 < bulClosest.Pos.Y && bulClosest.Pos.Y <= Jet.Pos.Y)
                 {
-
-                    Steer(HOTAS.Down);
-                }
-                else if (Jet.Pos.Y > EnemyClosest.Jet.Pos.Y + 50)
-                {
-                    Steer(HOTAS.Up);
+                    Press(HOTAS.Up);
                 }
                 else
                 {
                     Release(HOTAS.Up);
                 }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
 
-                //shoot at opponent tactic
-                if ((Jet.Pos - EnemyClosest.Jet.Pos).Magnitude < 300)
-                {
-                    //BotShoot(timeElapsed);
-                    Steer(HOTAS.Shoot);
-                }
-                else
-                {
-                    Release(HOTAS.Shoot);
-                }
+            //aiming at opponent tactic
 
-                //timeElapsed += ClsGameObjects.FrameRate;
-                Thread.Sleep(ReactionInterval);
+            Player EnemyClosest = ClosestEnemy;
+
+            Aim(EnemyClosest.Jet.Pos);
+            if (Jet.Pos.Y < EnemyClosest.Jet.Pos.Y - 50)
+            {
+
+                Press(HOTAS.Down);
+            }
+            else if (Jet.Pos.Y > EnemyClosest.Jet.Pos.Y + 50)
+            {
+                Press(HOTAS.Up);
+            }
+            else
+            {
+                Release(HOTAS.Up);
+            }
+
+            //shoot at opponent tactic
+            if ((Jet.Pos - EnemyClosest.Jet.Pos).Magnitude < 300)
+            {
+                Press(HOTAS.Shoot);
+            }
+            else
+            {
+                Release(HOTAS.Shoot);
             }
         }
     }
@@ -218,111 +263,88 @@ namespace GameObjects
     public class Bot3 : Bot
     {
 
-        public Bot3(int id, string connectionid, string name, int health, int ammo, Point At, Color color, GameState game)
-            : base(id, connectionid, name, health, ammo, At, color, game)
+        public Bot3(IUI game) : base(game)
         { }
 
-        public Bot3(int id, string connectionid, string name, int health, int ammo, Point At, Color color, GameState game, System.Windows.Forms.Timer timer)
-            : base(id, connectionid, name, health, ammo, At, color, game, timer)
-        { }
-
-
-
-        protected override void Play()
+        protected override void FrameReact()
         {
-            //int timeElapsed = 0;
-
 
             //todo:
             // make bot catch ammo and health crates
             // smarter maneuvring between asteroids and bullets
 
+            //double astavg = gamenow.AstroidList.Where(a => a.Pos.Y + 50 < Jet.Pos.Y && a.Pos.Y - 50 > Jet.Pos.Y).Select(c => c.Pos.X).Average();
+            //int astClosest = gamenow.AstroidList.Min(a => Jet.Dist(a));
 
-            while (true)
+            try
+            {
+                //asteroid evasion tactic
+
+                if (ClosestAsteroid.Pos.X - ClosestAsteroid.Size * 10 < Jet.Pos.X && Jet.Pos.X < ClosestAsteroid.Pos.X && ClosestAsteroid.Type == AstType.Rubble)
+                {
+                    Press(HOTAS.Left);
+                }
+                else if (ClosestAsteroid.Pos.X < Jet.Pos.X && Jet.Pos.X < ClosestAsteroid.Pos.X + ClosestAsteroid.Size * 10 && ClosestAsteroid.Type == AstType.Rubble)
+                {
+                    Press(HOTAS.Right);
+                }
+                else
+                {
+                    Release(HOTAS.Right);
+                }
+            }
+            catch
             {
 
-                //double astavg = gamenow.AstroidList.Where(a => a.Pos.Y + 50 < Jet.Pos.Y && a.Pos.Y - 50 > Jet.Pos.Y).Select(c => c.Pos.X).Average();
-                //int astClosest = gamenow.AstroidList.Min(a => Jet.Dist(a));
+            }
 
-                try
+            try
+            {
+                //bullet evasion tactic (not good yet)
+                Bullet bulClosest = Me.Bullets //wrong again - no need to evade my own bullets
+                                               //.Where(b => b.Shooter == Enemy)
+                    .Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
+
+                if (bulClosest.Pos.Y > Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
                 {
-                    //asteroid evasion tactic
-                    Astroid astClosest = GameState.Astroids.Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
-
-                    if (astClosest.Pos.X - astClosest.Size * 10 < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X && astClosest.Type == AstType.Rubble)
-                    {
-                        //Jet.Move(Keys.Left);
-                        Steer(HOTAS.Left);
-                    }
-                    else if (astClosest.Pos.X < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X + astClosest.Size * 10 && astClosest.Type == AstType.Rubble)
-                    {
-                        //Jet.Move(Keys.Right);
-                        Steer(HOTAS.Right);
-                    }
-                    else
-                    {
-                        Release(HOTAS.Right);
-                    }
+                    Press(HOTAS.Up);
                 }
-                catch
+                else if (bulClosest.Pos.Y < Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
                 {
-
-                }
-
-                try
-                {
-                    //bullet evasion tactic (not good yet)
-                    Bullet bulClosest = Bullets
-                        //.Where(b => b.Shooter == Enemy)
-                        .Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
-
-                    if (bulClosest.Pos.Y > Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
-                    {
-                        Steer(HOTAS.Up);
-                    }
-                    else if (bulClosest.Pos.Y < Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
-                    {
-                        Steer(HOTAS.Down);
-                    }
-                    else
-                    {
-                        Release(HOTAS.Up);
-                    }
-                }
-                catch
-                {
-                    //int a = 1000;
-                }
-
-
-                //aiming at opponent tactic
-                if (Jet.Pos.Y - GameState.players[0].Jet.Pos.Y < -20)
-                {
-                    //Jet.Move(Keys.Down);
-                    Steer(HOTAS.Down);
-                }
-                else if (Jet.Pos.Y - GameState.players[0].Jet.Pos.Y > 20)
-                {
-                    Steer(HOTAS.Up);
+                    Press(HOTAS.Down);
                 }
                 else
                 {
                     Release(HOTAS.Up);
+                }
+            }
+            catch
+            {
+            }
 
-                }
+            //aiming at opponent tactic
+            if (Jet.Pos.Y - gameObjects.players[0].Jet.Pos.Y < -20)
+            {
+                Press(HOTAS.Down);
+            }
+            else if (Jet.Pos.Y - gameObjects.players[0].Jet.Pos.Y > 20)
+            {
+                Press(HOTAS.Up);
+            }
+            else
+            {
+                Release(HOTAS.Up);
 
-                //shoot at opponent tactic
-                if (Math.Abs(Jet.Pos.Y - GameState.players[0].Jet.Pos.Y) < 20)
-                {
-                    //BotShoot(timeElapsed);
-                    Steer(HOTAS.Shoot);
-                }
-                else
-                {
-                    Release(HOTAS.Shoot);
-                }
-                //timeElapsed += ClsGameObjects.FrameRate;
-                Thread.Sleep(ReactionInterval);
+            }
+
+            //shoot at opponent tactic
+            if (Math.Abs(Jet.Pos.Y - gameObjects.players[0].Jet.Pos.Y) < 20)
+            {
+                Press(HOTAS.Shoot);
+            }
+            else
+            {
+                Release(HOTAS.Shoot);
             }
         }
     }
@@ -330,69 +352,64 @@ namespace GameObjects
     public class Bot2 : Bot
     {
 
-        public Bot2(int id, string connectionid, string name, int health, int ammo, Point At, Color color, ref GameState game)
-            : base(id, connectionid, name, health, ammo, At, color, game)
+        public Bot2(IUI game) : base(game)
         { }
 
 
-        protected override void Play()
+        protected override void FrameReact()
         {
-            int timeElapsed = 0;
 
-            while (true)
+
+            if (Jet.Pos.Y < gameObjects.players[0].Jet.Pos.Y)
             {
+                Yoke.Press(HOTAS.Up);
+            }
+            else
+            {
+                Yoke.Press(HOTAS.Down);
+            }
 
-                //Console.WriteLine(gamenow.GetHashCode());
-                if (Jet.Pos.Y < GameState.players[0].Jet.Pos.Y)
-                {
-                    Jet.Move(GameState);// (Keys.Down);									
-                }
-                else
-                {
-                    Jet.Move(GameState);// Keys.Up);					
-                }
-
-                if (Jet.Pos.Y - GameState.players[0].Jet.Pos.Y < 50)
-                {
-                    Jet.Shoot(this, timeElapsed);
-                }
-
-
-                Thread.Sleep(100);
-                timeElapsed++;
+            if (Jet.Pos.Y - gameObjects.players[0].Jet.Pos.Y < 50)
+            {
+                Yoke.Press(HOTAS.Shoot);
+            }
+            else
+            {
+                Yoke.Release(HOTAS.Shoot);
             }
 
         }
     }
-
     public class Bot1 : Bot
     {
-        public Bot1(int id, string connectionid, string name, int health, int ammo, Point At, Color color, GameState game)
-            : base(id, connectionid, name, health, ammo, At, color, game)
+        public Bot1(IUI game) : base(game)
         { }
 
-
-        protected override void Play()
+        /// <summary>
+        /// Constantly accelerates left. every frame aims at closest enemy(if in range) and shoots
+        /// </summary>
+        protected override void FrameReact()
         {
-            int timeElapsed = 0;
-            int count = 0;
-            HOTAS direction = directions[0];
-            while (true)
+            int count = (int)memory["count"];
+            HOTAS direction = (HOTAS)memory["direction"];
+            bool amShooting = (bool)memory["amShooting"];
+
+
+            Press(HOTAS.Left);
+            Aim(ClosestEnemy.Jet.Pos);
+
+            if (Me.Jet.Pos.Dist(ClosestEnemy.Jet.Pos) < 200)
             {
-                Thread.Sleep(50);
-                if (count < 5)
-                {
-                    Jet.Move(GameState);// direction);
-                    Jet.Shoot(this, timeElapsed);
-                    count++;
-                }
-                else
-                {
-                    count = 0;
-                    direction = pickOther(direction);
-                }
-                timeElapsed++;
+                Press(HOTAS.Shoot);
             }
+            else
+            {
+                Release(HOTAS.Shoot);
+            }
+
+            memory["count"] = count;
+            memory["direction"] = direction;
+            memory["amShooting"] = amShooting;
         }
     }
 }

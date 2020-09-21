@@ -10,10 +10,15 @@ namespace GameObjects
     public class GameServer
     {
         private readonly static Lazy<GameServer> _instance = new Lazy<GameServer>(() => new GameServer());
-        private Random rnd = new Random();
-        public Thread thrdGameLoop;
-        public IHubContext hubContext;
-        public GameState gameObjects;
+        
+        private Thread thrdGameLoop { get; set; }
+        
+        private IHubContext hubContext { get; set; }
+        
+        public GameState gameObjects { get; set; }
+
+        public string URL { get; private set; }
+
         IDisposable webapp;
         ManualResetEvent _shutdownEvent = new ManualResetEvent(false);
         ManualResetEvent _pauseEvent = new ManualResetEvent(true);
@@ -123,43 +128,45 @@ namespace GameObjects
 
         private async void GameLoop()
         {
-            DateTime dt;// maybe replace this with stopwatch
-            TimeSpan tdiff;
-            while (gameObjects.GameOn)
+            try
             {
-                _pauseEvent.WaitOne(Timeout.Infinite);
-
-                if (_shutdownEvent.WaitOne(0))
-                    break;
-
-                dt = DateTime.UtcNow;
-                if (gameObjects.Frame())
+                DateTime dt;// maybe replace this with stopwatch
+                TimeSpan tdiff;
+                while (gameObjects.GameOn)
                 {
-                    try
+                    _pauseEvent.WaitOne(Timeout.Infinite);
+
+                    if (_shutdownEvent.WaitOne(0))
+                        break;
+
+                    dt = DateTime.UtcNow;
+                    if (gameObjects.Frame())
                     {
                         //string gobj = JsonConvert.SerializeObject(gameObjects); only for debugging - to check what got serialized
                         await hubContext.Clients.All.UpdateModel(gameObjects);
                         _ = Task.Run(DispatchMessages);
+
+                        tdiff = DateTime.UtcNow - dt;
+                        Thread.Sleep((GameState.FrameInterval - tdiff).Duration()); //this is bad. There should be timer instead
+                        Console.WriteLine("frameNum: " + gameObjects.frameNum);// + "| " + tdiff.ToString()
                     }
-                    catch (Exception e)
+                    else
                     {
-                        Console.WriteLine(e.Message);
+                        Stop();
                     }
-                    tdiff = DateTime.UtcNow - dt;
-                    Thread.Sleep((GameState.FrameInterval - tdiff).Duration()); //this is bad. There should be timer instead
-                    Console.WriteLine("frameNum: " + gameObjects.frameNum);// + "| " + tdiff.ToString()
                 }
-                else
-                {
-                    Stop();
-                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
             }
         }
 
         public void Listen(string url)
         {
+            URL = url;
             webapp = WebApp.Start<Startup>(url);
-
+            
             Console.WriteLine(string.Format("Lobby open at {0}", url));
         }
     }

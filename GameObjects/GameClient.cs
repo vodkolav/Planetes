@@ -1,18 +1,19 @@
 ﻿using Microsoft.AspNet.SignalR.Client;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GameObjects
 {
     public class GameClient
     {
-        public IUI UI { get; set; }
+        private IUI UI { get; set; }
 
         public GameServer Srv { get; set; }
 
-        public IHubProxy Proxy { get; set; }
+        private IHubProxy Proxy { get; set; }
 
-        public HubConnection Conn { get; set; }
+        private HubConnection Conn { get; set; }
 
         public int PlayerId { get; set; }
 
@@ -20,11 +21,15 @@ namespace GameObjects
 
         public GameState gameObjects { get; set; }
 
+        protected Player Me { get { return gameObjects.players.SingleOrDefault(p => p.ID == PlayerId); } }
+
         public bool GameOn { get { return gameObjects != null && gameObjects.GameOn; } }
+
         public GameClient(IUI owner)
         {
             UI = owner;
         }
+
         public string hostNetworkGame()
         {
             string URL = "http://127.0.0.1:8030";
@@ -50,7 +55,6 @@ namespace GameObjects
                 await Conn.Start();
                 await Proxy.Invoke<GameState>("JoinLobby", new object[] { PlayerId });
 
-
             }
             catch (Exception e)
             {
@@ -73,6 +77,11 @@ namespace GameObjects
             UI.UpdateLobby(go);
         }
 
+        public async void UpdateMe()
+        {
+            await Proxy.Invoke<Player>("UpdateMe", new object[] { Me });
+        }
+
         public void Notify(Notification type, string message)
         {
             if (UI.InvokeRequired)
@@ -85,27 +94,31 @@ namespace GameObjects
                 {
                     case Notification.DeathNotice:
                         {
-                            Yoke.unbind();
-                            UI.AnnounceDeath();
-                            //new BillBoard().Show(UI);
+                            Die();
                             break;
                         }
                     case Notification.Message:
                         {
                             UI.Notify(message);
-                            //MessageBox.Show(message);
                             break;
                         }
                 }
 
             }
         }
+         
+        protected virtual void Die()
+        {
+            Yoke.unbind();
+            UI.AnnounceDeath();
+        }
+
         public async Task StartServer()
         {
             await Proxy.Invoke("Start");
         }
 
-        private void Start()
+        public virtual void Start()
         {
             if (UI.InvokeRequired)
             {

@@ -2,6 +2,8 @@
 Features:
 	implement pause
 	implement game with bots 
+	implement kick players/bots from lobby
+	implement ability to update player's info in lobby 
 	make local game great again?
 	implement recording games as movies/GIFs
 	implement game configuration 
