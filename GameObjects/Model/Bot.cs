@@ -30,6 +30,7 @@ namespace GameObjects
 
         public Bot(IUI game) : base(game)
         {
+            PlayerName = GetType().Name;
             computer = new Thread(BotLoop)
             { 
                 Name = "BotThread",

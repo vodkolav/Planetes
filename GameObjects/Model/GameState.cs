@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Concurrent;
+
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -15,18 +15,15 @@ namespace GameObjects
 
         public bool Paused { get; set; }
 
-        public int frameNum;
-        public Size WinSize { get; set; }
+        public int frameNum { get; set; }
 
-        public Player Winner;
-        [JsonIgnore]
-        public BlockingCollection<Tuple<string, Notification, string>> messageQ { get; set; }
-        //the Tuple holds: int ids of players to send message to and string the message
+        public Size WinSize { get; set; }
+                       
         public List<Player> players { get; set; }
 
         public List<Astroid> Astroids { get; set; }
 
-        [JsonIgnore]
+        [JsonIgnore] //Im not sure whether this is needed
         public List<Wall> Walls { get; set; }
 
         public GameState(Size winSize)
@@ -35,60 +32,52 @@ namespace GameObjects
 
             Walls = new Map(winSize).LoadDefault2();
             players = new List<Player>();
-            Astroids = new List<Astroid>();
-            messageQ = new BlockingCollection<Tuple<string, Notification, string>>();
-
+            Astroids = new List<Astroid>();   
             frameNum = 0;
         }
 
-        public bool Frame()
+        public void Frame()
         {
-            if (Paused) return true;
+            if (Paused) return;
             lock (this)
             {
                 players.ForEach(p => p.Move());
                 players.ForEach(p => p.Shoot(frameNum));
-                //purge loosers
-                Player looser;
-                if ((looser = players.FirstOrDefault(p => !p.isAlive)) != null)
-                {
-                    Purge(looser);
-                }
             }
 
-            if (GameOn)
+            lock (this)
             {
-                //Move asteroids
+                Astroids.ForEach(b => b.Move(this));
+                Astroids.RemoveAll(c => c.HasHit);
+            }
+            //Spawn asteroid after timeout
+            if (frameNum % Astroid.Timeout == 0)
+            {
+                Astroid astroid = new Astroid(WinSize);
                 lock (this)
                 {
-                    Astroids.ForEach(b => b.Move(this));
-                    Astroids.RemoveAll(c => c.HasHit);
+                    Astroids.Add(astroid);
                 }
-                //Spawn asteroid after timeout
-                if (frameNum % Astroid.Timeout == 0)
-                {
-                    Astroid astroid = new Astroid(WinSize);
-                    lock (this)
-                    {
-                        Astroids.Add(astroid);
-                    }
-                }
+            }
 
-                frameNum++;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            frameNum++;
         }
 
-        public void Purge(Player loser)
+        public Player Reap()
         {
-            messageQ.Add(new Tuple<string, Notification, string>(loser.ConnectionID, Notification.DeathNotice, "YOU DIED"));
-            players.Remove(loser); 
-            players.ForEach(p => p.Enemies.Remove(loser));// if I don't remove a dead player from all other players enemies lists, for the bullets the dead one still exists 
+            Player loser;
+            if ((loser = players.FirstOrDefault(p => !p.isAlive)) != null)
+            {
+                players.Remove(loser);
+                //Must remove a dead player from all other players enemies lists,
+                //otherwise from the point of view of the bullets the dead one still exists 
+                players.ForEach(p => p.Enemies.Remove(loser));               
+                return loser;
+            }
+            return null;
         }
+
+
 
         public void Draw(Graphics g)
         {
@@ -103,6 +92,17 @@ namespace GameObjects
             lock (this)
             {
                 Astroids.ForEach(a => a.Draw(g));
+            }
+        }   
+        public void InitFeudingParties()
+        {
+            //simplest case: Free-For-All (All-Against-All)
+            foreach (Player p1 in players)
+            {
+                foreach (Player p2 in players)
+                {
+                    p1.FeudWith(p2);
+                }
             }
         }
     }

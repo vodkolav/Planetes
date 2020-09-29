@@ -1,10 +1,7 @@
 ﻿TODO:
 Features:
 	implement pause
-	implement game with bots 
-	implement kick players/bots from lobby
-	implement ability to update player's info in lobby 
-	make local game great again?
+	implement ability to update player's info in lobby 	
 	implement recording games as movies/GIFs
 	implement game configuration 
 	implement drawing walls by hand (map editor)
@@ -12,7 +9,6 @@ Features:
 	make polygon collision calculation on GPU?
 
 Architecture:
-	Pull out server class from client class
 	make UI in WPF, beacuse GDI+ is horrible for animation
 	implement proper game loop with timer and without thread.sleep
 	change Steer to Press in player class
@@ -28,8 +24,8 @@ Visual:
 Gameplay:
 	implement trajectory prediction 
 	implement harpoon 
-	implement ship collisions
-	
+	implement ship collisions	
+
 
 
 DONE:
@@ -41,6 +37,10 @@ DONE:
 	implement proper connection <-> user management and Game Lobby
 	implement more than 2 players	
 	make HUDs for all the players, not just 2
+	Pull out server class from client class
+	make local game great again?
+	implement game with bots 
+	implement kick players/bots from lobby
 
 BUGS:
 	nullreference exception in yoke if you have mouse on game window when game is starting 

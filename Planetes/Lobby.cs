@@ -103,5 +103,11 @@ namespace Planetes
         {
             ((Game)Owner).AddBot();
         }
+
+        private void btnKickPlayer_Click(object sender, EventArgs e)
+        {
+            Player kickedone = (Player)dgvwPlayers.SelectedRows[0].DataBoundItem;
+            ((Game)Owner).KickPlayer(kickedone);
+        }
     }
 }

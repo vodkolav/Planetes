@@ -73,7 +73,7 @@
             // 
             // timerDraw
             // 
-            this.timerDraw.Interval = 10;
+            this.timerDraw.Interval = 20;
             this.timerDraw.Tick += new System.EventHandler(this.timerDraw_Tick);
             // 
             // toolStrip1

@@ -10,7 +10,9 @@ namespace Planetes
 {
     public partial class Game : Form, IUI
     {
-        internal bool isServer { get => C.Srv != null; }
+        internal bool isServer { get => S != null; }
+
+        private GameServer S { get; set; }
 
         public GameClient C { get; set; }
 
@@ -38,15 +40,26 @@ namespace Planetes
         public Game(string AutoStartgametype) : this()
         {
             Show();
-            if (AutoStartgametype == "hostNetworkGame")
+            switch (AutoStartgametype)
             {
-                Text += " (Server)";
-                _ = hostNetworkGame();
-            }
-            if (AutoStartgametype == "joinNetworkGame")
-            {
-                Text += " (Client)";
-                C.joinNetworkGame($"http://127.0.0.1:8030/");
+                case "hostNetworkGame":
+                    {
+                        var URL = hostNetworkGame();
+                        //string URL = C.hostNetworkGame();
+                        // Server application is also client for player1.
+                        _ = joinNetworkGame(URL);
+                        break;
+                    }
+                case "joinNetworkGame":
+                    {
+                        C.joinNetworkGame($"http://127.0.0.1:8030/");
+                        break;
+                    }
+                case "SinglePlayer":
+                    {
+                       _ = HostSingleplayer();
+                        break;
+                    }
             }
             Text += "Planetes: " + C.PlayerId;
         }
@@ -113,15 +126,24 @@ namespace Planetes
         {
             DummyPlug Rei = new DummyPlug();
             Bot DMYSYS = new Bot1(Rei);
-            DMYSYS.joinNetworkGame(C.Srv.URL);
+            DMYSYS.joinNetworkGame(S.URL);
             //DMYSYS.Me.Name = "Rei";
             //DMYSYS.Me.Jet.Color = Color.White;
             //DMYSYS.UpdateMe();
             Bots.Add(DMYSYS);
         }
 
-
-
+        public void KickPlayer(Player kickedone)
+        {
+            if(isServer)
+            {
+                S.Kick( kickedone);
+            }
+            else
+            {
+                Console.WriteLine("You can only kick yourself");
+            }
+        }
 
         #region Piloting
         private void Game_KeyDown(object sender, KeyEventArgs e)
@@ -200,19 +222,23 @@ namespace Planetes
 
         #region Network Game
 
-        public async Task hostNetworkGame()
+        public string hostNetworkGame()
         {
-            string URL = C.hostNetworkGame();
-            // Server application is also client for player1.
-            await joinNetworkGame(URL);
+            Text += " (Server)";
+            string URL = "http://127.0.0.1:8030";
 
+            S = GameServer.Instance;
+
+            S.Listen(URL);
+            return URL;
         }
-
 
 
         public async Task joinNetworkGame(string URL)
         {
+            Text += " (Client)";
             C.joinNetworkGame(URL);
+
             bool GameStarted = L.OpenLobby_WaitForGuestsAndBegin();
 
             if (GameStarted)
@@ -221,8 +247,30 @@ namespace Planetes
             }
             else
             {
-                C.TerminateServer();
+                TerminateServer();
             }
+        }
+
+        public void TerminateServer()
+        {
+            if (isServer)
+            {
+                S.Stop();
+            }
+            else
+            {
+                Console.WriteLine("You are not the server, you can't stop it");
+            }
+        }
+
+        public async Task HostSingleplayer()
+        {
+            var URL = hostNetworkGame();
+
+            AddBot();
+            AddBot();
+            await joinNetworkGame(URL);
+            //await C.StartServer();
         }
 
         public void Notify(string message)
@@ -246,9 +294,9 @@ namespace Planetes
             L.UpdateLobby(go);
         }
 
-        private async void hostToolStripMenuItem_Click_1(object sender, EventArgs e)
+        private void hostToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-            await hostNetworkGame();
+            hostNetworkGame();
         }
 
         private async void JoinToolStripMenuItem_Click(object sender, EventArgs e)

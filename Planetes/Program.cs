@@ -13,8 +13,9 @@ namespace Planetes
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            string gametype ="SinglePlayer" ;//"hostNetworkGame";//  "joinNetworkGame", 
 #if DEBUG
-            Application.Run(new Game("hostNetworkGame"));
+            Application.Run(new Game(gametype));
 #else
             Application.Run(new Game());
 #endif

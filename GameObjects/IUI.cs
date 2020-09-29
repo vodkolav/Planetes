@@ -44,15 +44,14 @@ namespace GameObjects
     /// </summary>
     public class DummyPlug : IUI
     {
+        public Ilobby L { get ; set ; }
+
         public string Text { get ; set ; }
 
         public bool InvokeRequired{get => false;}
-
-        public Ilobby L { get ; set ; }
-
+          
         public void AnnounceDeath()
         {
-            return;
         }
 
         public void bindHUDS(GameState gameObjects)

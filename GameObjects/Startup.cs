@@ -13,7 +13,8 @@ namespace GameObjects
             GlobalHost.DependencyResolver.Register(
             typeof(GameHub),
             () => new GameHub(GameServer.Instance));
-            GlobalHost.Configuration.ConnectionTimeout = TimeSpan.FromSeconds(400);
+            //seems like this is irrelevant change,  the app still gets disconnected 
+            GlobalHost.Configuration.ConnectionTimeout = TimeSpan.FromSeconds(4000);
             app.MapSignalR();
         }
     }

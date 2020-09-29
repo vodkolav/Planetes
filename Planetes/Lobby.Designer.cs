@@ -40,6 +40,7 @@
             this.btnCancel = new System.Windows.Forms.Button();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.btnAddBot = new System.Windows.Forms.Button();
+            this.btnKickPlayer = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvwPlayers)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.playerBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -64,6 +65,7 @@
             this.dgvwPlayers.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvwPlayers.Location = new System.Drawing.Point(0, 0);
             this.dgvwPlayers.Name = "dgvwPlayers";
+            this.dgvwPlayers.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvwPlayers.Size = new System.Drawing.Size(561, 375);
             this.dgvwPlayers.TabIndex = 0;
             this.dgvwPlayers.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvwPlayers_CellValueChanged);
@@ -143,6 +145,7 @@
             // 
             // splitContainer1.Panel2
             // 
+            this.splitContainer1.Panel2.Controls.Add(this.btnKickPlayer);
             this.splitContainer1.Panel2.Controls.Add(this.btnAddBot);
             this.splitContainer1.Panel2.Controls.Add(this.btnCancel);
             this.splitContainer1.Panel2.Controls.Add(this.btnStart);
@@ -159,6 +162,16 @@
             this.btnAddBot.Text = "Add Bot";
             this.btnAddBot.UseVisualStyleBackColor = true;
             this.btnAddBot.Click += new System.EventHandler(this.btnAddBot_Click);
+            // 
+            // btnKickPlayer
+            // 
+            this.btnKickPlayer.Location = new System.Drawing.Point(155, 3);
+            this.btnKickPlayer.Name = "btnKickPlayer";
+            this.btnKickPlayer.Size = new System.Drawing.Size(70, 60);
+            this.btnKickPlayer.TabIndex = 4;
+            this.btnKickPlayer.Text = "Kick Player";
+            this.btnKickPlayer.UseVisualStyleBackColor = true;
+            this.btnKickPlayer.Click += new System.EventHandler(this.btnKickPlayer_Click);
             // 
             // Lobby
             // 
@@ -190,5 +203,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn jetDataGridViewTextBoxColumn;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.Button btnAddBot;
+        private System.Windows.Forms.Button btnKickPlayer;
     }
 }

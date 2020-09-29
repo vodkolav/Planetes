@@ -7,7 +7,7 @@ using System.Drawing;
 namespace GameObjects
 {
     public enum Action { Press, Release, Aim }
-    public enum Notification { DeathNotice, Message }
+    public enum Notification { DeathNotice, Kicked, Message }
 
     [JsonObject(IsReference = true)]
     public class Player

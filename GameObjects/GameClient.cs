@@ -9,13 +9,13 @@ namespace GameObjects
     {
         private IUI UI { get; set; }
 
-        public GameServer Srv { get; set; }
-
         private IHubProxy Proxy { get; set; }
 
         private HubConnection Conn { get; set; }
 
         public int PlayerId { get; set; }
+
+        public string PlayerName { get; set; }
 
         public ControlPanel Yoke { get; set; }
 
@@ -27,18 +27,8 @@ namespace GameObjects
 
         public GameClient(IUI owner)
         {
+            PlayerName = "Human";
             UI = owner;
-        }
-
-        public string hostNetworkGame()
-        {
-            string URL = "http://127.0.0.1:8030";
-
-            Srv = GameServer.Instance;
-
-            Srv.Listen(URL);
-
-            return URL;
         }
 
         public async void joinNetworkGame(string URL)
@@ -53,7 +43,7 @@ namespace GameObjects
                 Proxy.On<Notification, string>("Notify", Notify);
                 Proxy.On("Start", Start);
                 await Conn.Start();
-                await Proxy.Invoke<GameState>("JoinLobby", new object[] { PlayerId });
+                await Proxy.Invoke<GameState>("JoinLobby", new object[] { PlayerId, PlayerName });
 
             }
             catch (Exception e)
@@ -102,6 +92,12 @@ namespace GameObjects
                             UI.Notify(message);
                             break;
                         }
+                    case Notification.Kicked:
+                        {
+                            UI.Notify(message);
+                            UI.CloseLobby();
+                            break;
+                        }
                 }
 
             }
@@ -140,17 +136,6 @@ namespace GameObjects
                 }
             }
         }
-
-        public void TerminateServer()
-        {
-            if (Srv != null)
-            {
-                Srv.Stop();
-            }
-            else
-            {
-                Console.WriteLine("You are not the server, you can't stop it");
-            }
-        }
+              
     }
 }
