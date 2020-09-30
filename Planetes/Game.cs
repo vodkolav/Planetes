@@ -16,13 +16,11 @@ namespace Planetes
 
         public GameClient C { get; set; }
 
-        public List<Bot> Bots { get; set; }
-
         public Bitmap B { get; set; }
 
         public Graphics G { get; set; }
 
-        public Ilobby L { get; set; }
+        public Lobby L { get; set; }
 
         public Game()
         {
@@ -34,7 +32,7 @@ namespace Planetes
                      ControlStyles.UserPaint, true);
             C = new GameClient(this);
             L = new Lobby(this);
-            Bots = new List<Bot>();
+
         }
 
         public Game(string AutoStartgametype) : this()
@@ -106,7 +104,7 @@ namespace Planetes
                 DrawGraphics();
             }
         }
-
+              
         public void DrawGraphics()
         {
             //should replace this with buffered image of the map
@@ -124,13 +122,7 @@ namespace Planetes
 
         public void AddBot()
         {
-            DummyPlug Rei = new DummyPlug();
-            Bot DMYSYS = new Bot1(Rei);
-            DMYSYS.joinNetworkGame(S.URL);
-            //DMYSYS.Me.Name = "Rei";
-            //DMYSYS.Me.Jet.Color = Color.White;
-            //DMYSYS.UpdateMe();
-            Bots.Add(DMYSYS);
+            S.AddBot();
         }
 
         public void KickPlayer(Player kickedone)
@@ -267,8 +259,8 @@ namespace Planetes
         {
             var URL = hostNetworkGame();
 
-            AddBot();
-            AddBot();
+            S.AddBot();
+            S.AddBot();
             await joinNetworkGame(URL);
             //await C.StartServer();
         }

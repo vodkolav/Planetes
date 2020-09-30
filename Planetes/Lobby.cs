@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace Planetes
 {
-    public partial class Lobby : Form, Ilobby
+    public partial class Lobby : Form
     {
         BindingList<Player> players;
 
@@ -90,7 +90,7 @@ namespace Planetes
             //will be needed further so that players will be able to update their name in lobby
         }
 
-        bool Ilobby.OpenLobby_WaitForGuestsAndBegin()
+        public bool OpenLobby_WaitForGuestsAndBegin()
         {
             if (ShowDialog(Owner) == DialogResult.OK)
             {

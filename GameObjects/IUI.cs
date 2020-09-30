@@ -9,7 +9,7 @@ namespace GameObjects
 
         bool InvokeRequired { get; }
 
-        Ilobby L { get; set; }
+        GameClient C { get; set; }
 
         void StartGraphics();
 
@@ -30,21 +30,13 @@ namespace GameObjects
         void UpdateLobby(GameState go);
     }
 
-    public interface Ilobby
-    {
-        void UpdateLobby(GameState go);
-
-        void Close();
-
-        bool OpenLobby_WaitForGuestsAndBegin();
-    }
 
     /// <summary>
     /// Needed for Bots - to disregard all UI calls from bot client 
     /// </summary>
     public class DummyPlug : IUI
     {
-        public Ilobby L { get ; set ; }
+        public GameClient C { get ; set ; }
 
         public string Text { get ; set ; }
 

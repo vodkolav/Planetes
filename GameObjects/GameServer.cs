@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace GameObjects
 {
@@ -25,6 +26,8 @@ namespace GameObjects
 
         public GameState gameObjects { get; set; }
 
+        public List<Bot> Bots { get; set; }
+
         //the Tuple holds: int ids of player to send message to, enum Notification type, and string the message
         public BlockingCollection<Tuple<string, Notification, string>> messageQ { get; set; }
 
@@ -37,6 +40,7 @@ namespace GameObjects
         public GameServer()
         {
             gameObjects = new GameState(GameConfig.WorldSize);
+            Bots = new List<Bot>();
             messageQ = new BlockingCollection<Tuple<string, Notification, string>>();
             hubContext = GlobalHost.ConnectionManager.GetHubContext<GameHub>();
         }
@@ -54,6 +58,17 @@ namespace GameObjects
             gameObjects.players.Add(newplayer);
             //string gobj = JsonConvert.SerializeObject(gameObjects); //only for debugging - to check what got serialized
             hubContext.Clients.All.UpdateLobby(gameObjects);
+        }
+
+        public void AddBot()
+        {
+            DummyPlug Rei = new DummyPlug();
+            Bot DMYSYS = new Bot1(Rei);
+            DMYSYS.joinNetworkGame(URL);
+            //DMYSYS.Me.Name = "Rei";
+            //DMYSYS.Me.Jet.Color = Color.White;
+            //DMYSYS.UpdateMe();
+            Bots.Add(DMYSYS);
         }
 
         public void Kick(Player kickedone)
