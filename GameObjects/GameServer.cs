@@ -11,6 +11,8 @@ namespace GameObjects
 {
     public class GameServer
     {
+        readonly Random R = new Random();
+
         private readonly static Lazy<GameServer> _instance = new Lazy<GameServer>(() => new GameServer());
         public static GameServer Instance
         {
@@ -52,12 +54,14 @@ namespace GameObjects
             Console.WriteLine(string.Format("Lobby open at {0}", url));
         }
 
-        public void Join(int playerID, string ConnectionID, string PlayerName)
+        public int Join( string ConnectionID, string PlayerName)
         {
+            int playerID = R.Next(1_000_000, 9_999_999); //GetHashCode();
             Player newplayer = new Player(playerID, ConnectionID, PlayerName, gameObjects);
             gameObjects.players.Add(newplayer);
             //string gobj = JsonConvert.SerializeObject(gameObjects); //only for debugging - to check what got serialized
-            hubContext.Clients.All.UpdateLobby(gameObjects);
+
+            return playerID;
         }
 
         public void AddBot()

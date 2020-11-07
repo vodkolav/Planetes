@@ -5,13 +5,15 @@ namespace GameObjects
 {
     public class Bullet
     {
-        public Vector Pos { get; set; }
-
+        public Vector Pos { get => Body.Pos; }     
+        
         public static int linearSpeed = 20;
 
-        public Vector Speed { get; set; }
+        public Vector Speed { get => Body.Tail; }
 
-        public int Size { get; set; }
+        public int Size { get => Body.Size; }       
+        
+        Ray Body { get; set; }
 
         public Color Color { get; set; }
 
@@ -21,23 +23,24 @@ namespace GameObjects
 
         public Bullet(Vector pos, Vector speed, int size, Color color)
         {
-            Pos = pos;
-            Speed = speed;
-            Size = size;
+            Body = new Ray();
+            Body.Pos = pos;
+            Body.Tail = speed;
+            Body.Size = size;
             Color = color;
             HasHit = false;
         }
 
         public bool Collides(Astroid a)
         {
-            return (Pos - a.Pos).Magnitude < a.Size;
+            return a.Body.Collides(Body);
         }
 
-        public void Draw(Graphics g)
+        public void Draw()
         {
             if (!HasHit)
             {
-                g.DrawLine(new Pen(Color, Size), (Pos - (Speed * 0.5)).AsPoint, Pos.AsPoint);
+                Body.Draw(Color);
             }
         }
 
@@ -46,7 +49,7 @@ namespace GameObjects
             //check for collision with wall
             foreach (Wall w in gameObjects.Walls)
             {
-                if (w.region.Collides(Pos))
+                if (w.Body.Collides(Pos))
                 {
                     HasHit = true;
                     return;
@@ -74,7 +77,7 @@ namespace GameObjects
 
         public void Offset(Vector by)
         {
-            Pos += by;
+           Body.Pos += by;
         }
     }
 }

@@ -36,18 +36,18 @@ namespace GameObjects
             }
         }
         [JsonIgnore]
-        public Brush Color
+        public Color Color
         {
             get
             {
                 switch (Type)
                 {
                     case AstType.Ammo:
-                        return Brushes.Yellow;
+                        return Color.Yellow;
                     case AstType.Health:
-                        return Brushes.Blue;
+                        return Color.Blue;
                     default:
-                        return Brushes.Brown;
+                        return Color.Brown;
                 }
             }
         }
@@ -64,11 +64,11 @@ namespace GameObjects
             HasHit = false;
         }
 
-        public void Draw(Graphics g)
+        public void Draw()
         {
             if (!HasHit)
             {
-                Body.Draw(g, Color);
+                Body.Draw(Color);
             }
         }
 
@@ -108,7 +108,7 @@ namespace GameObjects
 
             foreach (Wall w in gameObjects.Walls)
             {
-                if (w.region.Collides(Pos))
+                if (w.Body.Collides(Pos))
                 {
                     HasHit = true;
                 }

@@ -17,13 +17,7 @@ namespace GameObjects
 
         public Vector Aim { get; set; }
 
-        private SolidBrush brush;
-
-        public Color Color
-        {
-            get { return brush.Color; }
-            set { brush = new SolidBrush(value); }
-        }
+        public Color Color { get; set; } 
 
         public Polygon Hull { get; set; }
 
@@ -113,7 +107,7 @@ namespace GameObjects
             PolygonCollisionResult r;
             foreach (Wall w in gO.Walls)
             {
-                r = Hull.Collides(w.region, Speed);
+                r = Hull.Collides(w.Body, Speed);
                 if (r.WillIntersect)
                 {
                     Offset(Speed + r.MinimumTranslationVector);
@@ -148,18 +142,10 @@ namespace GameObjects
             }
         }
 
-        public void Draw(Graphics g)
+        public void Draw()
         {
-            //using (Matrix m = new Matrix())
-            //{
-            //	m.RotateAt((float)Bearing, Hull.Center());
-            //	g.Transform = m;
-
-            Hull.Draw(g, brush);
-            Cockpit.Draw(g, Brushes.Gray);
-            //	g.ResetTransform();
-
-            //}
+            Hull.Draw(Color);
+            Cockpit.Draw(Color.Gray);
         }
 
         public override string ToString()

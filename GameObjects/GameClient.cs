@@ -34,16 +34,16 @@ namespace GameObjects
         public async void joinNetworkGame(string URL)
         {
             try
-            {
-                PlayerId = new Random().Next(1_000_000, 9_999_999); //GetHashCode();
+            {                
                 Conn = new HubConnection(URL);
                 Proxy = Conn.CreateHubProxy("GameHub");
                 Proxy.On<GameState>("UpdateModel", updateGameState);
                 Proxy.On<GameState>("UpdateLobby", (go) => UpdateLobby(go));
+                Proxy.On<int>("JoinedLobby", (pID) => PlayerId = pID);
                 Proxy.On<Notification, string>("Notify", Notify);
                 Proxy.On("Start", Start);
                 await Conn.Start();
-                await Proxy.Invoke<GameState>("JoinLobby", new object[] { PlayerId, PlayerName });
+                await Proxy.Invoke<GameState>("JoinLobby", new object[] { PlayerName });
 
             }
             catch (Exception e)
@@ -65,6 +65,7 @@ namespace GameObjects
         public void UpdateLobby(GameState go)
         {
             UI.UpdateLobby(go);
+            updateGameState(go);
         }
 
         public async void UpdateMe()

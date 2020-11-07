@@ -46,10 +46,12 @@ namespace GameObjects
             _gameServer.Stop();
         }
 
-        public void JoinLobby(int playerID, string PlayerName)
+        public void JoinLobby(string PlayerName)
         {
-            _gameServer.Join(playerID, Context.ConnectionId, PlayerName);
-            Clients.All.UpdateModel(_gameServer.gameObjects);
+            int playerID = _gameServer.Join( Context.ConnectionId, PlayerName);
+            Clients.Client(Context.ConnectionId).JoinedLobby(playerID);
+            Clients.All.UpdateLobby(_gameServer.gameObjects);
+            //Clients.All.UpdateModel(_gameServer.gameObjects);
         }
 
 

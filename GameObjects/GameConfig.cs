@@ -6,7 +6,12 @@ namespace GameObjects
 {
     static class GameConfig
     {
+
+        static readonly Random r = new Random();
+
         public static Size WorldSize { get { return new Size(1600, 776); } }
+
+        public static TimeSpan FrameInterval { get { return new TimeSpan(0, 0, 0, 0, 10); } }
 
         public static int WallWidth { get { return 30; } }
 
@@ -39,7 +44,6 @@ namespace GameObjects
         {
             get
             {
-                Random r = new Random();
                 int x = r.Next(WallWidth * 3, WorldSize.Width - WallWidth * 3);
                 int y = r.Next(WallWidth * 3, WorldSize.Height - WallWidth * 3);
                 return new Point(x, y);

@@ -1,4 +1,5 @@
 ﻿using GameObjects;
+using PolygonCollision;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -17,8 +18,6 @@ namespace Planetes
         public GameClient C { get; set; }
 
         public Bitmap B { get; set; }
-
-        public Graphics G { get; set; }
 
         public Lobby L { get; set; }
 
@@ -66,12 +65,15 @@ namespace Planetes
         public void StartGraphics()
         {
             B = new Bitmap(pbxWorld.Width, pbxWorld.Height);
-            G = Graphics.FromImage(B);
+
+            Graphics G = Graphics.FromImage(B);
             G.SmoothingMode = SmoothingMode.AntiAlias;
+            DrawingContext.G = new WFGraphicsContainer(G);
+
             pbxWorld.Image = B;
 
             bindHUDS(C.gameObjects);
-            timerDraw.Interval = (int)(GameState.FrameInterval.TotalMilliseconds * 0.25);
+            timerDraw.Interval = (int)GameState.FrameInterval.TotalMilliseconds;// * 0.25);
             timerDraw.Start();
         }
 
@@ -107,9 +109,7 @@ namespace Planetes
               
         public void DrawGraphics()
         {
-            //should replace this with buffered image of the map
-            G.FillRectangle(Brushes.Black, new Rectangle(0, 0, pbxWorld.Width, pbxWorld.Height));
-            C.gameObjects.Draw(G);
+            C.gameObjects.Draw();
             pbxWorld.Image = B;
             if (pbxWorld != null)
                 pbxWorld.Invoke(new System.Action(pbxWorld.Refresh));

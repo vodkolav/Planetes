@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using System;
-
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -9,7 +8,7 @@ namespace GameObjects
 {
     public class GameState
     {
-        public static TimeSpan FrameInterval = new TimeSpan(0, 0, 0, 0, 15); // default. If you want to Change it, do it from outside
+        public static TimeSpan FrameInterval = GameConfig.FrameInterval; // default. If you want to Change it, do it from GameConfig
 
         public bool GameOn { get; set; } = false;
 
@@ -23,14 +22,16 @@ namespace GameObjects
 
         public List<Astroid> Astroids { get; set; }
 
-        [JsonIgnore] //Im not sure whether this is needed
-        public List<Wall> Walls { get; set; }
+        [JsonIgnore] //Im not sure whether this ignore is needed
+        public List<Wall> Walls { get => World.Walls; }
+
+        private Map World { get; set; }
 
         public GameState(Size winSize)
         {
             WinSize = winSize;
 
-            Walls = new Map(winSize).LoadDefault2();
+            World = new Map(winSize);
             players = new List<Player>();
             Astroids = new List<Astroid>();   
             frameNum = 0;
@@ -79,21 +80,22 @@ namespace GameObjects
 
 
 
-        public void Draw(Graphics g)
+        public void Draw()
         {
-            //make it iDrawable interface
-            Walls.ForEach(w => w.Draw(g));
+            //make it iDrawable interface?
+
+            World.Draw();
 
             lock (this)
             {
-                players.ForEach(p => p.Draw(g));
+                players.ForEach(p => p.Draw());
             }
 
             lock (this)
             {
-                Astroids.ForEach(a => a.Draw(g));
+                Astroids.ForEach(a => a.Draw());
             }
-        }   
+        }
         public void InitFeudingParties()
         {
             //simplest case: Free-For-All (All-Against-All)

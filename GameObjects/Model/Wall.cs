@@ -7,13 +7,13 @@ namespace GameObjects
     public class Wall
     {
         [JsonIgnore]
-        public Brush Color { get; set; }
+        public Color Color { get; set; }
 
         [JsonIgnore]
-        public Polygon region { get; set; }
+        public Polygon Body { get; set; }
 
 
-        public Wall(Point location, Size size, Brush color)
+        public Wall(Point location, Size size, Color color)
         {
             //Rectangle rectangle = new Rectangle(location, size);
             //region = new Region(rectangle);
@@ -21,19 +21,19 @@ namespace GameObjects
             Vector v01 = new Vector(0, 1);
             Vector vsize = new Vector(size.Width, size.Height);
             Vector vloc = new Vector(location);
-            region = new Polygon();
-            region.AddVertex(vloc);
-            region.AddVertex(vloc + v10 * vsize);
-            region.AddVertex(vloc + vsize);
-            region.AddVertex(vloc + v01 * vsize);
+            Body = new Polygon();
+            Body.AddVertex(vloc);
+            Body.AddVertex(vloc + v10 * vsize);
+            Body.AddVertex(vloc + vsize);
+            Body.AddVertex(vloc + v01 * vsize);
 
             //p.AddVertex(A - shift);
             Color = color;
         }
 
-        public Wall(Point from, Point to, Brush color, int width = 20)
+        public Wall(Point from, Point to, Color color, int width = 20)
         {
-            region = Construct(from, to, width);
+            Body = Construct(from, to, width);
 
             Color = color;
         }
@@ -58,9 +58,9 @@ namespace GameObjects
             return p;
         }
 
-        public void Draw(Graphics g)
+        public void Draw()
         {
-            g.FillPolygon(Color, region.PointFs);
+            Body.Draw(Color);
         }
     }
 }

@@ -13,6 +13,7 @@ namespace GameObjects
     public class Player
     {
         public int ID { get; set; }
+        [JsonIgnore]
         public string ConnectionID { get; set; }
         public string Name { get; set; }
         public Color Color { get { return Jet.Color; } }
@@ -229,10 +230,10 @@ namespace GameObjects
 
         }
 
-        internal void Draw(Graphics g)
+        internal void Draw()
         {
-            Jet.Draw(g);
-            Bullets.ForEach(b => b.Draw(g));
+            Jet.Draw();
+            Bullets.ForEach(b => b.Draw());
         }
     }
 }

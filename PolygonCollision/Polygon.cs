@@ -76,6 +76,15 @@ namespace PolygonCollision
             set { Vertices = new List<PointF>(value).ConvertAll(new Converter<PointF, Vector>(Vector.FromPointF)); }
         }
 
+        public Polygon FromRectangle(int x, int y, int w, int h)
+        {
+            AddVertex(new Vector(x, y));
+            AddVertex(new Vector(x + w, y));
+            AddVertex(new Vector(x + w, y + h));
+            AddVertex(new Vector(x, y + h));
+            return this;
+        }
+
         [JsonIgnore]
         public Vector Center
         {
@@ -283,9 +292,9 @@ namespace PolygonCollision
             return result;
         }
 
-        public void Draw(Graphics g, Brush color)
+        public void Draw(Color color)
         {
-            g.FillPolygon(color, PointFs);
+            DrawingContext.G.FillPolygon(color, PointFs);
         }
 
         // Calculate the distance between [minA, maxA] and [minB, maxB]

@@ -2,6 +2,7 @@
 
 namespace PolygonCollision
 {
+
     public class Circle
     {
         public Circle(Vector center, int r)
@@ -17,9 +18,9 @@ namespace PolygonCollision
             Pos += by;
         }
 
-        public void Draw(Graphics g, Brush color)
+        public void Draw(Color color)
         {
-            g.FillEllipse(color, Pos.X, Pos.Y, R, R);
+            DrawingContext.G.FillEllipse(color, Pos, (int)R);
         }
 
         /// <summary>
@@ -50,6 +51,11 @@ namespace PolygonCollision
                 return true;
             }
             return false;
+        }
+
+        public bool Collides(Ray l)
+        {
+            return (l.Pos - Pos).Magnitude < R;
         }
     }
 }
