@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System;
+using System.Windows.Forms;
 
 namespace Planetes
 {
@@ -11,8 +12,15 @@ namespace Planetes
 
         internal void Show(Form game, string message)
         {
-            Show(game);
-            Text = message;
+            if (InvokeRequired)
+            {
+                Invoke(new Action<Form,string>(Show), new object[] { message });
+            }
+            else
+            {
+                Show(game);
+                Text = message;
+            }
         }
     }
 }

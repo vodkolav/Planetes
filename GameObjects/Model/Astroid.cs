@@ -106,7 +106,7 @@ namespace GameObjects
 
 
 
-            foreach (Wall w in gameObjects.Walls)
+            foreach (Wall w in gameObjects.World.Walls)
             {
                 if (w.Body.Collides(Pos))
                 {

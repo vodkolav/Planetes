@@ -20,7 +20,7 @@ namespace PolygonCollision
 
         public void Draw(Color color)
         {
-            DrawingContext.G.FillEllipse(color, Pos, (int)R);
+            DrawingContext.GraphicsContainer.FillEllipse(color,this);
         }
 
         /// <summary>

@@ -47,7 +47,7 @@ namespace GameObjects
         public void Move(GameState gameObjects)
         {
             //check for collision with wall
-            foreach (Wall w in gameObjects.Walls)
+            foreach (Wall w in gameObjects.World.Walls)
             {
                 if (w.Body.Collides(Pos))
                 {

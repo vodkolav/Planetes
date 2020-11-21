@@ -62,13 +62,35 @@ namespace Planetes
         }
 
 
+        public virtual void Start()
+        {
+            
+            if (InvokeRequired)
+            {
+                Invoke(new System.Action(Start));
+            }
+            else
+            {
+                try
+                {                    
+                    StartGraphics();
+                    CloseLobby();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+            }
+        }
+
+
         public void StartGraphics()
         {
-            B = new Bitmap(pbxWorld.Width, pbxWorld.Height);
+            B = new Bitmap(C.gameObjects.WinSize.Width, C.gameObjects.WinSize.Height);
 
             Graphics G = Graphics.FromImage(B);
             G.SmoothingMode = SmoothingMode.AntiAlias;
-            DrawingContext.G = new WFGraphicsContainer(G);
+            DrawingContext.GraphicsContainer = new WFGraphicsContainer(G);
 
             pbxWorld.Image = B;
 
@@ -267,21 +289,28 @@ namespace Planetes
 
         public void Notify(string message)
         {
-            //should make a separate, non-blocking notification window.
-            MessageBox.Show(message);
+            if (InvokeRequired)
+            {
+                Invoke(new Action<string>(Notify), new object[] { message });
+            }
+            else
+            {
+                //should make a separate, non-blocking notification window.
+                MessageBox.Show(message);
+            }
         }
 
-        void IUI.AnnounceDeath()
+        public void AnnounceDeath()
         {
             new BillBoard().Show(this, "Tough luck");
         }
 
-        void IUI.CloseLobby()
+        public void CloseLobby()
         {
             L.Close();
         }
 
-        void IUI.UpdateLobby(GameState go)
+        public void UpdateLobby(GameState go)
         {
             L.UpdateLobby(go);
         }

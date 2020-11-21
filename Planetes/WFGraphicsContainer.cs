@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,25 +11,25 @@ namespace Planetes
 {
     class WFGraphicsContainer : IGraphicsContainer
     {
-        Graphics G;
+        readonly Graphics G;
         public WFGraphicsContainer(Graphics G)
         {
             this.G = G;
+        }      
+
+        public void DrawRay(Color c, Ray ray)
+        {
+            G.DrawLine(new Pen(c, ray.Size ), ray.Pos.AsPoint, (ray.Pos - ray.Tail).AsPoint);
         }
 
-        public void DrawLine(Color c, int Size, Vector Start, Vector End)
+        public void FillEllipse(Color c, Circle circ)
         {
-            G.DrawLine(new Pen(c, Size), Start.AsPoint, End.AsPoint);
+            G.FillEllipse(new SolidBrush(c), circ.Pos.X, circ.Pos.Y, circ.R, circ.R);
         }
 
-        public void FillEllipse(Color c, Vector Pos, int R)
+        public void FillPolygon(Color c, Polygon poly)
         {
-            G.FillEllipse(new SolidBrush(c), Pos.X, Pos.Y, R, R);
-        }
-
-        public void FillPolygon(Color c, PointF[] PointFs)
-        {
-            G.FillPolygon(new SolidBrush(c), PointFs);
+            G.FillPolygon(new SolidBrush(c), poly.PointFs);
         }
     }
 }

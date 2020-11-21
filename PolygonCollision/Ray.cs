@@ -21,7 +21,7 @@ namespace PolygonCollision
 
         public void Draw(Color c)
         {
-            DrawingContext.G.DrawLine(c, Size, Pos - (Tail * 0.5), Pos);
+            DrawingContext.GraphicsContainer.DrawRay(c, this);
         }
     }
 }

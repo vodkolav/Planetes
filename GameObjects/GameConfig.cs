@@ -9,7 +9,7 @@ namespace GameObjects
 
         static readonly Random r = new Random();
 
-        public static Size WorldSize { get { return new Size(1600, 776); } }
+        public static Size WorldSize { get { return new Size(1700, 800); } }
 
         public static TimeSpan FrameInterval { get { return new TimeSpan(0, 0, 0, 0, 10); } }
 

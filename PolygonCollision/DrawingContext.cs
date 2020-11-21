@@ -1,18 +1,8 @@
-﻿using System.Drawing;
-
-namespace PolygonCollision
-{
-    public static class DrawingContext 
-    {
-        public static IGraphicsContainer G { get; set; }
-    }
-
-    public interface IGraphicsContainer
-    {
-        void FillEllipse(Color c , Vector Pos, int R);
-
-        void FillPolygon(Color c, PointF[] PointFs);
-
-        void DrawLine(Color c, int Size, Vector Start , Vector End);
+﻿namespace PolygonCollision
+{ 
+    // We need this layer because we can't have static Interface
+    public static class DrawingContext
+    {       
+        public static IGraphicsContainer GraphicsContainer { get; set; }
     }
 }

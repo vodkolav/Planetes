@@ -39,7 +39,7 @@ namespace PolygonCollision
             return Edges;
         }
 
-
+      
         public void AddVertex(Vector vertex)
         {
             Vertices.Add(vertex);
@@ -69,6 +69,7 @@ namespace PolygonCollision
 
 
         public List<Vector> Vertices { get; private set; } = new List<Vector>();
+
         [JsonIgnore]
         public PointF[] PointFs
         {
@@ -76,12 +77,28 @@ namespace PolygonCollision
             set { Vertices = new List<PointF>(value).ConvertAll(new Converter<PointF, Vector>(Vector.FromPointF)); }
         }
 
-        public Polygon FromRectangle(int x, int y, int w, int h)
+        [JsonIgnore]
+        public int[] ints
+        {
+            get
+            {
+                int[] p = new int[Vertices.Count*2];
+                for (int i = 0; i <= Vertices.Count-1; i++)
+                {
+                    p[i*2] = (int)Vertices[i].X;
+                    p[i*2 + 1] = (int)Vertices[i].Y;
+                };
+                return p;
+            }
+        }
+
+    public Polygon FromRectangle(int x, int y, int w, int h)
         {
             AddVertex(new Vector(x, y));
             AddVertex(new Vector(x + w, y));
             AddVertex(new Vector(x + w, y + h));
             AddVertex(new Vector(x, y + h));
+            AddVertex(new Vector(x, y));
             return this;
         }
 
@@ -97,7 +114,6 @@ namespace PolygonCollision
                     totalX += Vertices[i].X;
                     totalY += Vertices[i].Y;
                 }
-
                 return new Vector(totalX / (float)Vertices.Count, totalY / (float)Vertices.Count);
             }
         }
@@ -294,8 +310,8 @@ namespace PolygonCollision
 
         public void Draw(Color color)
         {
-            DrawingContext.G.FillPolygon(color, PointFs);
-        }
+            DrawingContext.GraphicsContainer.FillPolygon(color, this);
+        }     
 
         // Calculate the distance between [minA, maxA] and [minB, maxB]
         // The distance will be negative if the intervals overlap

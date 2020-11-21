@@ -21,11 +21,9 @@ namespace GameObjects
         public List<Player> players { get; set; }
 
         public List<Astroid> Astroids { get; set; }
+     
 
-        [JsonIgnore] //Im not sure whether this ignore is needed
-        public List<Wall> Walls { get => World.Walls; }
-
-        private Map World { get; set; }
+        public Map World { get; set; }
 
         public GameState(Size winSize)
         {
@@ -83,9 +81,10 @@ namespace GameObjects
         public void Draw()
         {
             //make it iDrawable interface?
-
-            World.Draw();
-
+            lock (this)
+            {
+                World.Draw();
+            }
             lock (this)
             {
                 players.ForEach(p => p.Draw());

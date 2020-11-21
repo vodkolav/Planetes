@@ -36,11 +36,13 @@ namespace GameObjects
             Hull.AddVertex(new Vector(100, 50));
             Hull.AddVertex(new Vector(100, 70));
             Hull.AddVertex(new Vector(50, 70));
+            Hull.AddVertex(new Vector(50, 50));
 
             Cockpit = new Polygon();
             Cockpit.AddVertex(new Vector(100, 50));
             Cockpit.AddVertex(new Vector(130, 60));
             Cockpit.AddVertex(new Vector(100, 70));
+            Cockpit.AddVertex(new Vector(100, 50));
 
             Offset(new Vector(start));
             Speed = new Vector(0, 0);
@@ -105,7 +107,7 @@ namespace GameObjects
             }
 
             PolygonCollisionResult r;
-            foreach (Wall w in gO.Walls)
+            foreach (Wall w in gO.World.Walls)
             {
                 r = Hull.Collides(w.Body, Speed);
                 if (r.WillIntersect)

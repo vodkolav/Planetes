@@ -34,7 +34,7 @@ namespace GameObjects
         public async void joinNetworkGame(string URL)
         {
             try
-            {                
+            {
                 Conn = new HubConnection(URL);
                 Proxy = Conn.CreateHubProxy("GameHub");
                 Proxy.On<GameState>("UpdateModel", updateGameState);
@@ -75,35 +75,28 @@ namespace GameObjects
 
         public void Notify(Notification type, string message)
         {
-            if (UI.InvokeRequired)
-            {
-                UI.Invoke(new Action<Notification, string>(Notify), new object[] { type, message });
-            }
-            else
-            {
-                switch (type)
-                {
-                    case Notification.DeathNotice:
-                        {
-                            Die();
-                            break;
-                        }
-                    case Notification.Message:
-                        {
-                            UI.Notify(message);
-                            break;
-                        }
-                    case Notification.Kicked:
-                        {
-                            UI.Notify(message);
-                            UI.CloseLobby();
-                            break;
-                        }
-                }
 
+            switch (type)
+            {
+                case Notification.DeathNotice:
+                    {
+                        Die();
+                        break;
+                    }
+                case Notification.Message:
+                    {
+                        UI.Notify(message);
+                        break;
+                    }
+                case Notification.Kicked:
+                    {
+                        UI.Notify(message);
+                        UI.CloseLobby();
+                        break;
+                    }
             }
         }
-         
+
         protected virtual void Die()
         {
             Yoke.unbind();
@@ -117,26 +110,10 @@ namespace GameObjects
 
         public virtual void Start()
         {
-            if (UI.InvokeRequired)
-            {
-                UI.Invoke(new System.Action(Start));
-            }
-            else
-            {
-                try
-                {
-                    Yoke = new ControlPanel(Proxy, PlayerId);
-                    Yoke.bindWASD();
-                    Yoke.bindMouse();
-                    UI.StartGraphics();
-                    UI.CloseLobby();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                }
-            }
+            Yoke = new ControlPanel(Proxy, PlayerId);
+            Yoke.bindWASD();
+            Yoke.bindMouse();
+            UI.Start();
         }
-              
     }
 }

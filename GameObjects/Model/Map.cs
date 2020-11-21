@@ -32,37 +32,23 @@ namespace GameObjects
             Walls.ForEach(w => w.Draw());
         }
 
-
-        public List<Wall> LoadDefault(Color wallBrush, int wallWidth = 20)
-        {
-            //wallWidth = 20; //default wallwidth
-            //wallBrush = Brushes.Magenta;
-
-            Walls.Add(new Wall(new Point(0, 0), new Point(winSize.Width, 0), wallBrush));
-            Walls.Add(new Wall(new Point(0, 0), new Size(wallWidth, winSize.Height), wallBrush));
-            Walls.Add(new Wall(new Point(0, winSize.Height - wallWidth), new Size(winSize.Width, wallWidth), wallBrush));
-            Walls.Add(new Wall(new Point(winSize.Width - wallWidth, 0), new Size(wallWidth, winSize.Height), wallBrush));
-
-            Walls.Add(new Wall(new Point(winSize.Width / 2, 100), new Size(wallWidth, 100), wallBrush));
-
-            Walls.Add(new Wall(new Point(100, 100), new Point(200, 200), wallBrush, wallWidth));
-            return Walls;
-        }
         public List<Wall> LoadDefault2()
         {
             Color wallBrush = Color.Magenta;
 
+            int b = 0; //border width
+
             //create edge of screen walls 
-            Point nw = new Point(0, 0);
-            Point ne = new Point(winSize.Width, 0);
-            Point se = new Point(winSize.Width, winSize.Height);
-            Point sw = new Point(0, winSize.Height);
+            Point nw = new Point(b, b);
+            Point ne = new Point(winSize.Width-b, b);
+            Point se = new Point(winSize.Width-b, winSize.Height-b);
+            Point sw = new Point(b, winSize.Height-b);
 
 
-            Walls.Add(new Wall(nw, ne, wallBrush));
-            Walls.Add(new Wall(ne, se, wallBrush));
-            Walls.Add(new Wall(se, sw, wallBrush));
-            Walls.Add(new Wall(sw, nw, wallBrush));
+            Walls.Add(new Wall(nw, ne, wallBrush)); //upper
+            Walls.Add(new Wall(ne, se, wallBrush)); //right
+            Walls.Add(new Wall(se, sw, wallBrush)); //bottom
+            Walls.Add(new Wall(sw, nw, wallBrush)); //left
 
             //create corner diagonal walls 
             int sh = 200; //shift from corner
