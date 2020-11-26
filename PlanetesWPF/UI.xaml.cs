@@ -2,6 +2,7 @@
 using System;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -29,7 +30,7 @@ namespace PlanetesWPF
         {
             InitializeComponent();
             C = new GameClient(this);
-            L = new Lobby();//todo later: set UI as owner to lobby
+            L = new Lobby(this);//todo later: set UI as owner to lobby
         }
 
         public void AutoStart(string AutoStartgametype)
@@ -59,9 +60,10 @@ namespace PlanetesWPF
             Text += "Planetes: " + C.PlayerId;
         }
      
-        public void AnnounceDeath()
+        public void AnnounceDeath(string message)
         {
-            Console.WriteLine("YOU DIED");
+            MessageBox.Show(message); //"YOU DIED"
+            Console.WriteLine(message);
         }
 
         public void bindHUDS(GameState gameObjects)
@@ -75,13 +77,33 @@ namespace PlanetesWPF
             L.Close();
         }
 
-        public Point fromVector(PolygonCollision.Vector vec)
+        internal void AddBot()
         {
-            return new Point(vec.X, vec.Y);
-        }    
+            if (((UI)Owner).isServer)
+            {
+                S.AddBot();
+                return;
+            }
+            throw new UnauthorizedAccessException("Only the host can add players");
+        }
+
+        public void KickPlayer(Player kickedone)
+        {
+            if (isServer)
+            {
+                S.Kick(kickedone);
+            }
+            else
+            {
+                Console.WriteLine("You can only kick yourself");
+            }
+        }
 
         public void DrawGraphics()
         {
+            //or maybe try to implement it through DrawingVisual, here'is a good examplws site:
+            //http://windowspresentationfoundationinfo.blogspot.com/2014_07_01_archive.html?view=classic
+
             if (B != null)
             {
                 // Wrap updates in a GetContext call, to prevent invalidation and nested locking/unlocking during this block
@@ -100,7 +122,7 @@ namespace PlanetesWPF
         public void Notify(string message)
         {
             //should make a separate, non-blocking notification window.
-            MessageBox.Show(message);
+           MessageBox.Show(message);
         }
 
         public void Start()
@@ -143,7 +165,7 @@ namespace PlanetesWPF
             Text += " (Client)";
             C.joinNetworkGame(URL);
 
-            bool GameStarted = L.OpenLobby_WaitForGuestsAndBegin();
+            bool GameStarted = L.OpenLobby_WaitForGuestsAndBegin(this);
 
             if (GameStarted)
             {
@@ -196,5 +218,59 @@ namespace PlanetesWPF
         {
             AutoStart("SinglePlayer");
         }
+
+        #region piloting 
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (C.GameOn)
+            {
+                C.Yoke.Press(KeyInterop.VirtualKeyFromKey(e.Key));
+            }
+        }
+
+        private void Window_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (C.GameOn)
+            {
+                C.Yoke.Release(KeyInterop.VirtualKeyFromKey(e.Key));
+            }
+        }
+
+        private System.Windows.Forms.MouseButtons fromMouseButton(MouseButton btn)
+        {
+            System.Windows.Forms.MouseButtons btns;
+            Enum.TryParse(btn.ToString(), out btns);
+            return btns;
+        }
+
+        private void World_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (C.GameOn)
+            {
+                C.Yoke.Press(fromMouseButton(e.ChangedButton));
+            }
+        }
+
+        private void World_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (C.GameOn)
+            {
+                C.Yoke.Release(fromMouseButton(e.ChangedButton));
+            }             
+        }
+
+        private PolygonCollision.Vector FromPoint(Point p)
+        {
+            return new PolygonCollision.Vector((float)p.X, (float)p.Y);
+        }
+
+        private void World_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (C.GameOn)
+            {                
+                C.Yoke.Aim(FromPoint(e.GetPosition(World)));
+            }
+        }
+        #endregion
     }
 }

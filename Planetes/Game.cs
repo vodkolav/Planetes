@@ -1,7 +1,6 @@
 ﻿using GameObjects;
 using PolygonCollision;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Threading.Tasks;
@@ -21,6 +20,8 @@ namespace Planetes
 
         public Lobby L { get; set; }
 
+        public BillBoard Billboard { get; set; }
+
         public Game()
         {
             InitializeComponent();
@@ -31,7 +32,7 @@ namespace Planetes
                      ControlStyles.UserPaint, true);
             C = new GameClient(this);
             L = new Lobby(this);
-
+            Billboard = new BillBoard(this);
         }
 
         public Game(string AutoStartgametype) : this()
@@ -163,9 +164,7 @@ namespace Planetes
         private void Game_KeyDown(object sender, KeyEventArgs e)
         {
             if (C.GameOn)
-            {
                 C.Yoke.Press(e.KeyData);
-            }
         }
 
         private void Game_KeyUp(object sender, KeyEventArgs e)
@@ -178,7 +177,7 @@ namespace Planetes
         private void pbxWorld_MouseMove(object sender, MouseEventArgs e)
         {
             if (C.GameOn)
-                C.Yoke.Aim(e.Location);
+                C.Yoke.Aim(Vector.FromPoint(e.Location));
         }
 
         private void pbxWorld_MouseDown(object sender, MouseEventArgs e)
@@ -300,9 +299,16 @@ namespace Planetes
             }
         }
 
-        public void AnnounceDeath()
+        public void AnnounceDeath(string message)
         {
-            new BillBoard().Show(this, "Tough luck");
+            if (InvokeRequired)
+            {
+                Invoke(new Action<string>(AnnounceDeath),message);
+            }
+            else
+            {
+                Billboard.Show(this, message);               
+            }           
         }
 
         public void CloseLobby()

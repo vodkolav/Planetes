@@ -92,11 +92,7 @@ namespace Planetes
 
         public bool OpenLobby_WaitForGuestsAndBegin()
         {
-            if (ShowDialog(Owner) == DialogResult.OK)
-            {
-                return true;
-            }
-            return false;
+            return ShowDialog(Owner) == DialogResult.OK;            
         }
 
         private void btnAddBot_Click(object sender, EventArgs e)

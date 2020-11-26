@@ -22,12 +22,12 @@ namespace PlanetesWPF
         public void DrawRay(System.Drawing.Color c, Ray ray)
         {
             Vector End = ray.Pos - ray.Tail;
-            B.DrawLineAa((int)ray.Pos.X, (int)ray.Pos.Y, (int)End.X, (int)End.Y, System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B));
+            B.DrawLineAa((int)ray.Pos.X, (int)ray.Pos.Y, (int)End.X, (int)End.Y, System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B),ray.Size);
         }
 
         public void FillEllipse(System.Drawing.Color c, Circle cir)
         {
-            B.FillEllipseCentered((int)cir.Pos.X, (int)cir.Pos.Y, (int)cir.R, (int)cir.R, System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B));
+            B.FillEllipseCentered((int)cir.Pos.X, (int)cir.Pos.Y, (int)cir.R/2, (int)cir.R/2, System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B));
         }
 
         public void FillPolygon(System.Drawing.Color c, Polygon poly)

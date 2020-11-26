@@ -80,7 +80,7 @@ namespace GameObjects
             {
                 case Notification.DeathNotice:
                     {
-                        Die();
+                        Die(message);
                         break;
                     }
                 case Notification.Message:
@@ -97,10 +97,10 @@ namespace GameObjects
             }
         }
 
-        protected virtual void Die()
+        protected virtual void Die(string message)
         {
             Yoke.unbind();
-            UI.AnnounceDeath();
+            UI.AnnounceDeath(message);
         }
 
         public async Task StartServer()

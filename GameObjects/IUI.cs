@@ -7,9 +7,7 @@ namespace GameObjects
     {
         string Text { get; set; }
 
-
         GameClient C { get; set; }
-
 
         void DrawGraphics();
 
@@ -17,7 +15,7 @@ namespace GameObjects
 
         void Notify(string message);
 
-        void AnnounceDeath();
+        void AnnounceDeath(string message);
 
         Task LeaveLobby();
 

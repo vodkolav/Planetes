@@ -66,13 +66,20 @@ namespace GameObjects
 
         public void AddBot()
         {
-            DummyPlug Rei = new DummyPlug();
-            Bot DMYSYS = new Bot1(Rei);
-            DMYSYS.joinNetworkGame(URL);
-            //DMYSYS.Me.Name = "Rei";
-            //DMYSYS.Me.Jet.Color = Color.White;
-            //DMYSYS.UpdateMe();
-            Bots.Add(DMYSYS);
+            if (gameObjects.players.Count > 8)
+            {
+                throw new IndexOutOfRangeException("There can only be 9 players in a game ");
+            }
+            else
+            {  
+                DummyPlug Rei = new DummyPlug();
+                Bot DMYSYS = new Bot1(Rei);
+                DMYSYS.joinNetworkGame(URL);
+                //DMYSYS.Me.Name = "Rei";
+                //DMYSYS.Me.Jet.Color = Color.White;
+                //DMYSYS.UpdateMe();
+                Bots.Add(DMYSYS);
+            }
         }
 
         public void Kick(Player kickedone)

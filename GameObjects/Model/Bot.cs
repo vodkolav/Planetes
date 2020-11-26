@@ -123,10 +123,10 @@ namespace GameObjects
             }
         }
 
-        protected sealed override void Die()
+        protected sealed override void Die(string message)
         {
             computer.Join();
-            base.Die();
+            base.Die(message);
         }
 
         protected virtual void Prepare()

@@ -2,7 +2,6 @@
 using PolygonCollision;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -36,7 +35,7 @@ namespace GameObjects
         }
 
         public void bindMouse()
-        {
+        {            
             MouseBindings.Add(MouseButtons.Left, HOTAS.Shoot);
             MouseBindings.Add(MouseButtons.None, HOTAS.Aim);
         }
@@ -84,6 +83,11 @@ namespace GameObjects
                 Proxy.Invoke("Aim", new object[] { PlayerID, new Tuple<Action, Vector>(Action.Aim, at) });
         }
 
+        public void Press(int key)
+        {
+            Press((Keys)key);
+        }
+
         public void Press(Keys key)
         {
             if (KeyBindings.Keys.Contains(key))
@@ -92,6 +96,12 @@ namespace GameObjects
                 Press(instruction);
             }
         }
+
+        public void Release(int key)
+        {
+            Release((Keys)key);
+        }
+        
         public void Release(Keys key)
         {
             if (KeyBindings.Keys.Contains(key))
@@ -99,7 +109,7 @@ namespace GameObjects
                 HOTAS instruction = KeyBindings[key];
                 Release(instruction);
             }
-        }
+        }  
 
         public void Press(MouseButtons button)
         {
@@ -109,7 +119,7 @@ namespace GameObjects
                 Press(instruction);
             }
         }
-
+          
         public void Release(MouseButtons button)
         {
             if (MouseBindings.Keys.Contains(button))
@@ -119,11 +129,11 @@ namespace GameObjects
             }
         }
 
-        public void Aim(Point at)
+        public void Aim(Vector at)
         {
             if (MouseBindings.Keys.Contains(MouseButtons.None))
             {
-                Do(HOTAS.Aim, Vector.FromPoint(at));
+                Do(HOTAS.Aim, at);
                // Proxy.Invoke("Aim", new object[] { PlayerID, new Tuple<Action, Vector>(Action.Aim, Vector.FromPoint(at)) });
 
             }

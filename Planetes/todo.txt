@@ -1,6 +1,7 @@
 ﻿TODO:
 Features:
 	implement pause
+	implement braking (deceleration)
 	implement ability to update player's info in lobby 	
 	implement recording games as movies/GIFs
 	implement game configuration 
@@ -10,15 +11,16 @@ Features:
 
 Architecture:
 	make UI in WPF, beacuse GDI+ is horrible for animation
+	make a Class for all the objects conversions 
 	implement proper game loop with timer and without thread.sleep
 	change Steer to Press in player class
-	create iMovable, iCollidable interfaces
+	create iMovable, iCollidable interfaces?
 
 Visual:
 	make ship prettier, add wings
 	slap ship sprites on top of polygons?
 	make better maps
-	implement big world outside of screen and camera movement (probably this will be useful:
+	implement big world outside of screen and camera movement (viewport) (probably this will be useful:
 	https://www.codeproject.com/Articles/85603/A-WPF-custom-control-for-zooming-and-panning)
 	change $safeprojectname$ (appears in task manager) to Planetes
 
@@ -26,7 +28,7 @@ Gameplay:
 	implement trajectory prediction 
 	implement harpoon 
 	implement ship collisions	
-
+	implement gravity
 
 
 DONE:
@@ -43,10 +45,10 @@ DONE:
 	implement game with bots 
 	implement kick players/bots from lobby
 
-BUGS:
-	nullreference exception in yoke if you have mouse on game window when game is starting 
-	walls can't be serialized for some reason
+BUGS:	
 	If during debugging I stay in break mode for a bit more time then signalR disconnects with exception
 
 FIXED:
-	:(
+	walls can't be serialized for some reason
+		Cause: if class has more than one non-default constructor, jsonserializer doesn't know which one to choose
+	nullreference exception in yoke if you have mouse on game window when game is starting 	

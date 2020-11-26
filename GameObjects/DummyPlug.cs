@@ -13,7 +13,7 @@ namespace GameObjects
 
         //public bool InvokeRequired{get => false;}
           
-        public void AnnounceDeath()
+        public void AnnounceDeath(string message)
         {
         }
 

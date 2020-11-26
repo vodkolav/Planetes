@@ -6,8 +6,26 @@
         xmlns:local="clr-namespace:PlanetesWPF"
         mc:Ignorable="d"
         Title="Lobby" Height="450" Width="800">
-    <Grid>
-        <Button Content="Start" HorizontalAlignment="Left" Margin="25,352,0,0" VerticalAlignment="Top" Width="75" Height="57" Click="Button_Click"/>
+    <Grid Margin="0">
+        <Grid.RowDefinitions>
 
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="100"/>
+        </Grid.RowDefinitions>
+
+        <Button x:Name="btnStart" Grid.Row="1" Content="Start" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="75" Height="57" Click="btnStart_Click"/>
+        <Button x:Name="btnAddBot" Grid.Row="1" Content="Add Bot" HorizontalAlignment="Left" Margin="90,10,0,0" VerticalAlignment="Top" Width="75" Height="57" Click="btnAddBot_Click" />
+        <Button x:Name="btnKickPlayer" Grid.Row="1" Content="Kick Player" HorizontalAlignment="Left" Margin="170,10,0,0" VerticalAlignment="Top" Width="75" Height="57" Click="btnKickPlayer_Click"/>
+        <Button x:Name="btnCancel" Grid.Row="1" Content="Cancel" HorizontalAlignment="Left" Margin="707,10,0,0" VerticalAlignment="Top" Width="75" Height="57" Click="btnCancel_Click"  />
+        <DataGrid x:Name="dgPlayers" Grid.Row="0" HorizontalAlignment="Left" Height="299" Margin="10,10,0,0" VerticalAlignment="Top" Width="772">
+            <DataGrid.Columns>
+
+                <DataGridTextColumn Header="ID" Binding="{Binding ID}" />
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+                <DataGridTextColumn Header="MaxHealth" Binding="{Binding MaxHealth}" />
+                <DataGridTextColumn Header="MaxAmmo" Binding="{Binding MaxAmmo}" />
+                <DataGridTextColumn Header="Jet" Binding="{Binding Jet.Color}" />
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Window>
