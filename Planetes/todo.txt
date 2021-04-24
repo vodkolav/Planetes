@@ -8,6 +8,7 @@ Features:
 	implement drawing walls by hand (map editor)
 	make pretty README.MD
 	make polygon collision calculation on GPU?
+	make self-learning bots (https://towardsdatascience.com/how-to-teach-an-ai-to-play-games-deep-reinforcement-learning-28f9b920440a)
 
 Architecture:
 	make UI in WPF, beacuse GDI+ is horrible for animation
@@ -17,6 +18,7 @@ Architecture:
 	create iMovable, iCollidable interfaces?
 
 Visual:
+	ensure health 0 when killed
 	make ship prettier, add wings
 	slap ship sprites on top of polygons?
 	make better maps
@@ -25,6 +27,7 @@ Visual:
 	change $safeprojectname$ (appears in task manager) to Planetes
 
 Gameplay:
+	allow for variable game speed 
 	implement trajectory prediction 
 	implement harpoon 
 	implement ship collisions	
@@ -49,6 +52,7 @@ BUGS:
 	If during debugging I stay in break mode for a bit more time then signalR disconnects with exception
 
 FIXED:
+	implement ACTUAL network game, not just localhost to localhost 
 	walls can't be serialized for some reason
 		Cause: if class has more than one non-default constructor, jsonserializer doesn't know which one to choose
 	nullreference exception in yoke if you have mouse on game window when game is starting 	

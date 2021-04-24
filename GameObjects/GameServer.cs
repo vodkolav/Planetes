@@ -6,6 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
 
 namespace GameObjects
 {
@@ -46,12 +48,33 @@ namespace GameObjects
             messageQ = new BlockingCollection<Tuple<string, Notification, string>>();
             hubContext = GlobalHost.ConnectionManager.GetHubContext<GameHub>();
         }
-        public void Listen(string url)
+        public void Listen(int port)
         {
-            URL = url;
-            webapp = WebApp.Start<Startup>(url);
+            try
+            {
+                URL = "http://" + GetLocalIPAddress() + ":" + port;
+                // to allow doing this, run in cmd as administrator:
+                // netsh http add urlacl http://*:8030/ user=host\user
+                webapp = WebApp.Start<Startup>("http://*:" + port);
+                Console.WriteLine(string.Format("Lobby open at {0}", URL));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
 
-            Console.WriteLine(string.Format("Lobby open at {0}", url));
+        public static string GetLocalIPAddress()
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return ip.ToString();
+                }
+            }
+            throw new Exception("Local IP Address Not Found!");
         }
 
         public int Join( string ConnectionID, string PlayerName)
@@ -197,7 +220,7 @@ namespace GameObjects
 
                     tdiff = DateTime.UtcNow - dt;
                     Thread.Sleep((GameState.FrameInterval - tdiff).Duration()); //this is bad. There should be timer instead
-                    Console.WriteLine("frameNum: " + gameObjects.frameNum);// + "| " + tdiff.ToString()
+                    //Console.WriteLine("frameNum: " + gameObjects.frameNum);// + "| " + tdiff.ToString()
                 }
             }
             catch (Exception e)

@@ -26,6 +26,8 @@ namespace PlanetesWPF
 
         public WriteableBitmap B { get; set; }
 
+        public GameRecorder R { get; set; }
+
         public UI()
         {
             InitializeComponent();
@@ -48,7 +50,7 @@ namespace PlanetesWPF
                     }
                 case "joinNetworkGame":
                     {
-                        C.joinNetworkGame($"http://127.0.0.1:8030/");
+                        C.joinNetworkGame($"http://192.168.1.11:8030/");
                         break;
                     }
                 case "SinglePlayer":
@@ -79,7 +81,7 @@ namespace PlanetesWPF
 
         internal void AddBot()
         {
-            if (((UI)Owner).isServer)
+            if (isServer)
             {
                 S.AddBot();
                 return;
@@ -109,11 +111,11 @@ namespace PlanetesWPF
                 // Wrap updates in a GetContext call, to prevent invalidation and nested locking/unlocking during this block
                 using (B.GetBitmapContext())
                 {
-                    C.gameObjects.Draw();
+                    C.gameObjects.Draw();                      
                 }
             }
-        }     
-
+        }
+        
         public async Task LeaveLobby()
         {
             await C.LeaveLobby();
@@ -136,13 +138,16 @@ namespace PlanetesWPF
         }
 
         public void StartGraphics()
-        {
+        {            
             B = BitmapFactory.New(C.gameObjects.WinSize.Width, C.gameObjects.WinSize.Height);
             World.Source = B;
             PolygonCollision.DrawingContext.GraphicsContainer = new WPFGraphicsContainer(B);
-            CompositionTarget.Rendering += (s, e) => DrawGraphics();
+            R = new GameRecorder(B);
+            CompositionTarget.Rendering += (s, e) => DrawGraphics();            
+            CompositionTarget.Rendering += (s, e) => R.AddFrame(B);
+            Closing += (s, e) => R.End();            
         }
-
+        
         public void UpdateLobby(GameState go)
         {
             L.UpdateLobby(go);
@@ -151,12 +156,10 @@ namespace PlanetesWPF
         public string hostNetworkGame()
         {
             Text += " (Server)";
-            string URL = "http://127.0.0.1:8030";
-
             S = GameServer.Instance;
 
-            S.Listen(URL);
-            return URL;
+            S.Listen(8030);
+            return S.URL;
         }
 
 
@@ -192,7 +195,7 @@ namespace PlanetesWPF
         public async Task HostSingleplayer()
         {
             var URL = hostNetworkGame();
-
+            
             S.AddBot();
             S.AddBot();
             await joinNetworkGame(URL);
@@ -201,7 +204,26 @@ namespace PlanetesWPF
 
         private async void MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            await joinNetworkGame($"http://127.0.0.1:8030/");
+            IpDialog ipd = new IpDialog();
+            var dr = ipd.ShowDialog();
+            if (dr.HasValue && dr.Value)
+                try
+                {
+                    await joinNetworkGame(ipd.URL);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Could not connect to server!\n" + ex.Message);
+                }
+
+            //string url = $"http://127.0.0.1:8030/";
+            //string url = $"http://192.168.1.11:8030/";
+            //await joinNetworkGame(url);
+        }
+
+        private Task joinNetworkGame(object uRL)
+        {
+            throw new NotImplementedException();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -210,8 +232,8 @@ namespace PlanetesWPF
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
-        { 
-
+        {
+            AutoStart("SinglePlayer");// "HostSingleplayer");
         }
 
         private void MenuItem_Click_1(object sender, RoutedEventArgs e)
@@ -222,8 +244,13 @@ namespace PlanetesWPF
         #region piloting 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
+            Console.WriteLine("Window_KeyDown event" );
             if (C.GameOn)
             {
+                if (e.Key == Key.R)
+                {
+                    R.Start();
+                }
                 C.Yoke.Press(KeyInterop.VirtualKeyFromKey(e.Key));
             }
         }
@@ -232,6 +259,10 @@ namespace PlanetesWPF
         {
             if (C.GameOn)
             {
+                if (e.Key == Key.R)
+                {     
+                    R.End();
+                }               
                 C.Yoke.Release(KeyInterop.VirtualKeyFromKey(e.Key));
             }
         }

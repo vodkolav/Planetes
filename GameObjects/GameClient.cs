@@ -59,7 +59,7 @@ namespace GameObjects
         public void updateGameState(GameState go)
         {
             gameObjects = go;
-            Console.WriteLine("frameNum: " + gameObjects.frameNum);// + "| " + tdiff.ToString()
+            Console.Write("\r frameNum: " + gameObjects.frameNum);// + "| " + tdiff.ToString()
         }
 
         public void UpdateLobby(GameState go)

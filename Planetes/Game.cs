@@ -238,14 +238,12 @@ namespace Planetes
         public string hostNetworkGame()
         {
             Text += " (Server)";
-            string URL = "http://127.0.0.1:8030";
-
+            //string URL = "http://127.0.0.1:8030";
+            
             S = GameServer.Instance;
-
-            S.Listen(URL);
-            return URL;
-        }
-
+            S.Listen(8030);
+            return S.URL;
+        }   
 
         public async Task joinNetworkGame(string URL)
         {
@@ -332,10 +330,7 @@ namespace Planetes
             if (vd.ShowDialog() == DialogResult.OK)
                 try
                 {
-                    if (vd.IP == "...")
-                        await joinNetworkGame($"http://127.0.0.1:8030/");
-                    else
-                        await joinNetworkGame(vd.URL);
+                    await joinNetworkGame(vd.URL);
                 }
                 catch (Exception ex)
                 {
