@@ -39,6 +39,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -55,6 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DummyPlug.cs" />
     <Compile Include="Model\Astroid.cs" />
     <Compile Include="Model\Bot.cs" />
     <Compile Include="Model\Bullet.cs" />
@@ -84,10 +87,22 @@
     <PackageReference Include="Microsoft.AspNet.SignalR.Core">
       <Version>2.4.1</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.Owin">
+      <Version>4.1.1</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.Owin.Cors">
+      <Version>4.1.1</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Owin.Host.HttpListener">
       <Version>4.1.0</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Owin.Hosting">
+      <Version>4.1.0</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Owin.Security">
+      <Version>4.1.0</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Owin.SelfHost">
       <Version>4.1.0</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
@@ -96,6 +111,9 @@
     <PackageReference Include="Owin">
       <Version>1.0.0</Version>
     </PackageReference>
+    <PackageReference Include="WindowsBase">
+      <Version>4.6.1055</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PolygonCollision\PolygonCollision.csproj">
@@ -103,7 +121,6 @@
       <Name>PolygonCollision</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

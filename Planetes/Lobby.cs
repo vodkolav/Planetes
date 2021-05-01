@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace Planetes
 {
-    public partial class Lobby : Form, Ilobby
+    public partial class Lobby : Form
     {
         BindingList<Player> players;
 
@@ -90,13 +90,20 @@ namespace Planetes
             //will be needed further so that players will be able to update their name in lobby
         }
 
-        bool Ilobby.OpenLobby_WaitForGuestsAndBegin()
+        public bool OpenLobby_WaitForGuestsAndBegin()
         {
-            if (ShowDialog(Owner) == DialogResult.OK)
-            {
-                return true;
-            }
-            return false;
+            return ShowDialog(Owner) == DialogResult.OK;            
+        }
+
+        private void btnAddBot_Click(object sender, EventArgs e)
+        {
+            ((Game)Owner).AddBot();
+        }
+
+        private void btnKickPlayer_Click(object sender, EventArgs e)
+        {
+            Player kickedone = (Player)dgvwPlayers.SelectedRows[0].DataBoundItem;
+            ((Game)Owner).KickPlayer(kickedone);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace GameObjects
         public AstType Type { get; set; }
         public bool HasHit { get; set; }
 
-        static public int Timeout { get { return 10; } }
+        static public int Timeout { get { return GameConfig.AsteroidTimeout; } }
 
         public void TossType(Random random)
         {
@@ -36,18 +36,18 @@ namespace GameObjects
             }
         }
         [JsonIgnore]
-        public Brush Color
+        public Color Color
         {
             get
             {
                 switch (Type)
                 {
                     case AstType.Ammo:
-                        return Brushes.Yellow;
+                        return Color.Yellow;
                     case AstType.Health:
-                        return Brushes.Blue;
+                        return Color.Blue;
                     default:
-                        return Brushes.Brown;
+                        return Color.SaddleBrown;
                 }
             }
         }
@@ -55,8 +55,8 @@ namespace GameObjects
         public Astroid(Size winSize)
         {
             Random random = new Random();
-            Body = new Circle(new Vector(random.Next(winSize.Width), random.Next(winSize.Height)), random.Next(10) + 5);
-            int linearSpeed = random.Next(1, 4) + 1;
+            Body = new Circle(new Vector(random.Next(winSize.Width), random.Next(winSize.Height)), random.Next(20) + 5);
+            int linearSpeed = random.Next(1, (int)GameConfig.Lightspeed);
             double Angle = Math.PI / 180 * random.Next(360);
             Vector mult = new Vector((float)Math.Cos(Angle), (float)Math.Sin(Angle));
             Speed = mult * linearSpeed;
@@ -64,11 +64,11 @@ namespace GameObjects
             HasHit = false;
         }
 
-        public void Draw(Graphics g)
+        public void Draw()
         {
             if (!HasHit)
             {
-                Body.Draw(g, Color);
+                Body.Draw(Color);
             }
         }
 
@@ -106,9 +106,9 @@ namespace GameObjects
 
 
 
-            foreach (Wall w in gameObjects.Walls)
+            foreach (Wall w in gameObjects.World.Walls)
             {
-                if (w.region.Collides(Pos))
+                if (w.Body.Collides(Pos))
                 {
                     HasHit = true;
                 }

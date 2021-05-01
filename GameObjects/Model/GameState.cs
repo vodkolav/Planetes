@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -9,99 +8,102 @@ namespace GameObjects
 {
     public class GameState
     {
-        public static TimeSpan FrameInterval = new TimeSpan(0, 0, 0, 0, 15); // default. If you want to Change it, do it from outside
+        public static TimeSpan FrameInterval = GameConfig.FrameInterval; // default. If you want to Change it, do it from GameConfig
 
         public bool GameOn { get; set; } = false;
 
         public bool Paused { get; set; }
 
-        public int frameNum;
-        public Size WinSize { get; set; }
+        public int frameNum { get; set; }
 
-        public Player Winner;
-        [JsonIgnore]
-        public BlockingCollection<Tuple<string, Notification, string>> messageQ { get; set; }
-        //the Tuple holds: int ids of players to send message to and string the message
+        public Size WinSize { get; set; }
+                       
         public List<Player> players { get; set; }
 
         public List<Astroid> Astroids { get; set; }
+     
 
-        [JsonIgnore]
-        public List<Wall> Walls { get; set; }
+        public Map World { get; set; }
 
         public GameState(Size winSize)
         {
             WinSize = winSize;
 
-            Walls = new Map(winSize).LoadDefault2();
+            World = new Map(winSize);
             players = new List<Player>();
-            Astroids = new List<Astroid>();
-            messageQ = new BlockingCollection<Tuple<string, Notification, string>>();
-
+            Astroids = new List<Astroid>();   
             frameNum = 0;
         }
 
-        public bool Frame()
+        public void Frame()
         {
-            if (Paused) return true;
+            if (Paused) return;
             lock (this)
             {
                 players.ForEach(p => p.Move());
                 players.ForEach(p => p.Shoot(frameNum));
-                //purge loosers
-                Player looser;
-                if ((looser = players.FirstOrDefault(p => !p.isAlive)) != null)
-                {
-                    Over(looser);
-                }
             }
 
-            if (GameOn)
+            lock (this)
             {
-                //Move asteroids
+                Astroids.ForEach(b => b.Move(this));
+                Astroids.RemoveAll(c => c.HasHit);
+            }
+            //Spawn asteroid after timeout
+            if (frameNum % Astroid.Timeout == 0)
+            {
+                Astroid astroid = new Astroid(WinSize);
                 lock (this)
                 {
-                    Astroids.ForEach(b => b.Move(this));
-                    Astroids.RemoveAll(c => c.HasHit);
+                    Astroids.Add(astroid);
                 }
-                //Spawn asteroid after timeout
-                if (frameNum % Astroid.Timeout == 0)
+            }
+
+            frameNum++;
+        }
+
+        public Player Reap()
+        {
+            Player loser;
+            if ((loser = players.FirstOrDefault(p => !p.isAlive)) != null)
+            {
+                players.Remove(loser);
+                //Must remove a dead player from all other players enemies lists,
+                //otherwise from the point of view of the bullets the dead one still exists 
+                players.ForEach(p => p.Enemies.Remove(loser));               
+                return loser;
+            }
+            return null;
+        }
+
+
+
+        public void Draw()
+        {
+            //make it iDrawable interface?
+            lock (this)
+            {
+                World.Draw();
+            }
+            lock (this)
+            {
+                players.ForEach(p => p.Draw());
+            }
+
+            lock (this)
+            {
+                Astroids.ForEach(a => a.Draw());
+            }
+        }
+        public void InitFeudingParties()
+        {
+            //simplest case: Free-For-All (All-Against-All)
+            foreach (Player p1 in players)
+            {
+                foreach (Player p2 in players)
                 {
-                    Astroid astroid = new Astroid(WinSize);
-                    lock (this)
-                    {
-                        Astroids.Add(astroid);
-                    }
+                    p1.FeudWith(p2);
                 }
-
-                frameNum++;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public void Over(Player loser)
-        {
-            messageQ.Add(new Tuple<string, Notification, string>(loser.ConnectionID, Notification.DeathNotice, "YOU DIED"));
-            players.Remove(loser); //when a player is killed - moving mouse along his client makes the game slow - must fix it
-        }
-
-        public void Draw(Graphics g)
-        {
-            //make it iDrawable interface
-            Walls.ForEach(w => w.Draw(g));
-
-            lock (this)
-            {
-                players.ForEach(p => p.Draw(g));
-            }
-
-            lock (this)
-            {
-                Astroids.ForEach(a => a.Draw(g));
             }
         }
     }

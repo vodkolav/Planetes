@@ -19,18 +19,26 @@ namespace GameObjects
 
         public void Command(int who, Tuple<Action, HOTAS> command)
         {
-
-            _gameServer.gameObjects.players.Single(p => p.ID == who).Act(command);
-
-            //foreach (var connectionId in _connections.GetConnections(who))
-            //{
-            //	Clients.Client(connectionId).addChatMessage(name + ": " + message);
-            //}
+            try
+            {
+                _gameServer.gameObjects.players.Single(p => p.ID == who).Act(command);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }     
         }
 
         public void Aim(int who, Tuple<Action, Vector> command)
         {
-            _gameServer.gameObjects.players.Single(p => p.ID == who).Aim(command.Item2);
+            try
+            {
+                _gameServer.gameObjects.players.Single(p => p.ID == who).Aim(command.Item2);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         public void Over()
@@ -38,10 +46,12 @@ namespace GameObjects
             _gameServer.Stop();
         }
 
-        public void JoinLobby(int playerID)
+        public void JoinLobby(string PlayerName)
         {
-            _gameServer.Join(playerID, Context.ConnectionId);
-            Clients.All.UpdateModel(_gameServer.gameObjects);
+            int playerID = _gameServer.Join( Context.ConnectionId, PlayerName);
+            Clients.Client(Context.ConnectionId).JoinedLobby(playerID);
+            Clients.All.UpdateLobby(_gameServer.gameObjects);
+            //Clients.All.UpdateModel(_gameServer.gameObjects);
         }
 
 

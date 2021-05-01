@@ -63,8 +63,7 @@
             this.pbxWorld.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pbxWorld.Location = new System.Drawing.Point(0, 0);
             this.pbxWorld.Name = "pbxWorld";
-            this.pbxWorld.Size = new System.Drawing.Size(1600, 776);
-            this.pbxWorld.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.pbxWorld.Size = new System.Drawing.Size(1734, 820);
             this.pbxWorld.TabIndex = 0;
             this.pbxWorld.TabStop = false;
             this.pbxWorld.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pbxWorld_MouseDown);
@@ -73,7 +72,7 @@
             // 
             // timerDraw
             // 
-            this.timerDraw.Interval = 10;
+            this.timerDraw.Interval = 20;
             this.timerDraw.Tick += new System.EventHandler(this.timerDraw_Tick);
             // 
             // toolStrip1
@@ -82,7 +81,7 @@
             this.toolStripDropDownButton1});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1600, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(1734, 25);
             this.toolStrip1.TabIndex = 5;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -169,8 +168,8 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-            this.splitContainer1.Size = new System.Drawing.Size(1600, 936);
-            this.splitContainer1.SplitterDistance = 776;
+            this.splitContainer1.Size = new System.Drawing.Size(1734, 936);
+            this.splitContainer1.SplitterDistance = 820;
             this.splitContainer1.TabIndex = 8;
             // 
             // splitContainer2
@@ -188,7 +187,7 @@
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.flpOtherPlayers);
-            this.splitContainer2.Size = new System.Drawing.Size(1600, 156);
+            this.splitContainer2.Size = new System.Drawing.Size(1734, 112);
             this.splitContainer2.SplitterDistance = 221;
             this.splitContainer2.TabIndex = 8;
             // 
@@ -197,7 +196,7 @@
             this.flpOtherPlayers.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flpOtherPlayers.Location = new System.Drawing.Point(0, 0);
             this.flpOtherPlayers.Name = "flpOtherPlayers";
-            this.flpOtherPlayers.Size = new System.Drawing.Size(1375, 156);
+            this.flpOtherPlayers.Size = new System.Drawing.Size(1509, 112);
             this.flpOtherPlayers.TabIndex = 0;
             // 
             // hudLeft
@@ -205,7 +204,7 @@
             this.hudLeft.Dock = System.Windows.Forms.DockStyle.Fill;
             this.hudLeft.Location = new System.Drawing.Point(0, 0);
             this.hudLeft.Name = "hudLeft";
-            this.hudLeft.Size = new System.Drawing.Size(221, 156);
+            this.hudLeft.Size = new System.Drawing.Size(221, 112);
             this.hudLeft.TabIndex = 6;
             this.hudLeft.Visible = false;
             // 
@@ -214,7 +213,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(1600, 961);
+            this.ClientSize = new System.Drawing.Size(1734, 961);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.toolStrip1);
             this.DoubleBuffered = true;
@@ -230,7 +229,6 @@
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel1.PerformLayout();
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);

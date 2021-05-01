@@ -4,16 +4,39 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
 
 namespace GameObjects
 {
     public class GameServer
     {
+        readonly Random R = new Random();
+
         private readonly static Lazy<GameServer> _instance = new Lazy<GameServer>(() => new GameServer());
-        private Random rnd = new Random();
-        public Thread thrdGameLoop;
-        public IHubContext hubContext;
-        public GameState gameObjects;
+        public static GameServer Instance
+        {
+            get
+            {
+                return _instance.Value;
+            }
+        }
+
+        private Thread thrdGameLoop { get; set; }
+
+        private IHubContext hubContext { get; set; }
+
+        public GameState gameObjects { get; set; }
+
+        public List<Bot> Bots { get; set; }
+
+        //the Tuple holds: int ids of player to send message to, enum Notification type, and string the message
+        public BlockingCollection<Tuple<string, Notification, string>> messageQ { get; set; }
+
+        public string URL { get; private set; }
+
         IDisposable webapp;
         ManualResetEvent _shutdownEvent = new ManualResetEvent(false);
         ManualResetEvent _pauseEvent = new ManualResetEvent(true);
@@ -21,31 +44,97 @@ namespace GameObjects
         public GameServer()
         {
             gameObjects = new GameState(GameConfig.WorldSize);
+            Bots = new List<Bot>();
+            messageQ = new BlockingCollection<Tuple<string, Notification, string>>();
             hubContext = GlobalHost.ConnectionManager.GetHubContext<GameHub>();
         }
-
-        public void Join(int playerID, string ConnectionID)
+        public void Listen(int port)
         {
-            string PlayerName = "Player" + gameObjects.players.Count + 1;
+            try
+            {
+                URL = "http://" + GetLocalIPAddress() + ":" + port;
+                // to allow doing this, run in cmd as administrator:
+                // netsh http add urlacl http://*:8030/ user=host\user
+                webapp = WebApp.Start<Startup>("http://*:" + port);
+                Console.WriteLine(string.Format("Lobby open at {0}", URL));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public static string GetLocalIPAddress()
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return ip.ToString();
+                }
+            }
+            throw new Exception("Local IP Address Not Found!");
+        }
+
+        public int Join( string ConnectionID, string PlayerName)
+        {
+            int playerID = R.Next(1_000_000, 9_999_999); //GetHashCode();
             Player newplayer = new Player(playerID, ConnectionID, PlayerName, gameObjects);
             gameObjects.players.Add(newplayer);
             //string gobj = JsonConvert.SerializeObject(gameObjects); //only for debugging - to check what got serialized
-            hubContext.Clients.All.UpdateLobby(gameObjects);
+
+            return playerID;
+        }
+
+        public void AddBot()
+        {
+            if (gameObjects.players.Count > 8)
+            {
+                throw new IndexOutOfRangeException("There can only be 9 players in a game ");
+            }
+            else
+            {  
+                DummyPlug Rei = new DummyPlug();
+                Bot DMYSYS = new Bot1(Rei);
+                DMYSYS.joinNetworkGame(URL);
+                //DMYSYS.Me.Name = "Rei";
+                //DMYSYS.Me.Jet.Color = Color.White;
+                //DMYSYS.UpdateMe();
+                Bots.Add(DMYSYS);
+            }
+        }
+
+        public void Kick(Player kickedone)
+        {
+            Notify(kickedone, Notification.Kicked, "You were kicked by server");
+            Leave(kickedone);
+            _ = Task.Run(DispatchMessages);
         }
 
         internal void Leave(int playerID)
         {
             Player pl = gameObjects.players.Single(p => p.ID == playerID);
+            Leave(pl);
+        }
+
+        internal void Leave(Player pl)
+        {
             GameConfig.ReturnColor(pl.Color);
-            gameObjects.players.Remove(pl);
+            gameObjects.players.RemoveAll(p => p.ID == pl.ID);
             hubContext.Clients.All.UpdateLobby(gameObjects);
+        }
+
+        public void Notify(Player player, Notification about, string message)
+        {
+            messageQ.Add(new Tuple<string, Notification, string>(player.ConnectionID, about, message));
         }
 
         public void DispatchMessages()
         {
-            if (gameObjects.messageQ.Count != 0)
+            if (messageQ.Count != 0)
             {
-                foreach (var mes in gameObjects.messageQ.GetConsumingEnumerable())
+                foreach (var mes in messageQ.GetConsumingEnumerable())
                 {
                     string to = mes.Item1;
                     Notification type = mes.Item2;
@@ -55,17 +144,9 @@ namespace GameObjects
             }
         }
 
-        public static GameServer Instance
-        {
-            get
-            {
-                return _instance.Value;
-            }
-        }
-
         public void Start()
         {
-            InitWarringParties();
+            gameObjects.InitFeudingParties();
             thrdGameLoop = new Thread(GameLoop)
             {
                 Name = "GameLoop"
@@ -79,17 +160,6 @@ namespace GameObjects
         /// <summary>
         /// Define enemies for each player
         /// </summary>
-        private void InitWarringParties()
-        {
-            //simplest case: Free-For-All (All-Against-All)
-            foreach (Player p1 in gameObjects.players)
-            {
-                foreach (Player p2 in gameObjects.players)
-                {
-                    p1.FeudWith(p2);
-                }
-            }
-        }
 
         public void Stop(string message = "Game aborted")
         {
@@ -123,44 +193,40 @@ namespace GameObjects
 
         private async void GameLoop()
         {
-            DateTime dt;// maybe replace this with stopwatch
-            TimeSpan tdiff;
-            while (gameObjects.GameOn)
+            try
             {
-                _pauseEvent.WaitOne(Timeout.Infinite);
-
-                if (_shutdownEvent.WaitOne(0))
-                    break;
-
-                dt = DateTime.UtcNow;
-                if (gameObjects.Frame())
+                DateTime dt;// maybe replace this with stopwatch
+                TimeSpan tdiff;
+                Player loser;
+                while (gameObjects.GameOn)
                 {
-                    try
+                    _pauseEvent.WaitOne(Timeout.Infinite);
+
+                    if (_shutdownEvent.WaitOne(0))
+                        break;
+
+                    dt = DateTime.UtcNow;
+
+                    //reap dead losers, if any
+                    if ((loser = gameObjects.Reap()) != null)
                     {
-                        //string gobj = JsonConvert.SerializeObject(gameObjects); only for debugging - to check what got serialized
-                        await hubContext.Clients.All.UpdateModel(gameObjects);
-                        _ = Task.Run(DispatchMessages);
+                        Notify(loser, Notification.DeathNotice, "YOU DIED");
                     }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.Message);
-                    }
+                    gameObjects.Frame();
+
+                    //string gobj = JsonConvert.SerializeObject(gameObjects); only for debugging - to check what got serialized
+                    await hubContext.Clients.All.UpdateModel(gameObjects);
+                    _ = Task.Run(DispatchMessages);
+
                     tdiff = DateTime.UtcNow - dt;
                     Thread.Sleep((GameState.FrameInterval - tdiff).Duration()); //this is bad. There should be timer instead
-                    Console.WriteLine("frameNum: " + gameObjects.frameNum);// + "| " + tdiff.ToString()
-                }
-                else
-                {
-                    Stop();
+                    //Console.WriteLine("frameNum: " + gameObjects.frameNum);// + "| " + tdiff.ToString()
                 }
             }
-        }
-
-        public void Listen(string url)
-        {
-            webapp = WebApp.Start<Startup>(url);
-
-            Console.WriteLine(string.Format("Lobby open at {0}", url));
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
     }
 }

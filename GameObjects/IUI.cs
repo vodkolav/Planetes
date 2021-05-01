@@ -7,11 +7,7 @@ namespace GameObjects
     {
         string Text { get; set; }
 
-        bool InvokeRequired { get; }
-
-        Ilobby L { get; set; }
-
-        void StartGraphics();
+        GameClient C { get; set; }
 
         void DrawGraphics();
 
@@ -19,23 +15,14 @@ namespace GameObjects
 
         void Notify(string message);
 
-        void AnnounceDeath();
+        void AnnounceDeath(string message);
 
         Task LeaveLobby();
 
         void CloseLobby();
 
-        object Invoke(Delegate method, params object[] args);
-
-        void UpdateLobby(GameState go);
-    }
-
-    public interface Ilobby
-    {
         void UpdateLobby(GameState go);
 
-        void Close();
-
-        bool OpenLobby_WaitForGuestsAndBegin();
+        void Start();
     }
 }

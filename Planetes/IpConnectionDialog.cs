@@ -29,7 +29,14 @@ namespace Planetes
         {
             get
             {
-                return "http://" + ipAddressControl1.Text + ":" + tbxport.Text;
+                if (ipAddressControl1.Text == "...")
+                {
+                    return $"http://127.0.0.1:8030/";
+                }
+                else 
+                {
+                    return "http://" + ipAddressControl1.Text + ":" + tbxport.Text;
+                }
             }
         }
     }
