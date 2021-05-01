@@ -138,14 +138,14 @@ namespace PlanetesWPF
         }
 
         public void StartGraphics()
-        {            
+        {                        
             B = BitmapFactory.New(C.gameObjects.WinSize.Width, C.gameObjects.WinSize.Height);
             World.Source = B;
             PolygonCollision.DrawingContext.GraphicsContainer = new WPFGraphicsContainer(B);
             R = new GameRecorder(B);
             CompositionTarget.Rendering += (s, e) => DrawGraphics();            
-            CompositionTarget.Rendering += (s, e) => R.AddFrame(B);
-            Closing += (s, e) => R.End();            
+            CompositionTarget.Rendering += (s, e) => R.AddFrame(B,C.gameObjects.frameNum);
+            Closing += (s, e) => R.End();    
         }
         
         public void UpdateLobby(GameState go)
@@ -244,9 +244,10 @@ namespace PlanetesWPF
         #region piloting 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            Console.WriteLine("Window_KeyDown event" );
+
             if (C.GameOn)
-            {
+            {            
+                Console.WriteLine("Pressed " + e.Key);
                 if (e.Key == Key.R)
                 {
                     R.Start();
@@ -257,8 +258,10 @@ namespace PlanetesWPF
 
         private void Window_KeyUp(object sender, KeyEventArgs e)
         {
+            
             if (C.GameOn)
             {
+                Console.WriteLine("Releasd " + e.Key);
                 if (e.Key == Key.R)
                 {     
                     R.End();

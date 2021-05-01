@@ -32,11 +32,11 @@ namespace GameObjects
         public Jet(Point start, Color color)
         {
             Hull = new Polygon();
-            Hull.AddVertex(new Vector(50, 50));
+            Hull.AddVertex(new Vector(50, 40));
             Hull.AddVertex(new Vector(100, 50));
             Hull.AddVertex(new Vector(100, 70));
-            Hull.AddVertex(new Vector(50, 70));
-            Hull.AddVertex(new Vector(50, 50));
+            Hull.AddVertex(new Vector(50, 80));
+            Hull.AddVertex(new Vector(50, 40));
 
             Cockpit = new Polygon();
             Cockpit.AddVertex(new Vector(100, 50));
@@ -51,7 +51,7 @@ namespace GameObjects
             //Pos_x = start.X;
             //Pos_y = start.Y;
             Color = color;
-            Thrust = 0.05f;
+            Thrust = GameConfig.Thrust;
             Cooldown = 3;
         }
 
@@ -82,11 +82,8 @@ namespace GameObjects
         public float Dist(Jet j)
         {
             return Pos.Dist(j.Pos);
-
         }
-
-        // In some cases Asteroids don't collide when they should 
-        // that's because I use polygon/point collision while asteroids are circles 
+        
         public bool Collides(Astroid a)
         {
             return Hull.Collides(a.Body) || Cockpit.Collides(a.Body);
@@ -100,7 +97,7 @@ namespace GameObjects
         public void Move(GameState gO)
         {
             //Physics Police
-            Vector newSpeed = Speed + Acceleration * Thrust;
+            Vector newSpeed = Speed + Acceleration * Thrust ;
             if (newSpeed.Magnitude_X <= GameConfig.Lightspeed && newSpeed.Magnitude_Y <= GameConfig.Lightspeed)
             {
                 Speed = newSpeed;
@@ -114,6 +111,7 @@ namespace GameObjects
                 {
                     Offset(Speed + r.MinimumTranslationVector);
                     Bounce(r.translationAxis);
+                    break;
                 }
             }
             Offset(Speed);

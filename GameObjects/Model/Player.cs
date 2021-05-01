@@ -147,14 +147,11 @@ namespace GameObjects
                     }
             }
             Jet.Acceleration = Acceleration;
-            //if (SteerKeysBindings.Contains(command))
-            //{
-            //	Jet.Steer(command);
-            //}
-            //else if (command == ShootKeyBindings)
-            //{
-            //	KeyShoot = command;
-            //}
+
+            if (Name == "Human")
+            {
+                Console.WriteLine("Acceleration: " + Acceleration.ToString());
+            }
         }
 
         public virtual void Release(HOTAS command)

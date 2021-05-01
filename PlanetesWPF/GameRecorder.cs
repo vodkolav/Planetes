@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-
+using GameObjects;
 
 namespace PlanetesWPF
 {
@@ -24,23 +24,20 @@ namespace PlanetesWPF
         PixelFormat Format;
         BitmapPalette Palette;       
         int Stride;
+        byte[] aPixels;
 
-        public void AddFrame(WriteableBitmap Source)
-        {
-            lock (this)
-            {
-                if (IsRecording)
+        public void AddFrame(WriteableBitmap Source, int frameNum)
+        {          
+                if (IsRecording && frameNum%3==0)
                     if (Source != null)
                     {
-                        //Im gonna need this here : 
-                        //stackoverflow.com/questions/8763761/threading-communication-between-two-threads-c-sharp
+                    //Im gonna need this here : 
+                    //stackoverflow.com/questions/8763761/threading-communication-between-two-threads-c-sharp
 
-                        if (!(Source.Width == 0) && !(Source.Height == 0))
+                    // This is also a nice thread about doing the whole rendering writeblebitmap on another thread: 
+                    //https://stackoverflow.com/questions/9868929/how-to-edit-a-writablebitmap-backbuffer-in-non-ui-thread
+                    if (!(Source.Width == 0) && !(Source.Height == 0))
                         {
-
-                            int fSB = Source.PixelHeight * Source.BackBufferStride;
-
-                            byte[] aPixels = new byte[fSB];
                             Source.CopyPixels(aPixels, Source.BackBufferStride, 0);
                             frames.Add(aPixels);
                             //encoder.Frames.Add(BitmapFrame.Create(Source.CloneCurrentValue()));                       
@@ -49,8 +46,7 @@ namespace PlanetesWPF
                             throw new ArgumentException("Argument Frame, The bitmap size cannot be zero");
                     }
                     else
-                        throw new ArgumentException("Argument Frame cannot be nothing");
-            }
+                        throw new ArgumentException("Argument Frame cannot be nothing");            
         }
 
 
@@ -63,7 +59,9 @@ namespace PlanetesWPF
                 {
                     BitmapSource BF = BitmapSource.Create(PixelWidth, PixelHeight,
                     DpiX, DpiY, Format, Palette, aPixels, Stride);
-                    encoder.Frames.Add(BitmapFrame.Create(BF));
+                    var targetBitmap = new TransformedBitmap(BF, new ScaleTransform(0.5, 0.5));
+                    encoder.Frames.Add(BitmapFrame.Create(targetBitmap));
+                    
                 }
                 else
                 {
@@ -75,8 +73,7 @@ namespace PlanetesWPF
 
         public GameRecorder(WriteableBitmap imageSample)
         {
-            frames = new BlockingCollection<byte[]>();
-
+            frames = new BlockingCollection<byte[]>();    
             PixelWidth = imageSample.PixelWidth;
             PixelHeight = imageSample.PixelHeight;
             DpiX = imageSample.DpiX;
@@ -84,6 +81,7 @@ namespace PlanetesWPF
             Format = imageSample.Format;
             Palette = imageSample.Palette;
             Stride = imageSample.BackBufferStride;
+            aPixels = new byte[PixelHeight * Stride];            
             feeder = new Thread(Feed)
             {
                 Name = "Recorder Thread"
@@ -94,6 +92,7 @@ namespace PlanetesWPF
         {
             if (!IsRecording)
             {
+                Console.WriteLine("Recording game to gif...");
                 IsRecording = true;
                 feeder.Start(this);
             }
@@ -112,6 +111,7 @@ namespace PlanetesWPF
             {
                 try
                 {
+                    Console.WriteLine("Saving Gif...");
                     Save(stream);
                 }
                 catch (Exception e)
@@ -248,7 +248,7 @@ namespace PlanetesWPF
         /// <summary>
         ///     '''  Get or set the amount of time each frame will be shown (in milliseconds). The default value is 200ms
         ///     ''' </summary>
-        public int FrameRate { get; set; } = 50;
+        public int FrameRate { get; set; } = (int)GameConfig.FrameInterval.TotalMilliseconds;
     }
 }
 

@@ -27,10 +27,11 @@ Visual:
 	change $safeprojectname$ (appears in task manager) to Planetes
 
 Gameplay:
-	allow for variable game speed 
+	matches (rules, respawn,  kills/deaths count, etc )
+	variable game speed 
 	implement trajectory prediction 
-	implement harpoon 
 	implement ship collisions	
+	implement harpoon 
 	implement gravity
 
 

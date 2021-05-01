@@ -47,7 +47,7 @@ namespace GameObjects
                     case AstType.Health:
                         return Color.Blue;
                     default:
-                        return Color.Brown;
+                        return Color.SaddleBrown;
                 }
             }
         }
@@ -55,8 +55,8 @@ namespace GameObjects
         public Astroid(Size winSize)
         {
             Random random = new Random();
-            Body = new Circle(new Vector(random.Next(winSize.Width), random.Next(winSize.Height)), random.Next(10) + 5);
-            int linearSpeed = random.Next(1, 4) + 1;
+            Body = new Circle(new Vector(random.Next(winSize.Width), random.Next(winSize.Height)), random.Next(20) + 5);
+            int linearSpeed = random.Next(1, (int)GameConfig.Lightspeed);
             double Angle = Math.PI / 180 * random.Next(360);
             Vector mult = new Vector((float)Math.Cos(Angle), (float)Math.Sin(Angle));
             Speed = mult * linearSpeed;
