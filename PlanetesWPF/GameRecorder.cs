@@ -12,9 +12,8 @@ namespace PlanetesWPF
 {
     public class GameRecorder
     {
-        bool IsRecording { get; set; } = false;
+        public bool IsRecording { get; set; } = false;
         BlockingCollection<byte[]> frames;
-        Thread feeder;
         GifBitmapEncoder encoder;
 
         int PixelWidth;
@@ -24,56 +23,10 @@ namespace PlanetesWPF
         PixelFormat Format;
         BitmapPalette Palette;       
         int Stride;
-        byte[] aPixels;
-
-        public void AddFrame(WriteableBitmap Source, int frameNum)
-        {          
-                if (IsRecording && frameNum%3==0)
-                    if (Source != null)
-                    {
-                    //Im gonna need this here : 
-                    //stackoverflow.com/questions/8763761/threading-communication-between-two-threads-c-sharp
-
-                    // This is also a nice thread about doing the whole rendering writeblebitmap on another thread: 
-                    //https://stackoverflow.com/questions/9868929/how-to-edit-a-writablebitmap-backbuffer-in-non-ui-thread
-                    if (!(Source.Width == 0) && !(Source.Height == 0))
-                        {
-                            Source.CopyPixels(aPixels, Source.BackBufferStride, 0);
-                            frames.Add(aPixels);
-                            //encoder.Frames.Add(BitmapFrame.Create(Source.CloneCurrentValue()));                       
-                        }
-                        else
-                            throw new ArgumentException("Argument Frame, The bitmap size cannot be zero");
-                    }
-                    else
-                        throw new ArgumentException("Argument Frame cannot be nothing");            
-        }
-
-
-        public void Feed(object Image)
-        {
-            encoder = new GifBitmapEncoder();
-            foreach (var aPixels in frames.GetConsumingEnumerable())
-            {
-                if (IsRecording)
-                {
-                    BitmapSource BF = BitmapSource.Create(PixelWidth, PixelHeight,
-                    DpiX, DpiY, Format, Palette, aPixels, Stride);
-                    var targetBitmap = new TransformedBitmap(BF, new ScaleTransform(0.5, 0.5));
-                    encoder.Frames.Add(BitmapFrame.Create(targetBitmap));
-                    
-                }
-                else
-                {
-                    break;
-                }
-            }
-            Save();
-        }
 
         public GameRecorder(WriteableBitmap imageSample)
         {
-            frames = new BlockingCollection<byte[]>();    
+            frames = new BlockingCollection<byte[]>();
             PixelWidth = imageSample.PixelWidth;
             PixelHeight = imageSample.PixelHeight;
             DpiX = imageSample.DpiX;
@@ -81,26 +34,40 @@ namespace PlanetesWPF
             Format = imageSample.Format;
             Palette = imageSample.Palette;
             Stride = imageSample.BackBufferStride;
-            aPixels = new byte[PixelHeight * Stride];            
-            feeder = new Thread(Feed)
-            {
-                Name = "Recorder Thread"
-            };
         }
 
-        public void Start()
+        public void AddFrame(byte[] aPixels)
+        {           
+            frames.Add(aPixels);
+        }
+                public void Feed(object Image)
         {
+            encoder = new GifBitmapEncoder();
+            foreach (var aPixels in frames.GetConsumingEnumerable())
+            {
+                BitmapSource BF = BitmapSource.Create(PixelWidth, PixelHeight,
+                DpiX, DpiY, Format, Palette, aPixels, Stride);
+                var targetBitmap = new TransformedBitmap(BF, new ScaleTransform(0.5, 0.5));
+                encoder.Frames.Add(BitmapFrame.Create(targetBitmap));
+               
+            }
+            Save();
+            frames = new BlockingCollection<byte[]>();
+            IsRecording = false;
+        }       
+
+        public void Start()
+        {            
             if (!IsRecording)
             {
                 Console.WriteLine("Recording game to gif...");
                 IsRecording = true;
-                feeder.Start(this);
+                ThreadPool.QueueUserWorkItem(new WaitCallback(Feed));
             }
         }
 
         public void End()
         {
-            IsRecording = false;
             frames.CompleteAdding();
         }
 

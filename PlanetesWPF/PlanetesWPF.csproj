@@ -164,6 +164,7 @@
       <DependentUpon>IpDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="IPValidationRule.cs" />
+    <Compile Include="RecorderController.cs" />
     <Compile Include="WPFGraphicsContainer.cs" />
     <Page Include="IpDialog.xaml">
       <SubType>Designer</SubType>

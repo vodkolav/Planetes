@@ -26,7 +26,7 @@ namespace PlanetesWPF
 
         public WriteableBitmap B { get; set; }
 
-        public GameRecorder R { get; set; }
+        public RecorderController RC { get; set; }
 
         public UI()
         {
@@ -142,10 +142,10 @@ namespace PlanetesWPF
             B = BitmapFactory.New(C.gameObjects.WinSize.Width, C.gameObjects.WinSize.Height);
             World.Source = B;
             PolygonCollision.DrawingContext.GraphicsContainer = new WPFGraphicsContainer(B);
-            R = new GameRecorder(B);
+            RC = new RecorderController(B);
             CompositionTarget.Rendering += (s, e) => DrawGraphics();            
-            CompositionTarget.Rendering += (s, e) => R.AddFrame(B,C.gameObjects.frameNum);
-            Closing += (s, e) => R.End();    
+            CompositionTarget.Rendering += (s, e) => RC.AddFrame(B,C.gameObjects.frameNum);
+            Closing += (s, e) => RC.End();    
         }
         
         public void UpdateLobby(GameState go)
@@ -247,10 +247,9 @@ namespace PlanetesWPF
 
             if (C.GameOn)
             {            
-                Console.WriteLine("Pressed " + e.Key);
                 if (e.Key == Key.R)
                 {
-                    R.Start();
+                    RC.Start();
                 }
                 C.Yoke.Press(KeyInterop.VirtualKeyFromKey(e.Key));
             }
@@ -261,10 +260,9 @@ namespace PlanetesWPF
             
             if (C.GameOn)
             {
-                Console.WriteLine("Releasd " + e.Key);
                 if (e.Key == Key.R)
                 {     
-                    R.End();
+                    RC.End();
                 }               
                 C.Yoke.Release(KeyInterop.VirtualKeyFromKey(e.Key));
             }
