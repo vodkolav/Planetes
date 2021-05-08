@@ -19,9 +19,9 @@ namespace GameObjects
 
         public static int StartingAmmo { get { return 1000; } }
 
-        public static float  Thrust { get { return 0.5f; } }
+        public static float  Thrust { get { return 0.1f; } }
 
-        public static ConcurrentBag<Color> _colors = new ConcurrentBag<Color>() { Color.Blue, Color.Red, Color.Green, Color.Yellow, Color.Magenta, Color.Cyan, Color.White, Color.Orange };
+        public static ConcurrentBag<Color> _colors = new ConcurrentBag<Color>() { Color.Blue, Color.Red, Color.Green, Color.Yellow, Color.Magenta, Color.Cyan, Color.White, Color.Orange, Color.Purple };
 
         public static Color TossColor
         {

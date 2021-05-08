@@ -17,7 +17,7 @@ namespace GameObjects
         {
         }
 
-        public void bindHUDS(GameState gameObjects)
+        public void bindHUDS()
         {
         }
 

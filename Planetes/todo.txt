@@ -3,7 +3,6 @@ Features:
 	implement pause
 	implement braking (deceleration)
 	implement ability to update player's info in lobby 	
-	implement recording games as movies/GIFs
 	implement game configuration 
 	implement drawing walls by hand (map editor)
 	make pretty README.MD
@@ -11,10 +10,8 @@ Features:
 	make self-learning bots (https://towardsdatascience.com/how-to-teach-an-ai-to-play-games-deep-reinforcement-learning-28f9b920440a)
 
 Architecture:
-	make UI in WPF, beacuse GDI+ is horrible for animation
-	make a Class for all the objects conversions 
-	implement proper game loop with timer and without thread.sleep
-	change Steer to Press in player class
+	Ditch using network communication for bots - as it impacts performance significantly when there are a lot of bots
+	make a Class for all the objects conversions? 
 	create iMovable, iCollidable interfaces?
 
 Visual:
@@ -24,16 +21,14 @@ Visual:
 	make better maps
 	implement big world outside of screen and camera movement (viewport) (probably this will be useful:
 	https://www.codeproject.com/Articles/85603/A-WPF-custom-control-for-zooming-and-panning)
-	change $safeprojectname$ (appears in task manager) to Planetes
 
 Gameplay:
 	matches (rules, respawn,  kills/deaths count, etc )
 	variable game speed 
 	implement trajectory prediction 
 	implement ship collisions	
-	implement harpoon 
+	implement harpoon/grapple 
 	implement gravity
-
 
 DONE:
 	enable shooting
@@ -48,6 +43,10 @@ DONE:
 	make local game great again?
 	implement game with bots 
 	implement kick players/bots from lobby
+	implement proper game loop with timer and without thread.sleep
+	make UI in WPF, beacuse GDI+ is horrible for animation
+	implement recording games as movies/GIFs
+	change $safeprojectname$ (appears in task manager) to Planetes
 
 BUGS:	
 	If during debugging I stay in break mode for a bit more time then signalR disconnects with exception

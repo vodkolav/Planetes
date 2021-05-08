@@ -59,6 +59,7 @@ namespace GameObjects
         public void updateGameState(GameState go)
         {
             gameObjects = go;
+            if (PlayerName == "Human")
             Console.Write("\r frameNum: " + gameObjects.frameNum);// + "| " + tdiff.ToString()
         }
 

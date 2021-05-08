@@ -13,7 +13,7 @@ namespace GameObjects
 {
     public class GameServer
     {
-        readonly Random R = new Random();
+        private Random R ;
 
         private readonly static Lazy<GameServer> _instance = new Lazy<GameServer>(() => new GameServer());
         public static GameServer Instance
@@ -47,6 +47,7 @@ namespace GameObjects
             Bots = new List<Bot>();
             messageQ = new BlockingCollection<Tuple<string, Notification, string>>();
             hubContext = GlobalHost.ConnectionManager.GetHubContext<GameHub>();
+            R = new Random();
         }
         public void Listen(int port)
         {

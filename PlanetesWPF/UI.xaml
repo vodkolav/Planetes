@@ -5,16 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PlanetesWPF"
         mc:Ignorable="d"
-        Title="Planetes WPF" Height="1000" Width="1750" Closing="Window_Closing" Loaded="Window_Loaded" KeyDown="Window_KeyDown" KeyUp="Window_KeyUp">
+        Title="Planetes WPF" Height="1008" Width="1750" Closing="Window_Closing" Loaded="Window_Loaded" KeyDown="Window_KeyDown" KeyUp="Window_KeyUp">
     <Grid Margin="0">
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="100">
+            <RowDefinition/>
+            <RowDefinition Height="115">
 
             </RowDefinition>
         </Grid.RowDefinitions>
-        <ToolBarTray Grid.Row="0" HorizontalAlignment="Stretch" Height="35" VerticalAlignment="Stretch" >
+        <ToolBarTray Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,2" >
             <ToolBar RenderTransformOrigin="0.5,0.5"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                 <Menu Background="#00000000">
                     <MenuItem >
@@ -48,13 +48,10 @@
             </ToolBar>
         </ToolBarTray>
         <Image x:Name="World" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Top" Width="1700" Height="800" Margin="10,10,0,0" Stretch="None" RenderTransformOrigin="0.5,0.5" MouseDown="World_MouseDown" MouseUp="World_MouseUp" MouseMove="World_MouseMove"/>
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="9*" />
-            </Grid.ColumnDefinitions>
+        <WrapPanel  x:Name="wpHUDs" Grid.Row="2" Margin="0,8,0,0">
+            <local:HUD x:Name="hudLeft" HorizontalAlignment="Left" Height="100" Margin="10,0,0,0" VerticalAlignment="Top" Width="199" Visibility="Hidden"/>
 
-        </Grid>
+        </WrapPanel>
 
     </Grid>
 </Window>

@@ -95,14 +95,14 @@ namespace Planetes
 
             pbxWorld.Image = B;
 
-            bindHUDS(C.gameObjects);
+            bindHUDS();
             timerDraw.Interval = (int)GameState.FrameInterval.TotalMilliseconds;// * 0.25);
             timerDraw.Start();
         }
 
-        public void bindHUDS(GameState gameObjects)
+        public void bindHUDS()
         {
-            foreach (Player p in gameObjects.players)
+            foreach (Player p in C.gameObjects.players)
             {
                 if (p.ID == C.PlayerId)
                 {

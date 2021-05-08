@@ -64,14 +64,26 @@ namespace PlanetesWPF
      
         public void AnnounceDeath(string message)
         {
-            MessageBox.Show(message); //"YOU DIED"
+            Billboard B = new Billboard();
+            B.Show();          
             Console.WriteLine(message);
         }
 
-        public void bindHUDS(GameState gameObjects)
-        {
-            Console.WriteLine("bind HUDS");
-            //throw new NotImplementedException();
+        public void bindHUDS()
+        {            
+            foreach (Player p in C.gameObjects.players)
+            {
+                if (p.ID == C.PlayerId)
+                {
+                    hudLeft.bind(C, p);
+                }
+                else
+                {
+                    HUD newHUD = new HUD();
+                    newHUD.bind(C, p);
+                    wpHUDs.Children.Add(newHUD);
+                }
+            }
         }
 
         public void CloseLobby()
@@ -114,6 +126,10 @@ namespace PlanetesWPF
                     C.gameObjects.Draw();                      
                 }
             }
+            foreach (var hud in wpHUDs.Children)
+            {
+                ((HUD)hud).Draw();
+            }
         }
         
         public async Task LeaveLobby()
@@ -143,6 +159,7 @@ namespace PlanetesWPF
             World.Source = B;
             PolygonCollision.DrawingContext.GraphicsContainer = new WPFGraphicsContainer(B);
             RC = new RecorderController(B);
+            bindHUDS();
             CompositionTarget.Rendering += (s, e) => DrawGraphics();            
             CompositionTarget.Rendering += (s, e) => RC.AddFrame(B,C.gameObjects.frameNum);
             Closing += (s, e) => RC.End();    
