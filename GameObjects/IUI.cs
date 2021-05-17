@@ -11,7 +11,7 @@ namespace GameObjects
 
         void DrawGraphics();
 
-        void bindHUDS(GameState gameObjects);
+        void bindHUDS();
 
         void Notify(string message);
 

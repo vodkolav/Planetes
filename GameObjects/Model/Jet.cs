@@ -96,11 +96,16 @@ namespace GameObjects
 
         public void Move(GameState gO)
         {
-            //Physics Police
             Vector newSpeed = Speed + Acceleration * Thrust ;
-            if (newSpeed.Magnitude_X <= GameConfig.Lightspeed && newSpeed.Magnitude_Y <= GameConfig.Lightspeed)
+            //Physics Police            
+
+            if (newSpeed.Magnitude <= GameConfig.Lightspeed)
             {
                 Speed = newSpeed;
+            }
+            else
+            {
+                Speed = newSpeed.GetNormalized() * GameConfig.Lightspeed;
             }
 
             PolygonCollisionResult r;

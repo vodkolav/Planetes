@@ -159,12 +159,27 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Billboard.xaml.cs">
+      <DependentUpon>Billboard.xaml</DependentUpon>
+    </Compile>
     <Compile Include="GameRecorder.cs" />
+    <Compile Include="HUD.xaml.cs">
+      <DependentUpon>HUD.xaml</DependentUpon>
+    </Compile>
     <Compile Include="IpDialog.xaml.cs">
       <DependentUpon>IpDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="IPValidationRule.cs" />
+    <Compile Include="RecorderController.cs" />
     <Compile Include="WPFGraphicsContainer.cs" />
+    <Page Include="Billboard.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="HUD.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="IpDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -225,6 +240,12 @@
       <Project>{4af31dbd-dea0-426b-bb0c-545051127f6e}</Project>
       <Name>PolygonCollision</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\favicon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\YouDied.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

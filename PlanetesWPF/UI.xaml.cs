@@ -26,7 +26,7 @@ namespace PlanetesWPF
 
         public WriteableBitmap B { get; set; }
 
-        public GameRecorder R { get; set; }
+        public RecorderController RC { get; set; }
 
         public UI()
         {
@@ -64,14 +64,26 @@ namespace PlanetesWPF
      
         public void AnnounceDeath(string message)
         {
-            MessageBox.Show(message); //"YOU DIED"
+            Billboard B = new Billboard();
+            B.Show();          
             Console.WriteLine(message);
         }
 
-        public void bindHUDS(GameState gameObjects)
-        {
-            Console.WriteLine("bind HUDS");
-            //throw new NotImplementedException();
+        public void bindHUDS()
+        {            
+            foreach (Player p in C.gameObjects.players)
+            {
+                if (p.ID == C.PlayerId)
+                {
+                    hudLeft.bind(C, p);
+                }
+                else
+                {
+                    HUD newHUD = new HUD();
+                    newHUD.bind(C, p);
+                    wpHUDs.Children.Add(newHUD);
+                }
+            }
         }
 
         public void CloseLobby()
@@ -114,6 +126,10 @@ namespace PlanetesWPF
                     C.gameObjects.Draw();                      
                 }
             }
+            foreach (var hud in wpHUDs.Children)
+            {
+                ((HUD)hud).Draw();
+            }
         }
         
         public async Task LeaveLobby()
@@ -142,10 +158,11 @@ namespace PlanetesWPF
             B = BitmapFactory.New(C.gameObjects.WinSize.Width, C.gameObjects.WinSize.Height);
             World.Source = B;
             PolygonCollision.DrawingContext.GraphicsContainer = new WPFGraphicsContainer(B);
-            R = new GameRecorder(B);
+            RC = new RecorderController(B);
+            bindHUDS();
             CompositionTarget.Rendering += (s, e) => DrawGraphics();            
-            CompositionTarget.Rendering += (s, e) => R.AddFrame(B,C.gameObjects.frameNum);
-            Closing += (s, e) => R.End();    
+            CompositionTarget.Rendering += (s, e) => RC.AddFrame(B,C.gameObjects.frameNum);
+            Closing += (s, e) => RC.End();    
         }
         
         public void UpdateLobby(GameState go)
@@ -247,10 +264,9 @@ namespace PlanetesWPF
 
             if (C.GameOn)
             {            
-                Console.WriteLine("Pressed " + e.Key);
                 if (e.Key == Key.R)
                 {
-                    R.Start();
+                    RC.Start();
                 }
                 C.Yoke.Press(KeyInterop.VirtualKeyFromKey(e.Key));
             }
@@ -261,10 +277,9 @@ namespace PlanetesWPF
             
             if (C.GameOn)
             {
-                Console.WriteLine("Releasd " + e.Key);
                 if (e.Key == Key.R)
                 {     
-                    R.End();
+                    RC.End();
                 }               
                 C.Yoke.Release(KeyInterop.VirtualKeyFromKey(e.Key));
             }

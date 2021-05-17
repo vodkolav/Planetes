@@ -136,6 +136,10 @@ namespace PolygonCollision
             get { return X + Y; }
         }
 
+        public float SignX { get { return Math.Sign(X); } }
+
+        public float SignY { get { return Math.Sign(Y); } }
+
         public float Dist(Vector other)
         {
             return (this - other).Magnitude;
@@ -241,7 +245,7 @@ namespace PolygonCollision
 
         public override string ToString()
         {
-            return Math.Abs(X).ToString("+##.##;-##.##;0") + ", " + Math.Abs(Y).ToString("+##.##;-##.##;0");
+            return X.ToString("F2") + ", " + Y.ToString("F2");
         }
 
         public string ToString(bool rounded)
