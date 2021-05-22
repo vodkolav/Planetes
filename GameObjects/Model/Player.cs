@@ -42,7 +42,7 @@ namespace GameObjects
         {
             actionMapping = new Dictionary<Action, Action<HOTAS>>
             {
-                { Action.Press, Steer },
+                { Action.Press, Press },
                 { Action.Release, Release }
             };
         }
@@ -116,7 +116,7 @@ namespace GameObjects
             Health = Math.Min(Health + amount, MaxHealth);
         }
 
-        public virtual void Steer(HOTAS command)
+        public virtual void Press(HOTAS command)
         {
             switch (command)
             {
@@ -223,7 +223,10 @@ namespace GameObjects
             if (Health > points)
                 Health -= points;
             else
+            {
                 isAlive = false;
+                Console.WriteLine(Name + ": Goodbye, cruel world :'(");
+            }  
 
         }
 

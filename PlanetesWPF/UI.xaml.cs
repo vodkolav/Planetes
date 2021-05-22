@@ -212,9 +212,13 @@ namespace PlanetesWPF
         public async Task HostSingleplayer()
         {
             var URL = hostNetworkGame();
-            
-            S.AddBot();
-            S.AddBot();
+
+            S.AddlocalBot();
+            S.AddlocalBot();
+            S.AddlocalBot();
+            S.AddlocalBot();
+            S.AddlocalBot();
+            S.AddlocalBot();
             await joinNetworkGame(URL);
             //await C.StartServer();
         }

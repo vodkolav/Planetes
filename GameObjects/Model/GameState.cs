@@ -21,7 +21,9 @@ namespace GameObjects
         public List<Player> players { get; set; }
 
         public List<Astroid> Astroids { get; set; }
-     
+
+        [JsonIgnore]
+        public List<localBot> localBots { get { return players.OfType<localBot>().ToList(); } }
 
         public Map World { get; set; }
 

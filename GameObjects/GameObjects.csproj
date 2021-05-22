@@ -71,6 +71,7 @@
     <Compile Include="GameServer.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Model\Jet.cs" />
+    <Compile Include="Model\localBot.cs" />
     <Compile Include="Model\Map.cs" />
     <Compile Include="Model\Player.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

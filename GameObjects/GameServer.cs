@@ -31,7 +31,7 @@ namespace GameObjects
         public GameState gameObjects { get; set; }
 
         public List<Bot> Bots { get; set; }
-
+          
         //the Tuple holds: int ids of player to send message to, enum Notification type, and string the message
         public BlockingCollection<Tuple<string, Notification, string>> messageQ { get; set; }
 
@@ -106,6 +106,20 @@ namespace GameObjects
             }
         }
 
+        public void AddlocalBot()
+        {
+            if (gameObjects.players.Count > 8)
+            {
+                throw new IndexOutOfRangeException("There can only be 9 players in a game ");
+            }
+            else
+            {
+                int playerID = R.Next(1_000_000, 9_999_999); 
+                localBot DMYSYS = new localBot(playerID, gameObjects);
+                gameObjects.players.Add(DMYSYS);
+            }
+        }
+
         public void Kick(Player kickedone)
         {
             Notify(kickedone, Notification.Kicked, "You were kicked by server");
@@ -154,7 +168,9 @@ namespace GameObjects
             };
             thrdGameLoop.Start();
             Console.WriteLine("Fight!");
-            gameObjects.GameOn = true;
+            gameObjects.GameOn = true;             
+            BotLoop().ContinueWith(t => Console.WriteLine(t.Exception),
+        TaskContinuationOptions.OnlyOnFaulted);
             hubContext.Clients.All.Start();
         }
 
@@ -227,6 +243,22 @@ namespace GameObjects
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
+            }
+        }
+                
+        private async Task BotLoop()
+        {
+            try
+            {
+                while (gameObjects.GameOn)
+                {
+                    gameObjects.localBots.ForEach(b=>b.FrameReact());                    
+                    await Task.Delay(1000);
+                }
+            }
+            catch (Exception ex)
+            {
+                 Console.WriteLine(ex.Message);
             }
         }
     }
