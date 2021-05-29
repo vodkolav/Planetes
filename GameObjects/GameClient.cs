@@ -21,7 +21,7 @@ namespace GameObjects
 
         public GameState gameObjects { get; set; }
 
-        protected Player Me { get { return gameObjects.players.SingleOrDefault(p => p.ID == PlayerId); } }
+        public Player Me { get { return gameObjects.players.SingleOrDefault(p => p.ID == PlayerId); } }
 
         public bool GameOn { get { return gameObjects != null && gameObjects.GameOn; } }
 
@@ -67,11 +67,6 @@ namespace GameObjects
         {
             UI.UpdateLobby(go);
             updateGameState(go);
-        }
-
-        public async void UpdateMe()
-        {
-            await Proxy.Invoke<Player>("UpdateMe", new object[] { Me });
         }
 
         public void Notify(Notification type, string message)

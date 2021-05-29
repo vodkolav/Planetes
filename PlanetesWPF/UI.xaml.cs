@@ -213,12 +213,13 @@ namespace PlanetesWPF
         {
             var URL = hostNetworkGame();
 
-            S.AddlocalBot();
-            S.AddlocalBot();
-            S.AddlocalBot();
-            S.AddlocalBot();
-            S.AddlocalBot();
-            S.AddlocalBot();
+            S.AddDefaultlocalBot();
+            S.AddDefaultlocalBot();
+            S.AddDefaultlocalBot();           
+            S.AddlocalBot(new AI2());
+            S.AddlocalBot(new AI3());
+            S.AddlocalBot(new AI4());
+
             await joinNetworkGame(URL);
             //await C.StartServer();
         }

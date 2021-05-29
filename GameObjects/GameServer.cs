@@ -13,7 +13,6 @@ namespace GameObjects
 {
     public class GameServer
     {
-        private Random R ;
 
         private readonly static Lazy<GameServer> _instance = new Lazy<GameServer>(() => new GameServer());
         public static GameServer Instance
@@ -47,7 +46,6 @@ namespace GameObjects
             Bots = new List<Bot>();
             messageQ = new BlockingCollection<Tuple<string, Notification, string>>();
             hubContext = GlobalHost.ConnectionManager.GetHubContext<GameHub>();
-            R = new Random();
         }
         public void Listen(int port)
         {
@@ -80,11 +78,8 @@ namespace GameObjects
 
         public int Join( string ConnectionID, string PlayerName)
         {
-            int playerID = R.Next(1_000_000, 9_999_999); //GetHashCode();
-            Player newplayer = new Player(playerID, ConnectionID, PlayerName, gameObjects);
-            gameObjects.players.Add(newplayer);
-            //string gobj = JsonConvert.SerializeObject(gameObjects); //only for debugging - to check what got serialized
-
+            Player newplayer = new Player(ConnectionID, PlayerName, gameObjects);
+            int playerID = gameObjects.AddPlayer(newplayer);
             return playerID;
         }
 
@@ -96,28 +91,24 @@ namespace GameObjects
             }
             else
             {  
-                DummyPlug Rei = new DummyPlug();
-                Bot DMYSYS = new Bot1(Rei);
+                DummyUI DummyPlug = new DummyUI();
+                AI1 Rei = new AI1();
+                Bot DMYSYS = new Bot(DummyPlug, Rei);
                 DMYSYS.joinNetworkGame(URL);
-                //DMYSYS.Me.Name = "Rei";
-                //DMYSYS.Me.Jet.Color = Color.White;
-                //DMYSYS.UpdateMe();
                 Bots.Add(DMYSYS);
             }
         }
 
-        public void AddlocalBot()
+        public void AddlocalBot(AI ai)
         {
-            if (gameObjects.players.Count > 8)
-            {
-                throw new IndexOutOfRangeException("There can only be 9 players in a game ");
-            }
-            else
-            {
-                int playerID = R.Next(1_000_000, 9_999_999); 
-                localBot DMYSYS = new localBot(playerID, gameObjects);
-                gameObjects.players.Add(DMYSYS);
-            }
+            localBot DMYSYS = new localBot(ai, gameObjects);
+            gameObjects.AddPlayer(DMYSYS);
+        }
+
+        public void AddDefaultlocalBot()
+        {
+            AI ai = new AI1();
+            AddlocalBot(ai);
         }
 
         public void Kick(Player kickedone)
@@ -250,9 +241,10 @@ namespace GameObjects
         {
             try
             {
+                gameObjects.localBots.ForEach(b => b.Ai.Init());
                 while (gameObjects.GameOn)
                 {
-                    gameObjects.localBots.ForEach(b=>b.FrameReact());                    
+                    gameObjects.localBots.ForEach(b=>b.Ai.FrameReact());                    
                     await Task.Delay(1000);
                 }
             }

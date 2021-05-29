@@ -52,9 +52,8 @@ namespace GameObjects
 
         }
 
-        public Player(int id, string connectionid, string name, int health, int ammo, Point At, Color color, GameState game)
+        public Player(string connectionid, string name, int health, int ammo, Point At, Color color, GameState game)
         {
-            ID = id;
             ConnectionID = connectionid;
             Name = name;
             Health = health;
@@ -69,21 +68,12 @@ namespace GameObjects
             MapActions();
         }
 
-        public Player(int id, string connectionid, string playername, GameState game) :
-            this(id, connectionid, playername, health: GameConfig.StartingHP,
+        public Player(string connectionid, string playername, GameState game) :
+            this(connectionid, playername, health: GameConfig.StartingHP,
                  GameConfig.StartingAmmo, GameConfig.TossPoint, GameConfig.TossColor, game)
         {
 
         }
-
-        //private void bindCommands()
-        //{
-        //	//commands = new Dictionary<HOTAS, Vector>();
-        //	//commands.Add(HOTAS.Up, new Vector(0, -1));
-        //	//commands.Add(HOTAS.Down, new Vector(0, 1));
-        //	//commands.Add(HOTAS.Left, new Vector(-1,0));
-        //	//commands.Add(HOTAS.Right, new Vector(1,0));
-        //}
 
         public override string ToString()
         {
@@ -120,27 +110,27 @@ namespace GameObjects
         {
             switch (command)
             {
-                case (HOTAS.Up):
+                case HOTAS.Up:
                     {
                         Acceleration.Y = -1;
                         break;
                     }
-                case (HOTAS.Down):
+                case HOTAS.Down:
                     {
                         Acceleration.Y = 1;
                         break;
                     }
-                case (HOTAS.Left):
+                case HOTAS.Left:
                     {
                         Acceleration.X = -1;
                         break;
                     }
-                case (HOTAS.Right):
+                case HOTAS.Right:
                     {
                         Acceleration.X = 1;
                         break;
                     }
-                case (HOTAS.Shoot):
+                case HOTAS.Shoot:
                     {
                         KeyShoot = true;
                         break;
@@ -158,27 +148,27 @@ namespace GameObjects
         {
             switch (command)
             {
-                case (HOTAS.Up):
+                case HOTAS.Up:
                     {
                         Acceleration.Y = 0;
                         break;
                     }
-                case (HOTAS.Down):
+                case HOTAS.Down:
                     {
                         Acceleration.Y = 0;
                         break;
                     }
-                case (HOTAS.Left):
+                case HOTAS.Left:
                     {
                         Acceleration.X = 0;
                         break;
                     }
-                case (HOTAS.Right):
+                case HOTAS.Right:
                     {
                         Acceleration.X = 0;
                         break;
                     }
-                case (HOTAS.Shoot):
+                case HOTAS.Shoot:
                     {
                         KeyShoot = false;
                         break;
@@ -227,7 +217,6 @@ namespace GameObjects
                 isAlive = false;
                 Console.WriteLine(Name + ": Goodbye, cruel world :'(");
             }  
-
         }
 
         internal void Draw()

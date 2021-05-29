@@ -8,6 +8,8 @@ namespace GameObjects
 {
     public class GameState
     {
+        private readonly Random R;
+
         public static TimeSpan FrameInterval = GameConfig.FrameInterval; // default. If you want to Change it, do it from GameConfig
 
         public bool GameOn { get; set; } = false;
@@ -18,7 +20,7 @@ namespace GameObjects
 
         public Size WinSize { get; set; }
                        
-        public List<Player> players { get; set; }
+        public List<Player> players { get; private set; }
 
         public List<Astroid> Astroids { get; set; }
 
@@ -35,6 +37,7 @@ namespace GameObjects
             players = new List<Player>();
             Astroids = new List<Astroid>();   
             frameNum = 0;
+            R = new Random();
         }
 
         public void Frame()
@@ -64,6 +67,20 @@ namespace GameObjects
             frameNum++;
         }
 
+        public int AddPlayer(Player player )
+        {
+            if (players.Count > 8)
+            {
+                throw new IndexOutOfRangeException("There can only be 9 players in a game ");
+            }
+            else
+            {
+                player.ID = R.Next(1_000_000, 9_999_999);
+                players.Add(player);
+            }
+            return player.ID;
+        }
+
         public Player Reap()
         {
             Player loser;
@@ -77,8 +94,6 @@ namespace GameObjects
             }
             return null;
         }
-
-
 
         public void Draw()
         {

@@ -5,7 +5,7 @@ namespace GameObjects
     /// <summary>
     /// Needed for Bots - to disregard all UI calls from bot client 
     /// </summary>
-    public class DummyPlug : IUI
+    public class DummyUI : IUI
     {
         public GameClient C { get ; set ; }
 
@@ -29,11 +29,6 @@ namespace GameObjects
         {
         }
 
-        //public object Invoke(Delegate method, params object[] args)
-        //{
-        //    return new object();
-        //}
-
         public async Task LeaveLobby()
         {
             await Task.Delay(0);
@@ -46,11 +41,7 @@ namespace GameObjects
         public void Start()
         {
         }
-
-        //public void StartGraphics()
-        //{
-        //}
-
+        
         public void UpdateLobby(GameState go)
         {
         }

@@ -28,7 +28,7 @@ namespace PlanetesWPF
 
         public void AddFrame(WriteableBitmap Source, int frameNum)
         {
-            if (current.IsRecording && frameNum % 4 == 0)
+            if (current.IsRecording && frameNum % 2 == 0)
                 if (Source != null)
                 {
                     //Im gonna need this here : 

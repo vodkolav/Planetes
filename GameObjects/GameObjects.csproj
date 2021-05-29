@@ -57,9 +57,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DummyPlug.cs" />
+    <Compile Include="DummyUI.cs" />
+    <Compile Include="AIs\AI.cs" />
     <Compile Include="Model\Astroid.cs" />
     <Compile Include="Model\Bot.cs" />
+    <Compile Include="AIs\AI1.cs" />
+    <Compile Include="AIs\AI2.cs" />
+    <Compile Include="AIs\AI3.cs" />
+    <Compile Include="AIs\AI4.cs" />
     <Compile Include="Model\Bullet.cs" />
     <Compile Include="ConnectionMapping.cs" />
     <Compile Include="ControlPanel.cs" />
@@ -70,6 +75,7 @@
     <Compile Include="Model\GameState.cs" />
     <Compile Include="GameServer.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="AIs\IBot.cs" />
     <Compile Include="Model\Jet.cs" />
     <Compile Include="Model\localBot.cs" />
     <Compile Include="Model\Map.cs" />

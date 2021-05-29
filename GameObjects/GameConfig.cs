@@ -17,7 +17,7 @@ namespace GameObjects
 
         public static int StartingHP { get { return 1000; } }
 
-        public static int StartingAmmo { get { return 1000; } }
+        public static int StartingAmmo { get { return 3000; } }
 
         public static float  Thrust { get { return 0.1f; } }
 
