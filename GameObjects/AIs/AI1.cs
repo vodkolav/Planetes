@@ -12,7 +12,7 @@
         /// <summary>
         /// Constantly accelerates left. every frame aims at closest enemy(if in range) and shoots
         /// </summary>
-        public override void FrameReact()
+        public override void Act()
         {
             int count = (int)memory["count"];
             HOTAS direction = (HOTAS)memory["direction"];
@@ -34,6 +34,6 @@
             memory["count"] = count;
             memory["direction"] = direction;
             memory["amShooting"] = amShooting;
-        }      
+        }
     }
 }

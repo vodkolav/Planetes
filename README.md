@@ -24,7 +24,7 @@ Controls:
 Planned:
  - Actual matches with rules ( kills, deaths, respawns, winners etc)
  - trajectory prediction 
- - harpoon 
+ - grapple 
  - ship-to-ship collisions	
  - gravity field
  - world beyond screen and viewport

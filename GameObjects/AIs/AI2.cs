@@ -14,7 +14,7 @@
         /// basic logic for simplest bot. 
         /// just move up for 5 frames, start shoot, 5 frmaes down, stop shoot, etc...
         /// </summary>
-        public override void FrameReact()
+        public override void Act()
         {
             int count = (int)memory["count"];
             HOTAS direction = (HOTAS)memory["direction"];

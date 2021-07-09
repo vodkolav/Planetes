@@ -133,7 +133,8 @@ namespace GameObjects
 
         public void Notify(Player player, Notification about, string message)
         {
-            messageQ.Add(new Tuple<string, Notification, string>(player.ConnectionID, about, message));
+            if(player.ConnectionID!= null)
+                messageQ.Add(new Tuple<string, Notification, string>(player.ConnectionID, about, message));
         }
 
         public void DispatchMessages()

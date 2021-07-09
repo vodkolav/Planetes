@@ -17,6 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanetesWPF", "PlanetesWPF\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4DCCE5BE-60D7-4348-AD06-C4E0D421EA5E}"
 	ProjectSection(SolutionItems) = preProject
+		game.gif = game.gif
 		README.md = README.md
 	EndProjectSection
 EndProject

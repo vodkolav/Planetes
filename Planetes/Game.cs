@@ -96,7 +96,7 @@ namespace Planetes
             pbxWorld.Image = B;
 
             bindHUDS();
-            timerDraw.Interval = (int)GameState.FrameInterval.TotalMilliseconds;// * 0.25);
+            timerDraw.Interval = (int)(GameState.FrameInterval.TotalMilliseconds * 0.5);
             timerDraw.Start();
         }
 
@@ -132,15 +132,18 @@ namespace Planetes
               
         public void DrawGraphics()
         {
-            C.gameObjects.Draw();
-            pbxWorld.Image = B;
-            if (pbxWorld != null)
-                pbxWorld.Invoke(new System.Action(pbxWorld.Refresh));
-            hudLeft.Draw();
-            foreach (Control c in flpOtherPlayers.Controls)
+            if (C.GameOn)
             {
-                ((HUD)c).Draw();
-            }       
+                C.gameObjects.Draw();
+                pbxWorld.Image = B;
+                if (pbxWorld != null)
+                    pbxWorld.Invoke(new System.Action(pbxWorld.Refresh));
+                hudLeft.Draw();
+                foreach (Control c in flpOtherPlayers.Controls)
+                {
+                    ((HUD)c).Draw();
+                }
+            }
         }
 
         public void AddBot()

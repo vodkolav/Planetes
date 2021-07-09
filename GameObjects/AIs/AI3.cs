@@ -11,60 +11,41 @@ namespace GameObjects
             memory["direction"] = HOTAS.Up;
             memory["amShooting"] = true;
         }
-        public override void FrameReact()
+        public override void Act()
         {
 
             //todo:
             // make bot catch ammo and health crates
             // smarter maneuvring between asteroids and bullets
 
-            //double astavg = gamenow.AstroidList.Where(a => a.Pos.Y + 50 < Jet.Pos.Y && a.Pos.Y - 50 > Jet.Pos.Y).Select(c => c.Pos.X).Average();
-            //int astClosest = gamenow.AstroidList.Min(a => Jet.Dist(a));
+            //asteroid evasion tactic
 
-            try
+            if (ClosestAsteroid.Pos.X - ClosestAsteroid.Size * 10 < Jet.Pos.X && Jet.Pos.X < ClosestAsteroid.Pos.X && ClosestAsteroid.Type == AstType.Rubble)
             {
-                //asteroid evasion tactic
-
-                if (ClosestAsteroid.Pos.X - ClosestAsteroid.Size * 10 < Jet.Pos.X && Jet.Pos.X < ClosestAsteroid.Pos.X && ClosestAsteroid.Type == AstType.Rubble)
-                {
-                    Press(HOTAS.Left);
-                }
-                else if (ClosestAsteroid.Pos.X < Jet.Pos.X && Jet.Pos.X < ClosestAsteroid.Pos.X + ClosestAsteroid.Size * 10 && ClosestAsteroid.Type == AstType.Rubble)
-                {
-                    Press(HOTAS.Right);
-                }
-                else
-                {
-                    Release(HOTAS.Right);
-                }
+                Press(HOTAS.Left);
             }
-            catch
+            else if (ClosestAsteroid.Pos.X < Jet.Pos.X && Jet.Pos.X < ClosestAsteroid.Pos.X + ClosestAsteroid.Size * 10 && ClosestAsteroid.Type == AstType.Rubble)
             {
-
+                Press(HOTAS.Right);
             }
-
-            try
+            else
             {
-                //bullet evasion tactic (not good yet)
-                Bullet bulClosest = Me.Bullets //wrong again - no need to evade my own bullets
-                                               //.Where(b => b.Shooter == Enemy)
-                    .Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
-
-                if (bulClosest.Pos.Y > Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
-                {
-                    Press(HOTAS.Up);
-                }
-                else if (bulClosest.Pos.Y < Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
-                {
-                    Press(HOTAS.Down);
-                }
-                else
-                {
-                    Release(HOTAS.Up);
-                }
+                Release(HOTAS.Right);
             }
-            catch
+            //bullet evasion tactic (not good yet)
+            Bullet bulClosest = ClosestEnemyBullet;
+
+            if (bulClosest.Pos.Y > Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
             {
+                Press(HOTAS.Up);
+            }
+            else if (bulClosest.Pos.Y < Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
+            {
+                Press(HOTAS.Down);
+            }
+            else
+            {
+                Release(HOTAS.Up);
             }
 
             //aiming at opponent tactic

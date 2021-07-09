@@ -31,6 +31,7 @@ namespace GameObjects
                 Name = "BotThread",
                 IsBackground = true
             };
+            Ai.Bot = this;
             this.Ai = Ai;
         }
 
