@@ -98,17 +98,18 @@ namespace GameObjects
                 Bots.Add(DMYSYS);
             }
         }
-
-        public void AddlocalBot(AI ai)
+      
+        public void AddlocalBot(Type type)
         {
+            AI ai =  (AI)Activator.CreateInstance(type);
             localBot DMYSYS = new localBot(ai, gameObjects);
             gameObjects.AddPlayer(DMYSYS);
+            hubContext.Clients.All.UpdateLobby(gameObjects);
         }
 
-        public void AddDefaultlocalBot()
+        public void AddlocalBot()
         {
-            AI ai = new AI1();
-            AddlocalBot(ai);
+            AddlocalBot(typeof(AI1));
         }
 
         public void Kick(Player kickedone)

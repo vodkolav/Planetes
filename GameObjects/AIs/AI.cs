@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace GameObjects
 {
@@ -29,6 +30,16 @@ namespace GameObjects
         public AI()
         {
             memory = new Dictionary<string, object>();
+        }
+
+        public static Type[] GetInheritedClasses
+        {
+            get
+            {
+                Type MyType = typeof(AI);                
+                return Assembly.GetAssembly(MyType).GetTypes()
+                    .Where(TheType => TheType.IsClass && !TheType.IsAbstract && TheType.IsSubclassOf(MyType)).ToArray();
+            }
         }
 
         public abstract void Init();

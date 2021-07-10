@@ -61,12 +61,14 @@ namespace PlanetesWPF
             }
             Text += "Planetes: " + C.PlayerId;
         }
-     
+
         public void AnnounceDeath(string message)
         {
-            Billboard B = new Billboard();
-            B.Show();          
-            Console.WriteLine(message);
+            Dispatcher.BeginInvoke(new System.Action(() =>
+            {
+                Billboard.Show(message);
+                Console.WriteLine(message);
+            }));
         }
 
         public void bindHUDS()
@@ -95,7 +97,17 @@ namespace PlanetesWPF
         {
             if (isServer)
             {
-                S.AddBot();
+                S.AddBot();   
+                return;
+            }
+            throw new UnauthorizedAccessException("Only the host can add players");
+        }
+
+        internal void AddlocalBot(Type aiType)
+        {
+            if (isServer)
+            {                
+                S.AddlocalBot(aiType);
                 return;
             }
             throw new UnauthorizedAccessException("Only the host can add players");
@@ -213,12 +225,12 @@ namespace PlanetesWPF
         {
             var URL = hostNetworkGame();
 
-            S.AddDefaultlocalBot();
-            S.AddDefaultlocalBot();
-            S.AddDefaultlocalBot();           
-            S.AddlocalBot(new AI2());
-            S.AddlocalBot(new AI3());
-            S.AddlocalBot(new AI4());
+            S.AddlocalBot(typeof(AI1));
+            S.AddlocalBot(typeof(AI2));
+            S.AddlocalBot(typeof(AI4));
+            S.AddlocalBot(typeof(AI2));
+            S.AddlocalBot(typeof(AI3));
+            S.AddlocalBot(typeof(AI4));
 
             await joinNetworkGame(URL);
             //await C.StartServer();

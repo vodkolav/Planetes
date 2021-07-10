@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PlanetesWPF"
+        xmlns:model="clr-namespace:GameObjects;assembly=GameObjects"
         mc:Ignorable="d"
         Title="Lobby" Height="450" Width="800">
     <Grid Margin="0">
@@ -13,10 +14,10 @@
             <RowDefinition Height="100"/>
         </Grid.RowDefinitions>
 
-        <Button x:Name="btnStart" Grid.Row="1" Content="Start" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="75" Height="57" Click="btnStart_Click"/>
-        <Button x:Name="btnAddBot" Grid.Row="1" Content="Add Bot" HorizontalAlignment="Left" Margin="90,10,0,0" VerticalAlignment="Top" Width="75" Height="57" Click="btnAddBot_Click" />
-        <Button x:Name="btnKickPlayer" Grid.Row="1" Content="Kick Player" HorizontalAlignment="Left" Margin="170,10,0,0" VerticalAlignment="Top" Width="75" Height="57" Click="btnKickPlayer_Click"/>
-        <Button x:Name="btnCancel" Grid.Row="1" Content="Cancel" HorizontalAlignment="Left" Margin="707,10,0,0" VerticalAlignment="Top" Width="75" Height="57" Click="btnCancel_Click"  />
+        <Button x:Name="btnStart" Grid.Row="1" Content="Start" HorizontalAlignment="Left" Margin="627,10,0,0" VerticalAlignment="Top" Width="75" Height="57" Click="btnStart_Click" Background="#FF8BEA55"/>
+        <Button x:Name="btnAddBot" Grid.Row="1" Content="Add Bot" HorizontalAlignment="Left" Margin="10,37,0,0" VerticalAlignment="Top" Width="120" Height="30" Click="btnAddBot_Click" />
+        <Button x:Name="btnKickPlayer" Grid.Row="1" Content="Kick Player" HorizontalAlignment="Left" Margin="135,10,0,0" VerticalAlignment="Top" Width="75" Height="57" Click="btnKickPlayer_Click"/>
+        <Button x:Name="btnCancel" Grid.Row="1" Content="Cancel" HorizontalAlignment="Left" Margin="707,10,0,0" VerticalAlignment="Top" Width="75" Height="57" Click="btnCancel_Click" Background="#FFF57070"  />
         <DataGrid x:Name="dgPlayers" Grid.Row="0" HorizontalAlignment="Left" Height="299" Margin="10,10,0,0" VerticalAlignment="Top" Width="772">
             <DataGrid.Columns>
 
@@ -27,5 +28,8 @@
                 <DataGridTextColumn Header="Jet" Binding="{Binding Jet.Color}" />
             </DataGrid.Columns>
         </DataGrid>
+        <ComboBox Name="cmbxAISelector" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="1" 
+                  VerticalAlignment="Top" Width="120" IsSynchronizedWithCurrentItem="True" SelectedIndex="0" >
+        </ComboBox>
     </Grid>
 </Window>

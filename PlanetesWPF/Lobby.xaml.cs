@@ -22,6 +22,8 @@ namespace PlanetesWPF
             InitializeComponent();
             dgPlayers.AutoGenerateColumns = false;
             dgPlayers.ItemsSource = players;
+            cmbxAISelector.ItemsSource = AI.GetInheritedClasses;
+            cmbxAISelector.DisplayMemberPath = "Name";
         }
 
         public bool OpenLobby_WaitForGuestsAndBegin(Window uI)
@@ -67,8 +69,9 @@ namespace PlanetesWPF
         private void btnAddBot_Click(object sender, RoutedEventArgs e)
         {
             try 
-            {
-                ((UI)Owner).AddBot();
+            {                
+                Type botType = (Type)cmbxAISelector.SelectedItem;
+                ((UI)Owner).AddlocalBot(botType);
             }
             catch (Exception ex)
             {
