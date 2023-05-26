@@ -50,7 +50,7 @@ namespace PlanetesWPF
                     }
                 case "joinNetworkGame":
                     {
-                        C.joinNetworkGame($"http://192.168.1.11:8030/");
+                        C.joinNetworkGame($"http://192.168.1.11:2861/");
                         break;
                     }
                 case "SinglePlayer":
@@ -175,7 +175,7 @@ namespace PlanetesWPF
             Text += " (Server)";
             S = GameServer.Instance;
 
-            S.Listen(8030);
+            S.Listen(2861);
             return S.URL;
         }
 
@@ -233,8 +233,7 @@ namespace PlanetesWPF
                     MessageBox.Show("Could not connect to server!\n" + ex.Message);
                 }
 
-            //string url = $"http://127.0.0.1:8030/";
-            //string url = $"http://192.168.1.11:8030/";
+
             //await joinNetworkGame(url);
         }
 

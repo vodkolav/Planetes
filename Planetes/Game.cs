@@ -50,7 +50,7 @@ namespace Planetes
                     }
                 case "joinNetworkGame":
                     {
-                        C.joinNetworkGame($"http://127.0.0.1:8030/");
+                        C.joinNetworkGame($"http://127.0.0.1:2861/");
                         break;
                     }
                 case "SinglePlayer":
@@ -238,10 +238,10 @@ namespace Planetes
         public string hostNetworkGame()
         {
             Text += " (Server)";
-            //string URL = "http://127.0.0.1:8030";
-            
+            //string URL = "http://127.0.0.1:2861";
+
             S = GameServer.Instance;
-            S.Listen(8030);
+            S.Listen(2861);
             return S.URL;
         }   
 

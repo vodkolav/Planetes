@@ -55,7 +55,7 @@ namespace GameObjects
             {
                 URL = "http://" + GetLocalIPAddress() + ":" + port;
                 // to allow doing this, run in cmd as administrator:
-                // netsh http add urlacl http://*:8030/ user=host\user
+                // netsh http add urlacl http://*:2861/ user=host\user
                 webapp = WebApp.Start<Startup>("http://*:" + port);
                 Console.WriteLine(string.Format("Lobby open at {0}", URL));
             }

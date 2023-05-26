@@ -80,7 +80,10 @@ namespace GameObjects
 
         public void Draw()
         {
-            //make it iDrawable interface?
+        // consider using SkiaSharp instead of DrawableBitmapEx
+        // example here : https://github.com/swharden/Csharp-Data-Visualization/tree/main/dev/old/2019-09-08-SkiaSharp-openGL
+        // or SFML: 
+        // https://www.sfml-dev.org/download/bindings.php
             lock (this)
             {
                 World.Draw();
