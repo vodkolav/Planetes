@@ -16,8 +16,6 @@ namespace GameObjects
 
         public int frameNum { get; set; }
 
-        public Size WinSize { get; set; }
-                       
         public List<Player> players { get; set; }
 
         public List<Astroid> Astroids { get; set; }
@@ -25,13 +23,11 @@ namespace GameObjects
 
         public Map World { get; set; }
 
-        public GameState(Size winSize)
+        public GameState()
         {
-            WinSize = winSize;
-
-            World = new Map(winSize);
+            World = new Map(GameConfig.WorldSize);
             players = new List<Player>();
-            Astroids = new List<Astroid>();   
+            Astroids = new List<Astroid>();
             frameNum = 0;
         }
 
@@ -52,11 +48,16 @@ namespace GameObjects
             //Spawn asteroid after timeout
             if (frameNum % Astroid.Timeout == 0)
             {
-                Astroid astroid = new Astroid(WinSize);
+                Astroid astroid = new Astroid(World.size);
                 lock (this)
                 {
                     Astroids.Add(astroid);
                 }
+            }
+
+            lock (this) // calculate viewports for each player
+            {
+                players.ForEach(p => p.viewPort.Update(this));               
             }
 
             frameNum++;
@@ -78,26 +79,6 @@ namespace GameObjects
 
 
 
-        public void Draw()
-        {
-        // consider using SkiaSharp instead of DrawableBitmapEx
-        // example here : https://github.com/swharden/Csharp-Data-Visualization/tree/main/dev/old/2019-09-08-SkiaSharp-openGL
-        // or SFML: 
-        // https://www.sfml-dev.org/download/bindings.php
-            lock (this)
-            {
-                World.Draw();
-            }
-            lock (this)
-            {
-                players.ForEach(p => p.Draw());
-            }
-
-            lock (this)
-            {
-                Astroids.ForEach(a => a.Draw());
-            }
-        }
         public void InitFeudingParties()
         {
             //simplest case: Free-For-All (All-Against-All)

@@ -35,6 +35,10 @@ namespace PlanetesWPF
             L = new Lobby(this);//todo later: set UI as owner to lobby
         }
 
+        /// <summary>
+        /// Used when starting a game automatically as soon as UI is loaded 
+        /// </summary>
+        /// <param name="AutoStartgametype"></param>
         public void AutoStart(string AutoStartgametype)
         {
             Show();
@@ -50,7 +54,7 @@ namespace PlanetesWPF
                     }
                 case "joinNetworkGame":
                     {
-                        C.joinNetworkGame($"http://192.168.1.11:2861/");
+                        C.joinNetworkGame($"http://192.168.1.11:2861/", new PolygonCollision.Vector((int)Visor.Width, (int)Visor.Height));
                         break;
                     }
                 case "SinglePlayer":
@@ -115,15 +119,23 @@ namespace PlanetesWPF
 
         public void DrawGraphics()
         {
-            //or maybe try to implement it through DrawingVisual, here'is a good examplws site:
+            // here are 3 options of alternative approaches for drawing in WPF:
+            
+            //DrawingVisual, here'is a good examplws site:
             //http://windowspresentationfoundationinfo.blogspot.com/2014_07_01_archive.html?view=classic
+
+            // consider using SkiaSharp instead of DrawableBitmapEx
+            // example here : https://github.com/swharden/Csharp-Data-Visualization/tree/main/dev/old/2019-09-08-SkiaSharp-openGL
+            
+            // or SFML: 
+            // https://www.sfml-dev.org/download/bindings.php
 
             if (B != null)
             {
                 // Wrap updates in a GetContext call, to prevent invalidation and nested locking/unlocking during this block
                 using (B.GetBitmapContext())
                 {
-                    C.gameObjects.Draw();                      
+                    C.viewPort.Draw();
                 }
             }
             foreach (var hud in wpHUDs.Children)
@@ -154,9 +166,9 @@ namespace PlanetesWPF
         }
 
         public void StartGraphics()
-        {                        
-            B = BitmapFactory.New(C.gameObjects.WinSize.Width, C.gameObjects.WinSize.Height);
-            World.Source = B;
+        {                                    
+            B = BitmapFactory.New((int)Visor.Width, (int)Visor.Height);
+            Visor.Source = B;
             PolygonCollision.DrawingContext.GraphicsContainer = new WPFGraphicsContainer(B);
             RC = new RecorderController(B);
             bindHUDS();
@@ -179,12 +191,16 @@ namespace PlanetesWPF
             return S.URL;
         }
 
-
+        /// <summary>
+        /// Used when joining lobby manually
+        /// </summary>
+        /// <param name="URL"></param>
+        /// <returns></returns>
         public async Task joinNetworkGame(string URL)
         {
             Text += " (Client)";
-            C.joinNetworkGame(URL);
-
+            C.joinNetworkGame(URL, new PolygonCollision.Vector((int)Visor.Width, (int)Visor.Height));
+            
             bool GameStarted = L.OpenLobby_WaitForGuestsAndBegin(this);
 
             if (GameStarted)
@@ -316,7 +332,7 @@ namespace PlanetesWPF
         {
             if (C.GameOn)
             {                
-                C.Yoke.Aim(FromPoint(e.GetPosition(World)));
+                C.Yoke.Aim(FromPoint(e.GetPosition(Visor)));
             }
         }
         #endregion

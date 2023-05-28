@@ -55,7 +55,7 @@ namespace GameObjects
             Cooldown = 3;
         }
 
-        private void Offset(Vector by)
+        public void Offset(Vector by)
         {
             Hull.Offset(by);
             Cockpit.Offset(by);
@@ -93,6 +93,11 @@ namespace GameObjects
         {
             return Hull.Collides(b.Pos) || Cockpit.Collides(b.Pos);
         }
+
+        public bool Collides(Polygon p)
+        {
+            return Hull.Collides(p, Speed).Intersect || Cockpit.Collides(p, Speed).Intersect;
+        }     
 
         public void Move(GameState gO)
         {

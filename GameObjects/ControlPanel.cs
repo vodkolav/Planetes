@@ -64,25 +64,30 @@ namespace GameObjects
             MouseBindings.Clear();
             isWorking = false;
         }
-        public void Press(HOTAS instruction)
+        public void Press(HOTAS argument)
         {
             if (isWorking)
-                Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, object>(Action.Press, instruction) });
+                Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, object>(Action.Press, argument) });
         }
 
-        public void Release(HOTAS instruction)
+        public void Release(HOTAS argument)
         {
             if (isWorking)
-                Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, object>(Action.Release, instruction) });
+                Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, object>(Action.Release, argument) });
         }
-
-        public void Do(HOTAS instruction, Vector at)
+            
+        public void Do(Action instruction, object argument)
         {
             //instructions will probably be required later, for example to apply abilities at something/someone
             if (isWorking)
-                Proxy.Invoke("Aim", new object[] { PlayerID, new Tuple<Action, Vector>(Action.Aim, at) });
+                Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, object>(instruction, argument) });
         }
 
+        public void Aim(Vector argument)
+        {
+            if (isWorking)
+                Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, object>(Action.Aim, argument) });
+        }
         public void Press(int key)
         {
             Press((Keys)key);
@@ -126,16 +131,6 @@ namespace GameObjects
             {
                 HOTAS instruction = MouseBindings[button];
                 Release(instruction);
-            }
-        }
-
-        public void Aim(Vector at)
-        {
-            if (MouseBindings.Keys.Contains(MouseButtons.None))
-            {
-                Do(HOTAS.Aim, at);
-               // Proxy.Invoke("Aim", new object[] { PlayerID, new Tuple<Action, Vector>(Action.Aim, Vector.FromPoint(at)) });
-
             }
         }
 

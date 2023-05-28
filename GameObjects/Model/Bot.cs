@@ -100,7 +100,7 @@ namespace GameObjects
 
         public void Aim(Vector at)
         {
-            Yoke.Do(HOTAS.Aim, at);
+            Yoke.Aim(at);
         }
 
         

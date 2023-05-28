@@ -72,6 +72,15 @@ namespace GameObjects
             }
         }
 
+        internal void Draw(Vector vector)
+        {
+            if (!HasHit)
+            {
+                Offset(vector);
+                Body.Draw(Color);
+            }
+        }
+
         public void Collides(Player p)
         {
             if (p.Jet.Collides(this))
@@ -99,7 +108,7 @@ namespace GameObjects
             gameObjects.players.ForEach(Collides);
 
             //Asteroid is out of screen
-            if (Pos.X + Size > gameObjects.WinSize.Width || Pos.X < 0 || Pos.Y > gameObjects.WinSize.Height || Pos.Y < 0)
+            if (Pos.X + Size > gameObjects.World.size.Width || Pos.X < 0 || Pos.Y > gameObjects.World.size.Height || Pos.Y < 0)
             {
                 HasHit = true;
             }

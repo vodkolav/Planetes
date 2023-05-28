@@ -5,7 +5,7 @@ using System.Drawing.Drawing2D;
 
 namespace PolygonCollision
 {
-    public class Vector : ICloneable
+    public class Vector : ICloneable, IComparable<Vector>
     {
         public float X { get; set; }
 
@@ -299,6 +299,11 @@ namespace PolygonCollision
         public object Clone()
         {
             return new Vector(X, Y);
+        }
+
+        public int CompareTo(Vector other)
+        {
+            return (int)(this - other).Magnitude;
         }
     }
 }

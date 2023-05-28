@@ -56,8 +56,8 @@ namespace GameObjects
                 }
             }
 
-            //check whether a bullet as way outside of screen - can remove it then
-            if (Pos.Magnitude > new Vector(gameObjects.WinSize).Magnitude * 2)
+            //check whether a bullet as way outside of world - can remove it then
+            if (Pos.Magnitude > new Vector(gameObjects.World.size).Magnitude * 2)
             {
                 HasHit = true;
                 return;
@@ -78,6 +78,15 @@ namespace GameObjects
         public void Offset(Vector by)
         {
            Body.Pos += by;
+        }
+
+        internal void Draw(Vector offset)
+        {
+            if (!HasHit)
+            {
+                Offset(offset);
+                Body.Draw(Color);
+            }
         }
     }
 }

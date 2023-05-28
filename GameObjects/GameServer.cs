@@ -8,12 +8,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using Newtonsoft.Json;
 
 namespace GameObjects
 {
     public class GameServer
     {
-        private Random R ;
+        private Random R;
 
         private readonly static Lazy<GameServer> _instance = new Lazy<GameServer>(() => new GameServer());
         public static GameServer Instance
@@ -43,7 +44,7 @@ namespace GameObjects
 
         public GameServer()
         {
-            gameObjects = new GameState(GameConfig.WorldSize);
+            gameObjects = new GameState();
             Bots = new List<Bot>();
             messageQ = new BlockingCollection<Tuple<string, Notification, string>>();
             hubContext = GlobalHost.ConnectionManager.GetHubContext<GameHub>();
@@ -78,10 +79,10 @@ namespace GameObjects
             throw new Exception("Local IP Address Not Found!");
         }
 
-        public int Join( string ConnectionID, string PlayerName)
+        public int Join(string ConnectionID, PlayerInfo playerInfo)
         {
             int playerID = R.Next(1_000_000, 9_999_999); //GetHashCode();
-            Player newplayer = new Player(playerID, ConnectionID, PlayerName, gameObjects);
+            Player newplayer = new Player(playerID, ConnectionID, playerInfo, gameObjects);
             gameObjects.players.Add(newplayer);
             //string gobj = JsonConvert.SerializeObject(gameObjects); //only for debugging - to check what got serialized
 
@@ -95,10 +96,10 @@ namespace GameObjects
                 throw new IndexOutOfRangeException("There can only be 9 players in a game ");
             }
             else
-            {  
+            {
                 DummyPlug Rei = new DummyPlug();
                 Bot DMYSYS = new Bot1(Rei);
-                DMYSYS.joinNetworkGame(URL);
+                DMYSYS.joinNetworkGame(URL, new PolygonCollision.Vector(500, 500));
                 //DMYSYS.Me.Name = "Rei";
                 //DMYSYS.Me.Jet.Color = Color.White;
                 //DMYSYS.UpdateMe();
@@ -228,6 +229,11 @@ namespace GameObjects
             {
                 Console.WriteLine(e.Message);
             }
+        }
+
+        public void testSerialization(GameState go)
+        {
+            string json = JsonConvert.SerializeObject(go, Formatting.Indented);
         }
     }
 }

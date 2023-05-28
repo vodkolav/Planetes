@@ -92,7 +92,12 @@ namespace PolygonCollision
             }
         }
 
-    public Polygon FromRectangle(int x, int y, int w, int h)
+        public Polygon FromRectangle(int x, int y, int w, int h)
+        {
+            return FromRectangle((float)x, (float)y, (float)w, (float)h);
+        }
+
+        public Polygon FromRectangle(float x, float y, float w, float h)
         {
             AddVertex(new Vector(x, y));
             AddVertex(new Vector(x + w, y));

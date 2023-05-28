@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using PolygonCollision;
+﻿using PolygonCollision;
 using System.Drawing;
 
 namespace GameObjects
@@ -42,6 +41,12 @@ namespace GameObjects
 
         public void Draw()
         {
+            Body.Draw(Color);
+        }
+
+        internal void Draw(Vector offset)
+        {
+            Body.Offset(offset);
             Body.Draw(Color);
         }
     }

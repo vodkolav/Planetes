@@ -9,12 +9,12 @@ namespace GameObjects
     public class Map
     {
         public List<Wall> Walls { get; set; }
-        Size winSize;
+        public Size size;
         public Polygon Space { get; set; }
 
         public Map(Size size)
         {
-            winSize = size;
+            this.size = size;
             Space = new Polygon().FromRectangle(0, 0, size.Width, size.Height);
             Walls = new List<Wall>();            
             Walls = LoadDefault2();
@@ -40,9 +40,9 @@ namespace GameObjects
 
             //create edge of screen walls 
             Point nw = new Point(b, b);
-            Point ne = new Point(winSize.Width-b, b);
-            Point se = new Point(winSize.Width-b, winSize.Height-b);
-            Point sw = new Point(b, winSize.Height-b);
+            Point ne = new Point(size.Width-b, b);
+            Point se = new Point(size.Width-b, size.Height-b);
+            Point sw = new Point(b, size.Height-b);
 
 
             Walls.Add(new Wall(nw, ne, wallBrush)); //upper
@@ -57,16 +57,16 @@ namespace GameObjects
             Point nnw = new Point(0 + sh, 0);
             Walls.Add(new Wall(nww, nnw, wallBrush));
 
-            Point nne = new Point(winSize.Width - sh, 0);
-            Point nee = new Point(winSize.Width, 0 + sh);
+            Point nne = new Point(size.Width - sh, 0);
+            Point nee = new Point(size.Width, 0 + sh);
             Walls.Add(new Wall(nne, nee, wallBrush));
 
-            Point see = new Point(winSize.Width, winSize.Height - sh);
-            Point sse = new Point(winSize.Width - sh, winSize.Height);
+            Point see = new Point(size.Width, size.Height - sh);
+            Point sse = new Point(size.Width - sh, size.Height);
             Walls.Add(new Wall(see, sse, wallBrush));
 
-            Point ssw = new Point(0 + sh, winSize.Height);
-            Point sww = new Point(0, winSize.Height - sh);
+            Point ssw = new Point(0 + sh, size.Height);
+            Point sww = new Point(0, size.Height - sh);
             Walls.Add(new Wall(ssw, sww, wallBrush));
 
             Point sp1 = new Point(100, 200);
