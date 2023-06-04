@@ -35,7 +35,7 @@ namespace PlanetesWPF
             InitializeComponent();
             C = new GameClient(this);
             C.PlayerName = PlayerName;
-            L = new Lobby(this);//todo later: set UI as owner to lobby
+            L = new Lobby(this);           
         }
 
         /// <summary>

@@ -9,6 +9,7 @@ namespace GameObjects
     public class Map
     {
         // TODO: implement spawning region for asteroids and players
+        // TODO: add stars in the background
         public List<Wall> Walls { get; set; }
         public Size size;
         public Polygon Space { get; set; }

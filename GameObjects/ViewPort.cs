@@ -70,10 +70,8 @@ namespace GameObjects
 
                 World = gameState.World;
                 Walls = gameState.World.Walls.Where(w => w.Body.Collides(Body, velocity).Intersect).ToList();
-                Players = gameState.players.Where(p => p.Jet.Collides(Body)).ToList();
-                // TODO:  what's with all the bullets? apparently, when a jet
-                // is outside viewport, it's bullets wont be visible to enemies 
-                Astroids = gameState.Astroids.Where(a => !Body.Collides(a.Body)).ToList();
+                Players = gameState.players.Where(p => p.Jet.Collides(Body) || p.Bullets.Any(b => Body.Collides(b.Pos))).ToList();
+                Astroids = gameState.Astroids.Where(a => !Body.Collides(a.Body)).ToList(); // TODO: understand why Collides here is supposed to be negated?
             }
         }
 

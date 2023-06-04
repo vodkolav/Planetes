@@ -172,7 +172,7 @@ namespace GameObjects
         protected override void FrameReact()
         {
 
-            //todo:
+            //todo: Bot4 logic
             // make bot catch ammo and health crates
             // smarter maneuvring between asteroids and bullets
 
@@ -270,7 +270,7 @@ namespace GameObjects
         protected override void FrameReact()
         {
 
-            //todo:
+            //todo: Bot3 logic
             // make bot catch ammo and health crates
             // smarter maneuvring between asteroids and bullets
 

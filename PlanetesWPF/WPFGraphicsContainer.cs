@@ -19,7 +19,7 @@ namespace PlanetesWPF
             B = b;
         }
 
-        public Vector ViewPortOffset { get; set; } = new Vector(0, 0); //TODO: add this to IUI interface
+        public Vector ViewPortOffset { get; set; } = new Vector(0, 0); 
 
         public void DrawRay(System.Drawing.Color c, Ray ray)
         {
