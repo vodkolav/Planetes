@@ -112,21 +112,23 @@ namespace PolygonCollision
         {
             get
             {
-                float totalX = 0;
-                float totalY = 0;
-                for (int i = 0; i < Vertices.Count; i++)
+                float vc = Vertices.Count-1;
+                Vector total = new Vector(0,0);
+                for (int i = 0; i < vc; i++)
                 {
-                    totalX += Vertices[i].X;
-                    totalY += Vertices[i].Y;
+                    total += Vertices[i];
                 }
-                return new Vector(totalX / (float)Vertices.Count, totalY / (float)Vertices.Count);
+                return total / vc;
             }
         }
 
 
         public Vector MTV { get; set; }
 
-
+        /// <summary>
+        /// Offset (move) this polygon
+        /// </summary>
+        /// <param name="v"></param>
         public void Offset(Vector v)
         {
             Offset(v.X, v.Y);
@@ -142,6 +144,20 @@ namespace PolygonCollision
             }
         }
 
+        /// <summary>
+        /// Get an offsetted copy of this polygon, without affecting this one
+        /// </summary>
+        /// <param name="offset"></param>
+        /// <returns></returns>
+        public Polygon Offseted(Vector offset)
+        {
+            Polygon np = new Polygon(); 
+            foreach (Vector v in Vertices)
+            {
+                np.AddVertex(v + offset);
+            }
+            return np;
+        }      
 
         public void Rotate(float angle)
         {
@@ -316,7 +332,7 @@ namespace PolygonCollision
         public void Draw(Color color)
         {
             DrawingContext.GraphicsContainer.FillPolygon(color, this);
-        }     
+        }
 
         // Calculate the distance between [minA, maxA] and [minB, maxB]
         // The distance will be negative if the intervals overlap

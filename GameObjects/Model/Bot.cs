@@ -28,7 +28,7 @@ namespace GameObjects
         public TimeSpan ReactionInterval { get; private set; }
 
 
-        public Bot(IUI game) : base(game)
+        public Bot() : base(new DummyPlug())
         {
             PlayerName = GetType().Name;
             computer = new Thread(BotLoop)
@@ -166,7 +166,7 @@ namespace GameObjects
 
     public class Bot4 : Bot
     {
-        public Bot4(IUI game) : base(game)
+        public Bot4() : base()
         { }
 
         protected override void FrameReact()
@@ -264,7 +264,7 @@ namespace GameObjects
     public class Bot3 : Bot
     {
 
-        public Bot3(IUI game) : base(game)
+        public Bot3() : base()
         { }
 
         protected override void FrameReact()
@@ -353,7 +353,7 @@ namespace GameObjects
     public class Bot2 : Bot
     {
 
-        public Bot2(IUI game) : base(game)
+        public Bot2() : base()
         { }
 
 
@@ -383,7 +383,7 @@ namespace GameObjects
     }
     public class Bot1 : Bot
     {
-        public Bot1(IUI game) : base(game)
+        public Bot1() 
         { }
 
         /// <summary>

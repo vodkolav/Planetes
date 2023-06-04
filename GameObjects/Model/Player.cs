@@ -47,6 +47,11 @@ namespace GameObjects
             actionMapping[instruction.Item1](instruction.Item2);
         }
 
+        public void Act(Tuple<Action, Vector> instruction)
+        {
+            actionMapping[instruction.Item1](instruction.Item2);
+        }
+
         private void MapActions()
         {
             actionMapping = new Dictionary<Action, System.Action<object>>
@@ -54,7 +59,7 @@ namespace GameObjects
                 { Action.Press, Steer },
                 { Action.Release, Release },
                 { Action.Aim, Aim },
-                { Action.setViewPort,setViewPort } // not used for now, but will be useful when you want tot change window size in-game
+                { Action.setViewPort,setViewPort } // This Action is not used for now, but will be useful when you want tot change window size in-game
             };
         }
 
@@ -154,6 +159,11 @@ namespace GameObjects
                         KeyShoot = true;
                         break;
                     }
+                case HOTAS.Brake:
+                    {
+                        Acceleration = -Jet.Speed * 0.3;
+                        break;
+                    }
             }
             Jet.Acceleration = Acceleration;
 
@@ -192,13 +202,19 @@ namespace GameObjects
                         KeyShoot = false;
                         break;
                     }
+                case HOTAS.Brake:
+                    {
+                        Acceleration.X = 0;
+                        Acceleration.Y = 0;                       
+                        break;
+                    }
             }
             Jet.Acceleration = Acceleration;
         }
 
         public virtual void Aim(object argument)
         {
-            Jet.Aim = (Vector)argument;
+            Jet.Aim = (Vector)argument - (viewPort.Size * .5);
         }
 
         public void Move()
@@ -243,11 +259,5 @@ namespace GameObjects
             Bullets.ForEach(b => b.Draw());
         }
 
-        internal void Draw(Vector offset)
-        {
-            Jet.Offset(offset);
-            Jet.Draw();
-            Bullets.ForEach(b => b.Draw(offset));
-        }
     }
 }

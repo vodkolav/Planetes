@@ -23,10 +23,7 @@ namespace GameObjects
 
         public Bullet(Vector pos, Vector speed, int size, Color color)
         {
-            Body = new Ray();
-            Body.Pos = pos;
-            Body.Tail = speed;
-            Body.Size = size;
+            Body = new Ray(pos, speed, size);
             Color = color;
             HasHit = false;
         }
@@ -78,15 +75,6 @@ namespace GameObjects
         public void Offset(Vector by)
         {
            Body.Pos += by;
-        }
-
-        internal void Draw(Vector offset)
-        {
-            if (!HasHit)
-            {
-                Offset(offset);
-                Body.Draw(Color);
-            }
         }
     }
 }

@@ -13,10 +13,10 @@ namespace GameObjects
         public Polygon Body { get; set; }
         //Vector Position { get { return Body.Center; } }
         [JsonIgnore]
-        public Vector Origin { get { return Body.Vertices.Min(); } }
+        public Vector Origin { get { return Body.Vertices[0]; } }
         //Size size;
         public Vector velocity { get; set; }
-        public Polygon Space { get; set; }
+        public Map World { get; set; }
         public List<Wall> Walls { get; set; }
         public List<Player> Players { get; set; }
         public List<Astroid> Astroids { get; set; }
@@ -30,84 +30,76 @@ namespace GameObjects
             get { return size; }
 
             internal set
-            {
+            {                
                 size = value;
                 if (Body != null) {
-                    Body  = new Polygon().FromRectangle(Body.Vertices[0].X, Body.Vertices[0].Y, value.X, value.Y);
-                    Space = new Polygon().FromRectangle(Body.Vertices[0].X, Body.Vertices[0].Y, value.X, value.Y);
+                    Body  = new Polygon().FromRectangle(Body.Vertices.Min(v => v.X), Body.Vertices.Min(v => v.Y), value.X, value.Y);
                 }
                 else
                 {
                     Body = new Polygon().FromRectangle(0, 0, value.X, value.Y);
-                    Space = new Polygon().FromRectangle(0, 0, value.X, value.Y);
                 }
             }
         }
 
-        public ViewPort() //, GameState gameState)
+        public ViewPort() 
         {
 
         }
 
-        public ViewPort(Player player) //, GameState gameState)
+        public ViewPort(Player player) 
         {
-
-            //this.gameState = gameState;
             velocity = new Vector(0,0);
-            //this.size = size;
+            World = new Map(new Size(500,500));
             Walls = new List<Wall>();
             Players = new List<Player>();
             Astroids = new List<Astroid>();
-
             P = player;
             Size = new Vector(800, 600);
-
         }
 
 
         internal void Update(GameState gameState)
         {
-
-
-            //this.gameState = gameState;
             lock (gameState)
             {
-                Vector target = P.Jet.Hull.Center;
+                Vector target = P.Jet.Pos;
                 Vector source = Body.Center;
                 Vector ofst = target - source;
                 Body.Offset(ofst);
 
+                World = gameState.World;
                 Walls = gameState.World.Walls.Where(w => w.Body.Collides(Body, velocity).Intersect).ToList();
                 Players = gameState.players.Where(p => p.Jet.Collides(Body)).ToList();
-                // what's with all the bullets? apparently, when a jet is outside viewport, it's bullets wont be visible to enemies 
-                Astroids = gameState.Astroids.Where(a => Body.Collides(a.Body)).ToList();
+                // TODO:  what's with all the bullets? apparently, when a jet
+                // is outside viewport, it's bullets wont be visible to enemies 
+                Astroids = gameState.Astroids.Where(a => !Body.Collides(a.Body)).ToList();
             }
         }
 
 
         public void Draw()
         {
+            DrawingContext.GraphicsContainer.ViewPortOffset = -Origin;
 
-            // WriteableBitmap.Crop() approach ? no 
-
-            lock (this)
+            lock (this)// TODO: do these checks in map class 
             {
-                Space.Draw(Color.Black);
+                World.Space.Draw(Color.Black);
+            }
+
+            lock (this) // TODO: do these checks in map class 
+            {
+                Walls.ForEach(w => w.Draw()); 
             }
 
             lock (this)
             {
-                Walls.ForEach(w => w.Draw(-Origin)); 
+                Players.ForEach(p => p.Draw());
             }
 
             lock (this)
             {
-                Players.ForEach(p => p.Draw(-Origin));
-            }
-
-            lock (this)
-            {
-                Astroids.ForEach(a => a.Draw(-Origin));
+                Astroids.ForEach(a => a.Draw());
             }
         }
     }

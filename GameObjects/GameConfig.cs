@@ -52,9 +52,9 @@ namespace GameObjects
             }
         }
 
-        public static float Lightspeed { get { return 4; } }
+        public static float Lightspeed { get { return 8; } }
 
-        public static int AsteroidTimeout { get { return 50; } }
+        public static int AsteroidTimeout { get { return 30; } }
     }
 
 }

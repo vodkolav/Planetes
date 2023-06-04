@@ -47,9 +47,7 @@ namespace GameObjects
             Offset(new Vector(start));
             Speed = new Vector(0, 0);
             Acceleration = new Vector(0, 0);
-            Aim = new Vector(0, 0);
-            //Pos_x = start.X;
-            //Pos_y = start.Y;
+            Aim = new Vector(1, 0);
             Color = color;
             Thrust = GameConfig.Thrust;
             Cooldown = 3;
@@ -63,6 +61,7 @@ namespace GameObjects
 
         private void Rotate(Vector dir)
         {
+            dir.Normalize();
             float diff = Bearing.Angle(dir);
             Bearing = dir;
             Hull.RotateAt(diff, Hull.Center);
@@ -127,14 +126,14 @@ namespace GameObjects
             Offset(Speed);
 
             //Rotate
-            Vector dir = Aim - Hull.Center;
-
-            Rotate(dir);
+           
+            Rotate(Aim);
 
         }
 
         public void Bounce(Vector normal)
         {
+            //TODO: rename speed to velocity
             Speed -= 2 * Speed.Dot(normal) * normal;
         }
 
@@ -143,7 +142,7 @@ namespace GameObjects
             if (player.Ammo != 0 && timeElapsed > LastFired + Cooldown)
             {
                 LastFired = timeElapsed;
-                Bullet bullet = new Bullet(pos: player.Jet.Gun, speed: Bearing * (Bullet.linearSpeed / Bearing.Magnitude), size: 5, color: Color);
+                Bullet bullet = new Bullet(pos: player.Jet.Gun, speed: Bearing.GetNormalized() * Bullet.linearSpeed + Speed, size: 5, color: Color);
                 lock (player.gameState)
                 {
                     player.Bullets.Add(bullet);

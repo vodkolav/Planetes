@@ -8,6 +8,7 @@ namespace GameObjects
 {
     public class Map
     {
+        // TODO: implement spawning region for asteroids and players
         public List<Wall> Walls { get; set; }
         public Size size;
         public Polygon Space { get; set; }
@@ -15,19 +16,20 @@ namespace GameObjects
         public Map(Size size)
         {
             this.size = size;
-            Space = new Polygon().FromRectangle(0, 0, size.Width, size.Height);
+            Space = new Polygon().FromRectangle(-size.Width, -size.Height, 2*size.Width, 2*size.Height);
+
             Walls = new List<Wall>();            
             Walls = LoadDefault2();
         }
 
         public static Map Load(string MapFile)
         {
-            //todo: implement save
+            //todo: implement save and load map
             return JsonConvert.DeserializeObject<Map>(File.ReadAllText(MapFile));
         }
 
         public void Draw()
-        {            //should replace this with buffered image of the map
+        {   //TODO: return drawing here from the ViewPort Class
             Space.Draw(Color.Black);
             Walls.ForEach(w => w.Draw());
         }

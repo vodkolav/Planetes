@@ -89,22 +89,34 @@ namespace GameObjects
             return playerID;
         }
 
-        public void AddBot()
+        /// <summary>
+        /// Allows to chose what type of bot you want it to be
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <exception cref="IndexOutOfRangeException"></exception>
+        public void AddBot<T>() where T : Bot, new()
         {
             if (gameObjects.players.Count > 8)
             {
                 throw new IndexOutOfRangeException("There can only be 9 players in a game ");
             }
             else
-            {
-                DummyPlug Rei = new DummyPlug();
-                Bot DMYSYS = new Bot1(Rei);
+            {                              
+                Bot DMYSYS = new T();
                 DMYSYS.joinNetworkGame(URL, new PolygonCollision.Vector(500, 500));
                 //DMYSYS.Me.Name = "Rei";
                 //DMYSYS.Me.Jet.Color = Color.White;
                 //DMYSYS.UpdateMe();
                 Bots.Add(DMYSYS);
             }
+        }
+
+        /// <summary>
+        /// Adds Bot1 by default
+        /// </summary>
+        public void AddBot()
+        {
+            AddBot<Bot1>();
         }
 
         public void Kick(Player kickedone)

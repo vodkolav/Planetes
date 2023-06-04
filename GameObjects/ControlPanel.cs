@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 namespace GameObjects
 {
-    public enum HOTAS { Up, Down, Left, Right, Shoot, Aim };
+    public enum HOTAS { Up, Down, Left, Right, Shoot, Aim, Brake };
     public class ControlPanel
     {
         private Dictionary<Keys, HOTAS> KeyBindings;
@@ -46,7 +46,7 @@ namespace GameObjects
             bindKey(Keys.S, HOTAS.Down);
             bindKey(Keys.A, HOTAS.Left);
             bindKey(Keys.D, HOTAS.Right);
-            bindKey(Keys.Space, HOTAS.Shoot);
+            bindKey(Keys.Space, HOTAS.Brake);
         }
 
         public void bindARROWSto()
@@ -67,13 +67,13 @@ namespace GameObjects
         public void Press(HOTAS argument)
         {
             if (isWorking)
-                Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, object>(Action.Press, argument) });
+                Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, HOTAS>(Action.Press, argument) });
         }
 
         public void Release(HOTAS argument)
         {
             if (isWorking)
-                Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, object>(Action.Release, argument) });
+                Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, HOTAS>(Action.Release, argument) });
         }
             
         public void Do(Action instruction, object argument)
@@ -86,8 +86,11 @@ namespace GameObjects
         public void Aim(Vector argument)
         {
             if (isWorking)
-                Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, object>(Action.Aim, argument) });
+                Proxy.Invoke("Aim", new object[] { PlayerID, new Tuple<Action, Vector>(Action.Aim, argument) });
+            // these exceptions appear after waiting too long on a breakpoint. how to fix : https://stackoverflow.com/a/38161578
+
         }
+
         public void Press(int key)
         {
             Press((Keys)key);

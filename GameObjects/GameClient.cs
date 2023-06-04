@@ -30,7 +30,6 @@ namespace GameObjects
 
         public GameClient(IUI owner)
         {
-            PlayerName = "Human";
             UI = owner;
         }
 
