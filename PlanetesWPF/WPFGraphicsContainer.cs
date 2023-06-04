@@ -19,20 +19,24 @@ namespace PlanetesWPF
             B = b;
         }
 
+        public Vector ViewPortOffset { get; set; } = new Vector(0, 0); //TODO: add this to IUI interface
+
         public void DrawRay(System.Drawing.Color c, Ray ray)
         {
+            ray = ray.Offseted(ViewPortOffset);
             Vector End = ray.Pos - ray.Tail;
             B.DrawLineAa((int)ray.Pos.X, (int)ray.Pos.Y, (int)End.X, (int)End.Y, System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B),ray.Size);
         }
 
-        public void FillEllipse(System.Drawing.Color c, Circle cir)
+        public void FillEllipse(System.Drawing.Color c, Circle circ)
         {
-            B.FillEllipseCentered((int)cir.Pos.X, (int)cir.Pos.Y, (int)cir.R/2, (int)cir.R/2, System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B));
+            circ = circ.Offseted(ViewPortOffset);
+            B.FillEllipseCentered((int)circ.Pos.X, (int)circ.Pos.Y, (int)circ.R/2, (int)circ.R/2, System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B));
         }
 
         public void FillPolygon(System.Drawing.Color c, Polygon poly)
         {
-            B.FillPolygon(poly.ints, System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B));
+            B.FillPolygon(poly.Offseted(ViewPortOffset).ints, System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B));
         }
     }
 }

@@ -28,10 +28,13 @@ namespace PlanetesWPF
 
         public RecorderController RC { get; set; }
 
+        public string PlayerName = "WPFplayer";
+
         public UI()
         {
             InitializeComponent();
             C = new GameClient(this);
+            C.PlayerName = PlayerName;
             L = new Lobby(this);//todo later: set UI as owner to lobby
         }
 
@@ -54,7 +57,7 @@ namespace PlanetesWPF
                     }
                 case "joinNetworkGame":
                     {
-                        C.joinNetworkGame($"http://192.168.1.11:2861/", new PolygonCollision.Vector((int)Visor.Width, (int)Visor.Height));
+                        C.joinNetworkGame($"http://192.168.1.11:2861/", VisorSize);
                         break;
                     }
                 case "SinglePlayer":
@@ -66,6 +69,22 @@ namespace PlanetesWPF
             Text += "Planetes: " + C.PlayerId;
         }
      
+        /// <summary>
+        /// Convert from device-independent 1/60th inch WPF units to amount of pixels
+        /// </summary>
+        public PolygonCollision.Vector VisorSize
+        {
+            get
+            {
+                var source = PresentationSource.FromVisual(this);
+                Matrix transformToDevice = source.CompositionTarget.TransformToDevice;
+                Vector wpfSize = new Vector(Visor.Width, Visor.Height);
+                Size pixelSize = (Size)transformToDevice.Transform(wpfSize);
+                PolygonCollision.Vector v = new PolygonCollision.Vector((int)pixelSize.Width, (int)pixelSize.Height);
+                return v;
+            }
+        }
+
         public void AnnounceDeath(string message)
         {
             Billboard B = new Billboard();
@@ -199,7 +218,7 @@ namespace PlanetesWPF
         public async Task joinNetworkGame(string URL)
         {
             Text += " (Client)";
-            C.joinNetworkGame(URL, new PolygonCollision.Vector((int)Visor.Width, (int)Visor.Height));
+            C.joinNetworkGame(URL,VisorSize);
             
             bool GameStarted = L.OpenLobby_WaitForGuestsAndBegin(this);
 
@@ -229,8 +248,8 @@ namespace PlanetesWPF
         {
             var URL = hostNetworkGame();
             
-            S.AddBot();
-            S.AddBot();
+           S.AddBot();
+           S.AddBot<Bot2>();
             await joinNetworkGame(URL);
             //await C.StartServer();
         }
@@ -331,8 +350,8 @@ namespace PlanetesWPF
         private void World_MouseMove(object sender, MouseEventArgs e)
         {
             if (C.GameOn)
-            {                
-                C.Yoke.Aim(FromPoint(e.GetPosition(Visor)));
+            {
+                C.Yoke.Aim(FromPoint(e.GetPosition(Visor))); 
             }
         }
         #endregion

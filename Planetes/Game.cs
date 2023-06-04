@@ -22,6 +22,8 @@ namespace Planetes
 
         public BillBoard Billboard { get; set; }
 
+        public string PlayerName = "FormsPlayer";
+
         public Game()
         {
             InitializeComponent();
@@ -31,6 +33,7 @@ namespace Planetes
                      ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.UserPaint, true);
             C = new GameClient(this);
+            C.PlayerName = PlayerName;
             L = new Lobby(this);
             Billboard = new BillBoard(this);
         }
