@@ -13,6 +13,11 @@ namespace Planetes
 
         public Vector ViewPortOffset { get ; set; } = new Vector(0, 0);
 
+        public void Clear()
+        {
+            G.Clear(Color.Black);
+        }
+
         public void DrawRay(Color c, Ray ray)
         {
             ray = ray.Offseted(ViewPortOffset);

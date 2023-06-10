@@ -228,7 +228,7 @@ namespace GameObjects
                     }
                     gameObjects.Frame();
 
-                    //string gobj = JsonConvert.SerializeObject(gameObjects); only for debugging - to check what got serialized
+                    //string gobj = JsonConvert.SerializeObject(gameObjects); // only for debugging - to check what got serialized
                     await hubContext.Clients.All.UpdateModel(gameObjects);
                     _ = Task.Run(DispatchMessages);
 

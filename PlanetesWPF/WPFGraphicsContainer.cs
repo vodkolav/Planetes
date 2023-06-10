@@ -19,7 +19,12 @@ namespace PlanetesWPF
             B = b;
         }
 
-        public Vector ViewPortOffset { get; set; } = new Vector(0, 0); 
+        public Vector ViewPortOffset { get; set; } = new Vector(0, 0);
+
+        public void Clear()
+        {
+            B.Clear(Colors.Black);
+        }
 
         public void DrawRay(System.Drawing.Color c, Ray ray)
         {

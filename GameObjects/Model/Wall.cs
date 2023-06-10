@@ -1,8 +1,10 @@
-﻿using PolygonCollision;
+﻿using Newtonsoft.Json;
+using PolygonCollision;
 using System.Drawing;
 
 namespace GameObjects
 {
+    [JsonObject(IsReference = true)]
     public class Wall
     {
        

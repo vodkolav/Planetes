@@ -108,12 +108,17 @@ namespace GameObjects
         {
             try
             {
+                DateTime dt;// maybe replace this with stopwatch
+                TimeSpan tdiff;
                 memory = new Dictionary<string, object>();
                 Prepare();
                 while (Me != null)
-                {                    
+                {
+                    dt = DateTime.UtcNow;
                     FrameReact();
-                    await Task.Delay(2000);
+                    tdiff = DateTime.UtcNow - dt;
+                    await Task.Delay((GameState.FrameInterval - tdiff).Duration());//this is bad. There should be timer instead
+
                 }
                 Console.WriteLine("A BOT HAS DIED");
             }

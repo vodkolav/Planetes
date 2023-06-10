@@ -17,7 +17,7 @@ namespace GameObjects
         public Map(Size size)
         {
             this.size = size;
-            Space = new Polygon().FromRectangle(-size.Width, -size.Height, 2*size.Width, 2*size.Height);
+            Space = new Polygon().FromRectangle(0,0, size.Width, size.Height);
 
             Walls = new List<Wall>();            
             Walls = LoadDefault2();

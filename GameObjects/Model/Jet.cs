@@ -1,8 +1,10 @@
-﻿using PolygonCollision;
+﻿using Newtonsoft.Json;
+using PolygonCollision;
 using System.Drawing;
 
 namespace GameObjects
 {
+    [JsonObject(IsReference = true)]
     public class Jet
     {
         public Vector Pos { get => Hull.Center; }
@@ -142,7 +144,7 @@ namespace GameObjects
             if (player.Ammo != 0 && timeElapsed > LastFired + Cooldown)
             {
                 LastFired = timeElapsed;
-                Bullet bullet = new Bullet(pos: player.Jet.Gun, speed: Bearing.GetNormalized() * Bullet.linearSpeed + Speed, size: 5, color: Color);
+                Bullet bullet = new Bullet(pos: player.Jet.Gun, speed: Bearing.GetNormalized() * Bullet.linearSpeed + Speed, size: 3, color: Color);
                 lock (player.gameState)
                 {
                     player.Bullets.Add(bullet);

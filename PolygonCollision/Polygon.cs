@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+//TODO: remove dependency on  System.Drawing namespace from this project
+// Replace it with System.Windows.Media https://stackoverflow.com/a/7739547
 
 namespace PolygonCollision
 {

@@ -71,24 +71,14 @@ namespace GameObjects
                 Body.Draw(Color);
             }
         }
-
-        internal void Draw(Vector vector)
-        {
-            if (!HasHit)
-            {
-                Offset(vector);
-                Body.Draw(Color);
-            }
-        }
+ 
 
         public void Collides(Player p)
         {
             if (p.Jet.Collides(this))
-            //Pos_x + Size > gameObjects.player1.Jet.Pos_x
-            //&& Pos_x - Size < gameObjects.player1.Jet.Pos_x + gameObjects.player1.Jet.Width
-            //&& Pos_y - Size < gameObjects.player1.Jet.Pos_y + gameObjects.player1.Jet.Height
-            //&& Pos_y + Size > gameObjects.player1.Jet.Pos_y)
+
             {
+                //TODO: move this to HandleCollision()
                 HasHit = true;
                 if (Type == AstType.Ammo)
                 {

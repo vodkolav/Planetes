@@ -78,11 +78,14 @@ namespace GameObjects
 
         public void Draw()
         {
-            DrawingContext.GraphicsContainer.ViewPortOffset = -Origin;
-
+            lock (this)
+            {
+                DrawingContext.GraphicsContainer.ViewPortOffset = -Origin;                
+            }           
             lock (this)// TODO: do these checks in map class 
             {
-                World.Space.Draw(Color.Black);
+                DrawingContext.GraphicsContainer.Clear();
+                // World.Space.Draw(Color.Black);
             }
 
             lock (this) // TODO: do these checks in map class 
