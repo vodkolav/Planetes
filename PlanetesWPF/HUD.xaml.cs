@@ -1,18 +1,9 @@
 ﻿using GameObjects;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace PlanetesWPF
 {
@@ -48,11 +39,9 @@ namespace PlanetesWPF
                 if (playerstate != null)
                     lock (C.gameObjects)
                     {
-                        //lblSpeedX.Text = playerstate.Jet.Speed.X.ToString("N2");
-                        //lblSpeedY.Text = playerstate.Jet.Speed.Y.ToString("N2");
+                        lblSpeed.Content = playerstate.Jet.Speed.ToString();
 
-                        //lblAccX.Text = playerstate.Jet.Acceleration.X.ToString("N2");
-                        //lblAccY.Text = playerstate.Jet.Acceleration.Y.ToString("N2");
+                        lblAcc.Content = playerstate.Jet.Acceleration.X.ToString();
 
                         pbHealth.Value = playerstate.Health;
                         lblHealth.Content = "Health: " + playerstate.Health;
