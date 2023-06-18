@@ -139,13 +139,13 @@ namespace PlanetesWPF
         public void DrawGraphics()
         {
             // here are 3 options of alternative approaches for drawing in WPF:
-            
+
             //DrawingVisual, here'is a good examplws site:
             //http://windowspresentationfoundationinfo.blogspot.com/2014_07_01_archive.html?view=classic
 
             // consider using SkiaSharp instead of DrawableBitmapEx
             // example here : https://github.com/swharden/Csharp-Data-Visualization/tree/main/dev/old/2019-09-08-SkiaSharp-openGL
-            
+
             // or SFML: 
             // https://www.sfml-dev.org/download/bindings.php
 
@@ -154,7 +154,7 @@ namespace PlanetesWPF
                 // Wrap updates in a GetContext call, to prevent invalidation and nested locking/unlocking during this block
                 using (B.GetBitmapContext())
                 {
-                    C.viewPort.Draw();
+                    C.gameObjects.Draw(C.viewPort);
                 }
             }
             foreach (var hud in wpHUDs.Children)
@@ -176,7 +176,7 @@ namespace PlanetesWPF
 
         public void Start()
         {
-            Dispatcher.BeginInvoke(
+            Dispatcher.Invoke(
                 new System.Action(() =>
                 {
                     StartGraphics();
@@ -249,7 +249,7 @@ namespace PlanetesWPF
             var URL = hostNetworkGame();
             
            S.AddBot();
-           S.AddBot<Bot2>();
+           S.AddBot<Bot3>();
             await joinNetworkGame(URL);
             //await C.StartServer();
         }

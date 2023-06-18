@@ -207,6 +207,8 @@ namespace GameObjects
 
         private async void GameLoop()
         {
+        // TODO: implement quad-trees for spacial indexing :
+        // https://badecho.com/index.php/2023/01/14/fast-simple-quadtree/
             try
             {
                 DateTime dt;// maybe replace this with stopwatch

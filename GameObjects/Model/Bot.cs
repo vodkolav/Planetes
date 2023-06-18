@@ -19,14 +19,7 @@ namespace GameObjects
         protected List<HOTAS> directions = new List<HOTAS> { HOTAS.Up, HOTAS.Down };
         protected Jet Jet { get { return Me.Jet; } }
 
-
-        int SlowDownCoefficient
-        {
-            set { ReactionInterval = new TimeSpan(0, 0, 0, 0, (int)GameState.FrameInterval.TotalMilliseconds * value); }
-        }
-
-        public TimeSpan ReactionInterval { get; private set; }
-
+        public TimeSpan ReactionInterval { get; private set; } = TimeSpan.FromSeconds(1);
 
         public Bot() : base(new DummyPlug())
         {
@@ -103,8 +96,7 @@ namespace GameObjects
             Yoke.Aim(at);
         }
 
-        
-        private async void BotLoop()
+        private void BotLoop()
         {
             try
             {
@@ -115,9 +107,11 @@ namespace GameObjects
                 while (Me != null)
                 {
                     dt = DateTime.UtcNow;
+                    //TODO: cancel the call of this function if it takes longer than ReactionInterval 
+                    //https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/cancel-async-tasks-after-a-period-of-time
                     FrameReact();
                     tdiff = DateTime.UtcNow - dt;
-                    await Task.Delay((GameState.FrameInterval - tdiff).Duration());//this is bad. There should be timer instead
+                    Thread.Sleep(ReactionInterval - tdiff);//this is bad. There should be timer instead
 
                 }
                 Console.WriteLine("A BOT HAS DIED");

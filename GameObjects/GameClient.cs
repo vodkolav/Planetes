@@ -3,6 +3,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using PolygonCollision;
+using Microsoft.AspNet.SignalR.Client.Transports;
 
 namespace GameObjects
 {
@@ -44,9 +45,7 @@ namespace GameObjects
                 Proxy.On<int>("JoinedLobby", (pID) => PlayerId = pID);
                 Proxy.On<Notification, string>("Notify", Notify);
                 Proxy.On("Start", Start);
-                await Conn.Start();
-
-               
+                await Conn.Start(new WebSocketTransport());               
                 PlayerInfo info = new PlayerInfo() {
                     PlayerName = PlayerName,
                     VisorSize = windowSize
@@ -68,8 +67,6 @@ namespace GameObjects
         public void updateGameState(GameState go)
         {
             gameObjects = go;
-            if (PlayerName == "Human")
-            Console.Write("\r frameNum: " + gameObjects.frameNum);// + "| " + tdiff.ToString()
         }
 
         public void UpdateLobby(GameState go)

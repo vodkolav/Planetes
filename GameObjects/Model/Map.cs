@@ -76,6 +76,13 @@ namespace GameObjects
             Point sp2 = new Point(345, 521);
             Walls.Add(new Wall(sp1, sp2, wallBrush));
 
+            for (int i = 1; i < 8; i++)
+            {
+                sp1 = new Point(i * 200, size.Height - sh);
+                sp2 = new Point(i * 200 + 345, size.Height - 2*sh);
+                Walls.Add(new Wall(sp1, sp2, wallBrush));
+
+            }
             return Walls;
         }
     }

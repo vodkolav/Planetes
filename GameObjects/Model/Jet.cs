@@ -120,7 +120,7 @@ namespace GameObjects
                 r = Hull.Collides(w.Body, Speed);
                 if (r.WillIntersect)
                 {
-                    Offset(Speed + r.MinimumTranslationVector);
+                    Offset(r.MinimumTranslationVector);
                     Bounce(r.translationAxis);
                     break;
                 }
@@ -144,7 +144,7 @@ namespace GameObjects
             if (player.Ammo != 0 && timeElapsed > LastFired + Cooldown)
             {
                 LastFired = timeElapsed;
-                Bullet bullet = new Bullet(pos: player.Jet.Gun, speed: Bearing.GetNormalized() * Bullet.linearSpeed + Speed, size: 3, color: Color);
+                Bullet bullet = new Bullet(pos: player.Jet.Gun, speed: Bearing.GetNormalized() * Bullet.linearSpeed /*+ Speed*/, size: 3, color: Color);
                 lock (player.gameState)
                 {
                     player.Bullets.Add(bullet);

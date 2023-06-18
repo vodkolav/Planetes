@@ -1,7 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using PolygonCollision;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 
 namespace GameObjects
@@ -57,7 +56,7 @@ namespace GameObjects
 
             lock (this) // calculate viewports for each player
             {
-                players.ForEach(p => p.viewPort.Update(this));               
+                players.ForEach(p => p.viewPort.Update());
             }
 
             frameNum++;
@@ -77,7 +76,48 @@ namespace GameObjects
             return null;
         }
 
+        public void Draw(ViewPort vp) //maybe it's supposed to be Player , not ViewPort
+        {
+            //TODO: draw only the objects that are in the ViewPort.
+            // for this i need to replace Collides function with Rectangle.intersect - as it's supposed to be computationally cheaper.
+            /*  Walls = gameState.World.Walls.Where(w => w.Body.Collides(Body, velocity).Intersect).ToList();
+            Players = gameState.players.Where(p => p.Jet.Collides(Body) || p.Bullets.Any(b => Body.Collides(b.Pos))).ToList();
+            Astroids = gameState.Astroids.Where(a => !Body.Collides(a.Body)).ToList(); // TODO: understand why Collides here is supposed to be negated? */
+           
+            lock (this)
+            {
+                DrawingContext.GraphicsContainer.ViewPortOffset =  -vp.Origin;
+            }
+            lock (this)// TODO: do these checks in map class 
+            {
+                DrawingContext.GraphicsContainer.Clear();
+                // World.Space.Draw(Color.Black);
+            }
 
+            lock (this) // TODO: do these checks in map class 
+            {                
+                foreach (Wall w in World.Walls)
+                {
+                    w.Draw();
+                }
+            }
+
+            lock (this)
+            {               
+                foreach (Player p in players)
+                {
+                    p.Draw();
+                }
+            }
+
+            lock (this)
+            {    
+                foreach (Astroid a in Astroids)
+                {
+                    a.Draw();
+                }
+            }
+        }
 
         public void InitFeudingParties()
         {

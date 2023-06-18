@@ -135,7 +135,7 @@ namespace Planetes
               
         public void DrawGraphics()
         {
-            C.viewPort.Draw();
+            C.gameObjects.Draw(C.viewPort);
             pbxWorld.Image = B;
             if (pbxWorld != null)
                 pbxWorld.Invoke(new System.Action(pbxWorld.Refresh));

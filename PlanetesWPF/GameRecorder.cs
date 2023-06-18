@@ -40,7 +40,7 @@ namespace PlanetesWPF
         {           
             frames.Add(aPixels);
         }
-                public void Feed(object Image)
+        public void Feed(object Image)
         {
             encoder = new GifBitmapEncoder();
             foreach (var aPixels in frames.GetConsumingEnumerable())
