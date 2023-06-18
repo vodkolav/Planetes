@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30225.117
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Planetes", "Planetes\Planetes.csproj", "{D85151FF-22EC-4F2A-BE4F-9CCDB6D33E00}"
 EndProject
@@ -18,6 +18,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4DCCE5BE-60D7-4348-AD06-C4E0D421EA5E}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
+		todo.md = todo.md
 	EndProjectSection
 EndProject
 Global

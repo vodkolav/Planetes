@@ -229,7 +229,6 @@
   <ItemGroup>
     <None Include="Resources\YouDied.png" />
     <None Include="Resources\favicon.ico" />
-    <Content Include="TODO.txt" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />

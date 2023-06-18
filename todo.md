@@ -1,11 +1,9 @@
 ﻿TODO:
 Features:
 	implement pause
-	implement braking (deceleration)
 	implement ability to update player's info in lobby 	
 	implement game configuration 
 	implement drawing walls by hand (map editor)
-	make pretty README.MD
 	make polygon collision calculation on GPU?
 	make self-learning bots (https://towardsdatascience.com/how-to-teach-an-ai-to-play-games-deep-reinforcement-learning-28f9b920440a)
 
@@ -19,8 +17,6 @@ Visual:
 	make ship prettier, add wings
 	slap ship sprites on top of polygons?
 	make better maps
-	implement big world outside of screen and camera movement (viewport) (probably this will be useful:
-	https://www.codeproject.com/Articles/85603/A-WPF-custom-control-for-zooming-and-panning)
 
 Gameplay:
 	matches (rules, respawn,  kills/deaths count, etc )
@@ -47,6 +43,9 @@ DONE:
 	make UI in WPF, beacuse GDI+ is horrible for animation
 	implement recording games as movies/GIFs
 	change $safeprojectname$ (appears in task manager) to Planetes
+	implement braking (deceleration)
+	make pretty README.MD
+	implement big world outside of screen and camera movement (viewport) 
 
 BUGS:	
 	If during debugging I stay in break mode for a bit more time then signalR disconnects with exception
