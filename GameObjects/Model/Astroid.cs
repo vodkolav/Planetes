@@ -71,15 +71,14 @@ namespace GameObjects
                 Body.Draw(Color);
             }
         }
+ 
 
         public void Collides(Player p)
         {
             if (p.Jet.Collides(this))
-            //Pos_x + Size > gameObjects.player1.Jet.Pos_x
-            //&& Pos_x - Size < gameObjects.player1.Jet.Pos_x + gameObjects.player1.Jet.Width
-            //&& Pos_y - Size < gameObjects.player1.Jet.Pos_y + gameObjects.player1.Jet.Height
-            //&& Pos_y + Size > gameObjects.player1.Jet.Pos_y)
+
             {
+                //TODO: move this to HandleCollision()
                 HasHit = true;
                 if (Type == AstType.Ammo)
                 {
@@ -99,7 +98,7 @@ namespace GameObjects
             gameObjects.players.ForEach(Collides);
 
             //Asteroid is out of screen
-            if (Pos.X + Size > gameObjects.WinSize.Width || Pos.X < 0 || Pos.Y > gameObjects.WinSize.Height || Pos.Y < 0)
+            if (Pos.X + Size > gameObjects.World.size.Width || Pos.X < 0 || Pos.Y > gameObjects.World.size.Height || Pos.Y < 0)
             {
                 HasHit = true;
             }

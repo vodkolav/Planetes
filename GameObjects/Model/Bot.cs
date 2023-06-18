@@ -19,16 +19,9 @@ namespace GameObjects
         protected List<HOTAS> directions = new List<HOTAS> { HOTAS.Up, HOTAS.Down };
         protected Jet Jet { get { return Me.Jet; } }
 
+        public TimeSpan ReactionInterval { get; private set; } = TimeSpan.FromSeconds(1);
 
-        int SlowDownCoefficient
-        {
-            set { ReactionInterval = new TimeSpan(0, 0, 0, 0, (int)GameState.FrameInterval.TotalMilliseconds * value); }
-        }
-
-        public TimeSpan ReactionInterval { get; private set; }
-
-
-        public Bot(IUI game) : base(game)
+        public Bot() : base(new DummyPlug())
         {
             PlayerName = GetType().Name;
             computer = new Thread(BotLoop)
@@ -100,20 +93,26 @@ namespace GameObjects
 
         public void Aim(Vector at)
         {
-            Yoke.Do(HOTAS.Aim, at);
+            Yoke.Aim(at);
         }
 
-        
-        private async void BotLoop()
+        private void BotLoop()
         {
             try
             {
+                DateTime dt;// maybe replace this with stopwatch
+                TimeSpan tdiff;
                 memory = new Dictionary<string, object>();
                 Prepare();
                 while (Me != null)
-                {                    
+                {
+                    dt = DateTime.UtcNow;
+                    //TODO: cancel the call of this function if it takes longer than ReactionInterval 
+                    //https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/cancel-async-tasks-after-a-period-of-time
                     FrameReact();
-                    await Task.Delay(2000);
+                    tdiff = DateTime.UtcNow - dt;
+                    Thread.Sleep(ReactionInterval - tdiff);//this is bad. There should be timer instead
+
                 }
                 Console.WriteLine("A BOT HAS DIED");
             }
@@ -166,13 +165,13 @@ namespace GameObjects
 
     public class Bot4 : Bot
     {
-        public Bot4(IUI game) : base(game)
+        public Bot4() : base()
         { }
 
         protected override void FrameReact()
         {
 
-            //todo:
+            //todo: Bot4 logic
             // make bot catch ammo and health crates
             // smarter maneuvring between asteroids and bullets
 
@@ -264,13 +263,13 @@ namespace GameObjects
     public class Bot3 : Bot
     {
 
-        public Bot3(IUI game) : base(game)
+        public Bot3() : base()
         { }
 
         protected override void FrameReact()
         {
 
-            //todo:
+            //todo: Bot3 logic
             // make bot catch ammo and health crates
             // smarter maneuvring between asteroids and bullets
 
@@ -353,7 +352,7 @@ namespace GameObjects
     public class Bot2 : Bot
     {
 
-        public Bot2(IUI game) : base(game)
+        public Bot2() : base()
         { }
 
 
@@ -383,7 +382,7 @@ namespace GameObjects
     }
     public class Bot1 : Bot
     {
-        public Bot1(IUI game) : base(game)
+        public Bot1() 
         { }
 
         /// <summary>
