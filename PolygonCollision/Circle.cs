@@ -5,7 +5,7 @@ namespace PolygonCollision
 
     public class Circle
     {
-        public Circle(Vector center, int r)
+        public Circle(Vector center, float r)
         {
             Pos = center;
             R = r;
@@ -16,6 +16,16 @@ namespace PolygonCollision
         public void Offset(Vector by)
         {
             Pos += by;
+        }
+
+        /// <summary>
+        /// Get an offsetted copy of this Circle without affecting this one
+        /// </summary>
+        /// <param name="offset"></param>
+        /// <returns></returns>
+        public Circle Offseted(Vector offset)
+        {
+            return new Circle(Pos + offset, R);            
         }
 
         public void Draw(Color color)
