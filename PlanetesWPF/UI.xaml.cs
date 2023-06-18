@@ -154,7 +154,7 @@ namespace PlanetesWPF
                 // Wrap updates in a GetContext call, to prevent invalidation and nested locking/unlocking during this block
                 using (B.GetBitmapContext())
                 {
-                    C.gameObjects.Draw(C.viewPort);
+                    C.Draw();
                 }
             }
             foreach (var hud in wpHUDs.Children)
