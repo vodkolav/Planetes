@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 namespace GameObjects
 {
-    public enum HOTAS { Up, Down, Left, Right, Shoot, Aim };
+    public enum HOTAS { Up, Down, Left, Right, Shoot, Aim, Brake };
     public class ControlPanel
     {
         private Dictionary<Keys, HOTAS> KeyBindings;
@@ -46,7 +46,7 @@ namespace GameObjects
             bindKey(Keys.S, HOTAS.Down);
             bindKey(Keys.A, HOTAS.Left);
             bindKey(Keys.D, HOTAS.Right);
-            bindKey(Keys.Space, HOTAS.Shoot);
+            bindKey(Keys.Space, HOTAS.Brake);
         }
 
         public void bindARROWSto()
@@ -64,23 +64,31 @@ namespace GameObjects
             MouseBindings.Clear();
             isWorking = false;
         }
-        public void Press(HOTAS instruction)
+        public void Press(HOTAS argument)
         {
             if (isWorking)
-                Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, object>(Action.Press, instruction) });
+                Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, HOTAS>(Action.Press, argument) });
         }
 
-        public void Release(HOTAS instruction)
+        public void Release(HOTAS argument)
         {
             if (isWorking)
-                Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, object>(Action.Release, instruction) });
+                Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, HOTAS>(Action.Release, argument) });
         }
-
-        public void Do(HOTAS instruction, Vector at)
+            
+        public void Do(Action instruction, object argument)
         {
             //instructions will probably be required later, for example to apply abilities at something/someone
             if (isWorking)
-                Proxy.Invoke("Aim", new object[] { PlayerID, new Tuple<Action, Vector>(Action.Aim, at) });
+                Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, object>(instruction, argument) });
+        }
+
+        public void Aim(Vector argument)
+        {
+            if (isWorking)
+                Proxy.Invoke("Aim", new object[] { PlayerID, new Tuple<Action, Vector>(Action.Aim, argument) });
+            // these exceptions appear after waiting too long on a breakpoint. how to fix : https://stackoverflow.com/a/38161578
+
         }
 
         public void Press(int key)
@@ -126,16 +134,6 @@ namespace GameObjects
             {
                 HOTAS instruction = MouseBindings[button];
                 Release(instruction);
-            }
-        }
-
-        public void Aim(Vector at)
-        {
-            if (MouseBindings.Keys.Contains(MouseButtons.None))
-            {
-                Do(HOTAS.Aim, at);
-               // Proxy.Invoke("Aim", new object[] { PlayerID, new Tuple<Action, Vector>(Action.Aim, Vector.FromPoint(at)) });
-
             }
         }
 

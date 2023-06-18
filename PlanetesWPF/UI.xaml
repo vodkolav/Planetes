@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PlanetesWPF"
         mc:Ignorable="d"
-        Title="Planetes WPF" Height="1008" Width="1750" Closing="Window_Closing" Loaded="Window_Loaded" KeyDown="Window_KeyDown" KeyUp="Window_KeyUp">
-    <Grid Margin="0">
+        Title="Planetes WPF" Height="1008" Width="1600" Closing="Window_Closing" Loaded="Window_Loaded" KeyDown="Window_KeyDown" KeyUp="Window_KeyUp">
+    <Grid Margin="0,0,10,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
             <RowDefinition/>
@@ -47,7 +47,7 @@
                 </Menu>
             </ToolBar>
         </ToolBarTray>
-        <Image x:Name="World" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Top" Width="1700" Height="800" Margin="10,10,0,0" Stretch="None" RenderTransformOrigin="0.5,0.5" MouseDown="World_MouseDown" MouseUp="World_MouseUp" MouseMove="World_MouseMove"/>
+        <Image x:Name="Visor" Grid.Row="1" Margin="10,0,0,30" Stretch="None" RenderTransformOrigin="0.5,0.5" MouseDown="World_MouseDown" MouseUp="World_MouseUp" MouseMove="World_MouseMove" Height="779" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="1578"/>
         <WrapPanel  x:Name="wpHUDs" Grid.Row="2" Margin="0,8,0,0">
             <local:HUD x:Name="hudLeft" HorizontalAlignment="Left" Height="100" Margin="10,0,0,0" VerticalAlignment="Top" Width="199" Visibility="Hidden"/>
 

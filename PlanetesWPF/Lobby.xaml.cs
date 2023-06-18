@@ -14,7 +14,7 @@ namespace PlanetesWPF
         
         public Lobby(Window owner) : this()
         {
-            Title = owner.Title;
+            Title = owner.Title;            
         }       
 
         public Lobby()
@@ -28,6 +28,7 @@ namespace PlanetesWPF
         {
             Owner = uI;
             var res = ShowDialog();
+            Owner = uI;
             return res.HasValue && res.Value;
         }
 

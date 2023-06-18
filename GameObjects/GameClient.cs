@@ -2,6 +2,8 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using PolygonCollision;
+using Microsoft.AspNet.SignalR.Client.Transports;
 
 namespace GameObjects
 {
@@ -21,17 +23,18 @@ namespace GameObjects
 
         public GameState gameObjects { get; set; }
 
-        protected Player Me { get { return gameObjects.players.SingleOrDefault(p => p.ID == PlayerId); } }
+        public Player Me { get { return gameObjects.players.SingleOrDefault(p => p.ID == PlayerId); } }
 
         public bool GameOn { get { return gameObjects != null && gameObjects.GameOn; } }
 
+        public ViewPort viewPort { get { return Me.viewPort; } }
+
         public GameClient(IUI owner)
         {
-            PlayerName = "Human";
             UI = owner;
         }
 
-        public async void joinNetworkGame(string URL)
+        public async void joinNetworkGame(string URL, Vector windowSize)
         {
             try
             {
@@ -42,8 +45,13 @@ namespace GameObjects
                 Proxy.On<int>("JoinedLobby", (pID) => PlayerId = pID);
                 Proxy.On<Notification, string>("Notify", Notify);
                 Proxy.On("Start", Start);
-                await Conn.Start();
-                await Proxy.Invoke<GameState>("JoinLobby", new object[] { PlayerName });
+                await Conn.Start(new WebSocketTransport());               
+                PlayerInfo info = new PlayerInfo() {
+                    PlayerName = PlayerName,
+                    VisorSize = windowSize
+                };
+
+                await Proxy.Invoke<GameState>("JoinLobby", new object[] { info });
 
             }
             catch (Exception e)
@@ -59,8 +67,6 @@ namespace GameObjects
         public void updateGameState(GameState go)
         {
             gameObjects = go;
-            if (PlayerName == "Human")
-            Console.Write("\r frameNum: " + gameObjects.frameNum);// + "| " + tdiff.ToString()
         }
 
         public void UpdateLobby(GameState go)
