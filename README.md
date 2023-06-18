@@ -8,6 +8,7 @@ Features:
  - Ships bounce from walls and other obstacles
  - Multiplayer through Lan
  - Bots
+ - World beyond screen and viewport
 
 Goals: 
  - Kill all enemies
@@ -27,4 +28,3 @@ Planned:
  - harpoon 
  - ship-to-ship collisions	
  - gravity field
- - world beyond screen and viewport
