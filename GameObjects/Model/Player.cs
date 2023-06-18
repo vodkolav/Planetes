@@ -6,8 +6,14 @@ using System.Drawing;
 
 namespace GameObjects
 {
-    public enum Action { Press, Release, Aim }
+    public enum Action { Press, Release, Aim, setViewPort }
     public enum Notification { DeathNotice, Kicked, Message }
+
+    public struct PlayerInfo
+    {
+        public string PlayerName { get; set; } 
+        public Vector VisorSize { get; set; }
+    }
 
     [JsonObject(IsReference = true)]
     public class Player
@@ -30,7 +36,10 @@ namespace GameObjects
         [JsonIgnore]
         public GameState gameState { get; set; }
         [JsonIgnore]
-        public Dictionary<Action, Action<HOTAS>> actionMapping { get; set; }
+        public Dictionary<Action, Action<object>> actionMapping { get; set; }
+
+        public ViewPort viewPort { get; set; }
+
         public bool isAlive { get; private set; } = true;
 
         public void Act(Tuple<Action, HOTAS> instruction)
@@ -38,12 +47,19 @@ namespace GameObjects
             actionMapping[instruction.Item1](instruction.Item2);
         }
 
+        public void Act(Tuple<Action, Vector> instruction)
+        {
+            actionMapping[instruction.Item1](instruction.Item2);
+        }
+
         private void MapActions()
         {
-            actionMapping = new Dictionary<Action, Action<HOTAS>>
+            actionMapping = new Dictionary<Action, System.Action<object>>
             {
                 { Action.Press, Steer },
-                { Action.Release, Release }
+                { Action.Release, Release },
+                { Action.Aim, Aim },
+                { Action.setViewPort,setViewPort } // This Action is not used for now, but will be useful when you want tot change window size in-game
             };
         }
 
@@ -52,11 +68,11 @@ namespace GameObjects
 
         }
 
-        public Player(int id, string connectionid, string name, int health, int ammo, Point At, Color color, GameState game)
+        public Player(int id, string connectionid, PlayerInfo Info, int health, int ammo, Point At, Color color, GameState game)
         {
             ID = id;
             ConnectionID = connectionid;
-            Name = name;
+            Name = Info.PlayerName;
             Health = health;
             MaxHealth = health;
             Ammo = ammo;
@@ -66,24 +82,22 @@ namespace GameObjects
             Enemies = new List<Player>();
             gameState = game;
             Acceleration = new Vector();
+            viewPort = new ViewPort(this);
+            setViewPort(Info.VisorSize);
             MapActions();
         }
 
-        public Player(int id, string connectionid, string playername, GameState game) :
-            this(id, connectionid, playername, health: GameConfig.StartingHP,
+        public Player(int id, string connectionid, PlayerInfo Info, GameState game) :
+            this(id, connectionid, Info, health: GameConfig.StartingHP,
                  GameConfig.StartingAmmo, GameConfig.TossPoint, GameConfig.TossColor, game)
         {
 
         }
 
-        //private void bindCommands()
-        //{
-        //	//commands = new Dictionary<HOTAS, Vector>();
-        //	//commands.Add(HOTAS.Up, new Vector(0, -1));
-        //	//commands.Add(HOTAS.Down, new Vector(0, 1));
-        //	//commands.Add(HOTAS.Left, new Vector(-1,0));
-        //	//commands.Add(HOTAS.Right, new Vector(1,0));
-        //}
+        internal void setViewPort(object argument)
+        {
+            viewPort.Size = (Vector)argument;
+        }
 
         public override string ToString()
         {
@@ -116,9 +130,9 @@ namespace GameObjects
             Health = Math.Min(Health + amount, MaxHealth);
         }
 
-        public virtual void Steer(HOTAS command)
+        public virtual void Steer(object argument)
         {
-            switch (command)
+            switch ((HOTAS)argument)
             {
                 case (HOTAS.Up):
                     {
@@ -145,6 +159,11 @@ namespace GameObjects
                         KeyShoot = true;
                         break;
                     }
+                case HOTAS.Brake:
+                    {
+                        Acceleration = -Jet.Speed * 0.3;
+                        break;
+                    }
             }
             Jet.Acceleration = Acceleration;
 
@@ -154,9 +173,9 @@ namespace GameObjects
             }
         }
 
-        public virtual void Release(HOTAS command)
+        public virtual void Release(object argument)
         {
-            switch (command)
+            switch ((HOTAS)argument)
             {
                 case (HOTAS.Up):
                     {
@@ -183,14 +202,21 @@ namespace GameObjects
                         KeyShoot = false;
                         break;
                     }
+                case HOTAS.Brake:
+                    {
+                        Acceleration.X = 0;
+                        Acceleration.Y = 0;                       
+                        break;
+                    }
             }
             Jet.Acceleration = Acceleration;
         }
 
-        public void Aim(Vector at)
+        public virtual void Aim(object argument)
         {
-            Jet.Aim = at;
+            Jet.Aim = (Vector)argument - (viewPort.Size * .5);
         }
+
         public void Move()
         {
             Jet.Move(gameState);
@@ -232,5 +258,6 @@ namespace GameObjects
             Jet.Draw();
             Bullets.ForEach(b => b.Draw());
         }
+
     }
 }

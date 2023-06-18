@@ -20,20 +20,20 @@ namespace GameObjects
         public void Command(int who, Tuple<Action, HOTAS> command)
         {
             try
-            {
+            {              
                 _gameServer.gameObjects.players.Single(p => p.ID == who).Act(command);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-            }     
+            }            
         }
-
+        
         public void Aim(int who, Tuple<Action, Vector> command)
         {
             try
-            {
-                _gameServer.gameObjects.players.Single(p => p.ID == who).Aim(command.Item2);
+            {                
+                _gameServer.gameObjects.players.Single(p => p.ID == who).Act(command);
             }
             catch (Exception e)
             {
@@ -46,9 +46,10 @@ namespace GameObjects
             _gameServer.Stop();
         }
 
-        public void JoinLobby(string PlayerName)
+        public void JoinLobby(PlayerInfo playerInfo)
         {
-            int playerID = _gameServer.Join( Context.ConnectionId, PlayerName);
+
+            int playerID = _gameServer.Join( Context.ConnectionId, playerInfo);
             Clients.Client(Context.ConnectionId).JoinedLobby(playerID);
             Clients.All.UpdateLobby(_gameServer.gameObjects);
             //Clients.All.UpdateModel(_gameServer.gameObjects);

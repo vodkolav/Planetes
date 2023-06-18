@@ -5,7 +5,7 @@ namespace Planetes
 {
     public partial class IpConnectionDialog : Form
     {
-        public IpConnectionDialog(string ip = "127.0.0.1", string port = "8030")
+        public IpConnectionDialog(string ip = "127.0.0.1", string port = "2861")
         {
             InitializeComponent();
             ipAddressControl1.Text = ip;
@@ -31,7 +31,7 @@ namespace Planetes
             {
                 if (ipAddressControl1.Text == "...")
                 {
-                    return $"http://127.0.0.1:8030/";
+                    return $"http://127.0.0.1:2861/";
                 }
                 else 
                 {

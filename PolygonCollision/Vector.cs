@@ -5,7 +5,7 @@ using System.Drawing.Drawing2D;
 
 namespace PolygonCollision
 {
-    public class Vector : ICloneable
+    public class Vector : ICloneable, IComparable<Vector>
     {
         public float X { get; set; }
 
@@ -121,8 +121,8 @@ namespace PolygonCollision
 
         public Vector GetNormalized()
         {
-            float magnitude = Magnitude;
-            return new Vector(X / magnitude, Y / magnitude);
+                float magnitude = Magnitude;
+                return new Vector(X / magnitude, Y / magnitude);       
         }
 
         public float Dot(Vector other)
@@ -135,10 +135,6 @@ namespace PolygonCollision
         {
             get { return X + Y; }
         }
-
-        public float SignX { get { return Math.Sign(X); } }
-
-        public float SignY { get { return Math.Sign(Y); } }
 
         public float Dist(Vector other)
         {
@@ -214,6 +210,11 @@ namespace PolygonCollision
         public static Vector operator *(Vector a, Vector b)
         {
             return new Vector((float)(a.X * b.X), (float)(a.Y * b.Y));
+        }
+
+        public static Vector operator /(Vector a, float b)
+        {
+            return new Vector(a.X / b, a.Y / b);
         }
 
         public override bool Equals(object obj)
@@ -299,6 +300,11 @@ namespace PolygonCollision
         public object Clone()
         {
             return new Vector(X, Y);
+        }
+
+        public int CompareTo(Vector other)
+        {
+            return (int)(this - other).Magnitude;
         }
     }
 }

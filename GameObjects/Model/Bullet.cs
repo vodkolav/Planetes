@@ -1,8 +1,10 @@
-﻿using PolygonCollision;
+﻿using Newtonsoft.Json;
+using PolygonCollision;
 using System.Drawing;
 
 namespace GameObjects
 {
+    [JsonObject(IsReference = true)]
     public class Bullet
     {
         public Vector Pos { get => Body.Pos; }     
@@ -23,10 +25,7 @@ namespace GameObjects
 
         public Bullet(Vector pos, Vector speed, int size, Color color)
         {
-            Body = new Ray();
-            Body.Pos = pos;
-            Body.Tail = speed;
-            Body.Size = size;
+            Body = new Ray(pos, speed, size);
             Color = color;
             HasHit = false;
         }
@@ -56,8 +55,8 @@ namespace GameObjects
                 }
             }
 
-            //check whether a bullet as way outside of screen - can remove it then
-            if (Pos.Magnitude > new Vector(gameObjects.WinSize).Magnitude * 2)
+            //check whether a bullet as way outside of world - can remove it then
+            if (Pos.Magnitude > new Vector(gameObjects.World.size).Magnitude * 2)
             {
                 HasHit = true;
                 return;
