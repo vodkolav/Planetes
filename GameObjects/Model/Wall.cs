@@ -4,6 +4,7 @@ using System.Drawing;
 
 namespace GameObjects
 {
+    [JsonObject(IsReference = true)]
     public class Wall
     {
        
@@ -44,5 +45,6 @@ namespace GameObjects
         {
             Body.Draw(Color);
         }
+
     }
 }

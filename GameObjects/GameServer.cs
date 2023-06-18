@@ -8,12 +8,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using Newtonsoft.Json;
 
 namespace GameObjects
 {
     public class GameServer
     {
-        private Random R ;
+        private Random R;
 
         private readonly static Lazy<GameServer> _instance = new Lazy<GameServer>(() => new GameServer());
         public static GameServer Instance
@@ -43,7 +44,7 @@ namespace GameObjects
 
         public GameServer()
         {
-            gameObjects = new GameState(GameConfig.WorldSize);
+            gameObjects = new GameState();
             Bots = new List<Bot>();
             messageQ = new BlockingCollection<Tuple<string, Notification, string>>();
             hubContext = GlobalHost.ConnectionManager.GetHubContext<GameHub>();
@@ -55,7 +56,7 @@ namespace GameObjects
             {
                 URL = "http://" + GetLocalIPAddress() + ":" + port;
                 // to allow doing this, run in cmd as administrator:
-                // netsh http add urlacl http://*:8030/ user=host\user
+                // netsh http add urlacl http://*:2861/ user=host\user
                 webapp = WebApp.Start<Startup>("http://*:" + port);
                 Console.WriteLine(string.Format("Lobby open at {0}", URL));
             }
@@ -78,32 +79,44 @@ namespace GameObjects
             throw new Exception("Local IP Address Not Found!");
         }
 
-        public int Join( string ConnectionID, string PlayerName)
+        public int Join(string ConnectionID, PlayerInfo playerInfo)
         {
             int playerID = R.Next(1_000_000, 9_999_999); //GetHashCode();
-            Player newplayer = new Player(playerID, ConnectionID, PlayerName, gameObjects);
+            Player newplayer = new Player(playerID, ConnectionID, playerInfo, gameObjects);
             gameObjects.players.Add(newplayer);
             //string gobj = JsonConvert.SerializeObject(gameObjects); //only for debugging - to check what got serialized
 
             return playerID;
         }
 
-        public void AddBot()
+        /// <summary>
+        /// Allows to chose what type of bot you want it to be
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <exception cref="IndexOutOfRangeException"></exception>
+        public void AddBot<T>() where T : Bot, new()
         {
             if (gameObjects.players.Count > 8)
             {
                 throw new IndexOutOfRangeException("There can only be 9 players in a game ");
             }
             else
-            {  
-                DummyPlug Rei = new DummyPlug();
-                Bot DMYSYS = new Bot1(Rei);
-                DMYSYS.joinNetworkGame(URL);
+            {                              
+                Bot DMYSYS = new T();
+                DMYSYS.joinNetworkGame(URL, new PolygonCollision.Vector(500, 500));
                 //DMYSYS.Me.Name = "Rei";
                 //DMYSYS.Me.Jet.Color = Color.White;
                 //DMYSYS.UpdateMe();
                 Bots.Add(DMYSYS);
             }
+        }
+
+        /// <summary>
+        /// Adds Bot1 by default
+        /// </summary>
+        public void AddBot()
+        {
+            AddBot<Bot1>();
         }
 
         public void Kick(Player kickedone)
@@ -194,6 +207,8 @@ namespace GameObjects
 
         private async void GameLoop()
         {
+        // TODO: implement quad-trees for spacial indexing :
+        // https://badecho.com/index.php/2023/01/14/fast-simple-quadtree/
             try
             {
                 DateTime dt;// maybe replace this with stopwatch
@@ -215,7 +230,7 @@ namespace GameObjects
                     }
                     gameObjects.Frame();
 
-                    //string gobj = JsonConvert.SerializeObject(gameObjects); only for debugging - to check what got serialized
+                    //string gobj = JsonConvert.SerializeObject(gameObjects); // only for debugging - to check what got serialized
                     await hubContext.Clients.All.UpdateModel(gameObjects);
                     _ = Task.Run(DispatchMessages);
 
@@ -228,6 +243,11 @@ namespace GameObjects
             {
                 Console.WriteLine(e.Message);
             }
+        }
+
+        public void testSerialization(GameState go)
+        {
+            string json = JsonConvert.SerializeObject(go, Formatting.Indented);
         }
     }
 }

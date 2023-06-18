@@ -22,6 +22,8 @@ namespace Planetes
 
         public BillBoard Billboard { get; set; }
 
+        public string PlayerName = "FormsPlayer";
+
         public Game()
         {
             InitializeComponent();
@@ -31,6 +33,7 @@ namespace Planetes
                      ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.UserPaint, true);
             C = new GameClient(this);
+            C.PlayerName = PlayerName;
             L = new Lobby(this);
             Billboard = new BillBoard(this);
         }
@@ -50,7 +53,7 @@ namespace Planetes
                     }
                 case "joinNetworkGame":
                     {
-                        C.joinNetworkGame($"http://127.0.0.1:8030/");
+                        C.joinNetworkGame($"http://127.0.0.1:2861/", new Vector(pbxWorld.Width, pbxWorld.Height));
                         break;
                     }
                 case "SinglePlayer":
@@ -87,7 +90,7 @@ namespace Planetes
 
         public void StartGraphics()
         {
-            B = new Bitmap(C.gameObjects.WinSize.Width, C.gameObjects.WinSize.Height);
+            B = new Bitmap(pbxWorld.Width, pbxWorld.Height);
 
             Graphics G = Graphics.FromImage(B);
             G.SmoothingMode = SmoothingMode.AntiAlias;
@@ -132,7 +135,7 @@ namespace Planetes
               
         public void DrawGraphics()
         {
-            C.gameObjects.Draw();
+            C.gameObjects.Draw(C.viewPort);
             pbxWorld.Image = B;
             if (pbxWorld != null)
                 pbxWorld.Invoke(new System.Action(pbxWorld.Refresh));
@@ -238,17 +241,17 @@ namespace Planetes
         public string hostNetworkGame()
         {
             Text += " (Server)";
-            //string URL = "http://127.0.0.1:8030";
-            
+            //string URL = "http://127.0.0.1:2861";
+
             S = GameServer.Instance;
-            S.Listen(8030);
+            S.Listen(2861);
             return S.URL;
         }   
 
         public async Task joinNetworkGame(string URL)
         {
             Text += " (Client)";
-            C.joinNetworkGame(URL);
+            C.joinNetworkGame(URL, new Vector(pbxWorld.Width, pbxWorld.Height));
 
             bool GameStarted = L.OpenLobby_WaitForGuestsAndBegin();
 
