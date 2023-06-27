@@ -18,8 +18,6 @@ namespace GameObjects
         public AstType Type { get; set; }
         public bool HasHit { get; set; }
 
-        static public int Timeout { get { return GameConfig.AsteroidTimeout; } }
-
         public void TossType(Random random)
         {
             switch (random.Next(10))
@@ -52,10 +50,10 @@ namespace GameObjects
             }
         }
 
-        public Astroid(Size winSize)
+        public Astroid(Size worldSize)
         {
             Random random = new Random();
-            Body = new Circle(new Vector(random.Next(winSize.Width), random.Next(winSize.Height)), random.Next(20) + 5);
+            Body = new Circle(new Vector(random.Next(worldSize.Width), random.Next(worldSize.Height)), random.Next(20) + 5);
             int linearSpeed = random.Next(1, (int)GameConfig.Lightspeed);
             double Angle = Math.PI / 180 * random.Next(360);
             Vector mult = new Vector((float)Math.Cos(Angle), (float)Math.Sin(Angle));
@@ -70,8 +68,7 @@ namespace GameObjects
             {
                 Body.Draw(Color);
             }
-        }
- 
+        } 
 
         public void Collides(Player p)
         {
@@ -97,7 +94,7 @@ namespace GameObjects
         {
             gameObjects.players.ForEach(Collides);
 
-            //Asteroid is out of screen
+            //Asteroid is out of world bounds
             if (Pos.X + Size > gameObjects.World.size.Width || Pos.X < 0 || Pos.Y > gameObjects.World.size.Height || Pos.Y < 0)
             {
                 HasHit = true;
@@ -113,8 +110,6 @@ namespace GameObjects
                 }
             }
             Offset(Speed);
-            //Pos_x += (int)(Math.Cos(2 * Math.PI / 360 * Angle) * Speed);
-            //Pos_y += (int)(Math.Sin(2 * Math.PI / 360 * Angle) * Speed);
         }
 
         private void Offset(Vector by)

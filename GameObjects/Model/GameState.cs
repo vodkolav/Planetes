@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -41,7 +42,7 @@ namespace GameObjects
                 Astroids.RemoveAll(c => c.HasHit);
 
                 //Spawn asteroid after timeout
-                if (frameNum % Astroid.Timeout == 0)
+                if (frameNum % GameConfig.AsteroidTimeout == 0)
                 {
                     Astroids.Add(new Astroid(World.size));
                 }

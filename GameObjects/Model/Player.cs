@@ -239,6 +239,7 @@ namespace GameObjects
             Bullets.RemoveAll(b => b.HasHit);
 
         }
+
         public virtual void Shoot(int timeElapsed)
         {
             if (KeyShoot)
