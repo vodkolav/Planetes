@@ -30,8 +30,8 @@ namespace GameObjects
         }
 
         public void Draw()
-        {   //TODO: return drawing here from the ViewPort Class
-            Space.Draw(Color.Black);
+        {
+            DrawingContext.GraphicsContainer.Clear();
             Walls.ForEach(w => w.Draw());
         }
 

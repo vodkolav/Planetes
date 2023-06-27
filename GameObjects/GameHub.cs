@@ -73,7 +73,6 @@ namespace GameObjects
             //string name = Context.User.Identity.Name;
             //_connections.Add(name, Context.ConnectionId);
 
-            Clients.All.UpdateModel(_gameServer.gameObjects);
             return base.OnConnected();
 
         }

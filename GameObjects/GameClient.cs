@@ -27,7 +27,6 @@ namespace GameObjects
 
         public bool GameOn { get { return gameObjects != null && gameObjects.GameOn; } }
 
-        public ViewPort viewPort { get { return Me.viewPort; } }
 
         public GameClient(IUI owner)
         {
@@ -64,20 +63,19 @@ namespace GameObjects
         {
             await Proxy.Invoke<GameState>("LeaveLobby", new object[] { PlayerId });
         }
+
         public void updateGameState(GameState go)
         {
-            gameObjects = go;
+            lock (gameObjects)
+            {
+                gameObjects = go;
+            }            
         }
 
         public void UpdateLobby(GameState go)
         {
             UI.UpdateLobby(go);
-            updateGameState(go);
-        }
-
-        public async void UpdateMe()
-        {
-            await Proxy.Invoke<Player>("UpdateMe", new object[] { Me });
+            gameObjects = go;
         }
 
         public void Notify(Notification type, string message)
@@ -121,6 +119,36 @@ namespace GameObjects
             Yoke.bindWASD();
             Yoke.bindMouse();
             UI.Start();
+        }
+
+        public void Draw()
+        {
+            //TODO: draw only the objects that are in the ViewPort.
+            // for this i need to replace Collides function with Rectangle.intersect - as it's supposed to be computationally cheaper.
+            /*  Walls = gameState.World.Walls.Where(w => w.Body.Collides(Body, velocity).Intersect).ToList();
+            Players = gameState.players.Where(p => p.Jet.Collides(Body) || p.Bullets.Any(b => Body.Collides(b.Pos))).ToList();
+            Astroids = gameState.Astroids.Where(a => !Body.Collides(a.Body)).ToList(); // TODO: understand why Collides here is supposed to be negated? */
+
+            lock (gameObjects)
+            {
+                DrawingContext.GraphicsContainer.ViewPortOffset = -Me.viewPort.Origin;
+
+                gameObjects.World.Draw();
+            }
+            lock (gameObjects)
+            {
+                foreach (Player p in gameObjects.players)
+                {
+                    p.Draw();
+                }
+            }
+            lock (gameObjects)
+            {
+                foreach (Astroid a in gameObjects.Astroids)
+                {
+                    a.Draw();
+                }
+            }
         }
     }
 }

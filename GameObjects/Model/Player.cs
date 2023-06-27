@@ -220,7 +220,8 @@ namespace GameObjects
         public void Move()
         {
             Jet.Move(gameState);
-
+            viewPort.Update();
+            Shoot(gameState.frameNum);
             //check wheteher we've hit some enemies
             foreach (Bullet b in Bullets)
             {

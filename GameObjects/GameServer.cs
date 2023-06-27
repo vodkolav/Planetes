@@ -207,8 +207,12 @@ namespace GameObjects
 
         private async void GameLoop()
         {
-        // TODO: implement quad-trees for spacial indexing :
-        // https://badecho.com/index.php/2023/01/14/fast-simple-quadtree/
+            // TODO: implement quad-trees for spacial indexing :
+            // https://badecho.com/index.php/2023/01/14/fast-simple-quadtree/
+
+            // TODO: tweak SignalR performance:
+            //https://learn.microsoft.com/en-us/aspnet/signalr/overview/performance/signalr-performance
+            //https://learn.microsoft.com/en-us/aspnet/signalr/overview/getting-started/tutorial-high-frequency-realtime-with-signalr
             try
             {
                 DateTime dt;// maybe replace this with stopwatch
