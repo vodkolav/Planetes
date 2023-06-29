@@ -67,6 +67,7 @@
     <Compile Include="GameConfig.cs" />
     <Compile Include="IUI.cs" />
     <Compile Include="GameHub.cs" />
+    <Compile Include="Model\ICollideable.cs" />
     <Compile Include="Model\GameState.cs" />
     <Compile Include="GameServer.cs" />
     <Compile Include="GlobalSuppressions.cs" />

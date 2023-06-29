@@ -5,7 +5,7 @@ using System.Drawing;
 namespace GameObjects
 {
     [JsonObject(IsReference = true)]
-    public class Jet
+    public class Jet : ICollideable
     {
         public Vector Pos { get => Hull.Center; }
 
@@ -25,13 +25,15 @@ namespace GameObjects
 
         public Polygon Cockpit { get; set; }
 
+        public Player Owner { get; set; }
+
         public Vector Gun { get { return Cockpit.Vertices[1]; } }
 
         public int LastFired { get; set; }
 
         public int Cooldown { get; set; }
 
-        public Jet(Point start, Color color)
+        public Jet(Player owner, Color color)
         {
             Hull = new Polygon();
             Hull.AddVertex(new Vector(50, 40));
@@ -46,7 +48,8 @@ namespace GameObjects
             Cockpit.AddVertex(new Vector(100, 70));
             Cockpit.AddVertex(new Vector(100, 50));
 
-            Offset(new Vector(start));
+            Owner = owner;
+            Offset(new Vector(GameConfig.TossPoint));
             Speed = new Vector(0, 0);
             Acceleration = new Vector(0, 0);
             Aim = new Vector(1, 0);
@@ -84,21 +87,29 @@ namespace GameObjects
         {
             return Pos.Dist(j.Pos);
         }
-        
+
         public bool Collides(Astroid a)
         {
-            return Hull.Collides(a.Body) || Cockpit.Collides(a.Body);
+            return false;
         }
 
-        public bool Collides(Bullet b)
+        public bool Collides(Jet j)
         {
-            return Hull.Collides(b.Pos) || Cockpit.Collides(b.Pos);
+            return false ;
         }
 
-        public bool Collides(Polygon p)
+        public PolygonCollisionResult Collides(Wall w)
         {
-            return Hull.Collides(p, Speed).Intersect || Cockpit.Collides(p, Speed).Intersect;
-        }     
+            PolygonCollisionResult r = Hull.Collides(w.Body, Speed);
+            if (r.WillIntersect)
+            {
+                return r;
+            }
+            else
+            {
+                return Cockpit.Collides(w.Body, Speed);
+            }
+        }
 
         public void Move(GameState gO)
         {
@@ -117,7 +128,7 @@ namespace GameObjects
             PolygonCollisionResult r;
             foreach (Wall w in gO.World.Walls)
             {
-                r = Hull.Collides(w.Body, Speed);
+                r = Collides(w);
                 if (r.WillIntersect)
                 {
                     Offset(r.MinimumTranslationVector);
@@ -139,17 +150,17 @@ namespace GameObjects
             Speed -= 2 * Speed.Dot(normal) * normal;
         }
 
-        public void Shoot(Player player, int timeElapsed)
+        public void Shoot(int timeElapsed)
         {
-            if (player.Ammo != 0 && timeElapsed > LastFired + Cooldown)
+            if (Owner.Ammo != 0 && timeElapsed > LastFired + Cooldown)
             {
                 LastFired = timeElapsed;
-                Bullet bullet = new Bullet(pos: player.Jet.Gun, speed: Bearing.GetNormalized() * Bullet.linearSpeed /*+ Speed*/, size: 3, color: Color);
-                lock (player.gameState)
+                Bullet bullet = new Bullet(Owner, Owner.Jet.Gun, speed: Bearing.GetNormalized() * Bullet.linearSpeed /*+ Speed*/, size: 3, color: Color);
+                lock (Owner.gameState)
                 {
-                    player.Bullets.Add(bullet);
+                    Owner.Bullets.Add(bullet);
                 }
-                player.Ammo--;
+                Owner.Ammo--;
             }
         }
 

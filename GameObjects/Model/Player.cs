@@ -68,7 +68,7 @@ namespace GameObjects
 
         }
 
-        public Player(int id, string connectionid, PlayerInfo Info, int health, int ammo, Point At, Color color, GameState game)
+        public Player(int id, string connectionid, PlayerInfo Info, int health, int ammo, Color color, GameState game)
         {
             ID = id;
             ConnectionID = connectionid;
@@ -77,7 +77,7 @@ namespace GameObjects
             MaxHealth = health;
             Ammo = ammo;
             MaxAmmo = ammo;
-            Jet = new Jet(At, color);
+            Jet = new Jet(this, color);
             Bullets = new List<Bullet>();
             Enemies = new List<Player>();
             gameState = game;
@@ -89,7 +89,7 @@ namespace GameObjects
 
         public Player(int id, string connectionid, PlayerInfo Info, GameState game) :
             this(id, connectionid, Info, health: GameConfig.StartingHP,
-                 GameConfig.StartingAmmo, GameConfig.TossPoint, GameConfig.TossColor, game)
+                 GameConfig.StartingAmmo, GameConfig.TossColor, game)
         {
 
         }
@@ -223,27 +223,14 @@ namespace GameObjects
             viewPort.Update();
             Shoot(gameState.frameNum);
             //check wheteher we've hit some enemies
-            foreach (Bullet b in Bullets)
-            {
-                foreach (Player e in Enemies)
-                {
-                    if (e.Jet.Collides(b))
-                    {
-                        b.HasHit = true;
-                        e.Hit(b.Power);
-                        break;
-                    }
-                }
-            }
             Bullets.ForEach(b => b.Move(gameState));
             Bullets.RemoveAll(b => b.HasHit);
-
         }
 
         public virtual void Shoot(int timeElapsed)
         {
             if (KeyShoot)
-                Jet.Shoot(this, timeElapsed);
+                Jet.Shoot(timeElapsed);
         }
 
         internal void Hit(int points)

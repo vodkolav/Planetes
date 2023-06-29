@@ -148,7 +148,15 @@ namespace Planetes
 
         public void AddBot()
         {
-            S.AddBot();
+            if (isServer)
+            {
+                S.AddBot();
+            }
+            else
+            {
+                Console.WriteLine("You are not the server, you can't add bots");
+            }
+
         }
 
         public void KickPlayer(Player kickedone)

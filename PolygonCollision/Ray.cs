@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+﻿using System.Drawing; // TODO: replace with windows.media
 
 namespace PolygonCollision
 {
@@ -22,11 +22,10 @@ namespace PolygonCollision
 
         public int Size { get; set; }
 
-        public bool Collides(Circle a)
-        {
-            return (Pos - a.Pos).Magnitude < a.R;
+        public void Offset(Vector by)
+        {            
+            Pos = new Vector(Pos.X + by.X, Pos.Y + by.Y);
         }
-
         public void Draw(Color c)
         {
             DrawingContext.GraphicsContainer.DrawRay(c, this);

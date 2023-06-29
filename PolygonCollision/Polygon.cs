@@ -8,7 +8,6 @@ using System.Drawing.Drawing2D;
 
 namespace PolygonCollision
 {
-
     // Structure that stores the results of the PolygonCollision function
     public struct PolygonCollisionResult
     {
@@ -41,7 +40,7 @@ namespace PolygonCollision
             return Edges;
         }
 
-      
+
         public void AddVertex(Vector vertex)
         {
             Vertices.Add(vertex);
@@ -84,11 +83,11 @@ namespace PolygonCollision
         {
             get
             {
-                int[] p = new int[Vertices.Count*2];
-                for (int i = 0; i <= Vertices.Count-1; i++)
+                int[] p = new int[Vertices.Count * 2];
+                for (int i = 0; i <= Vertices.Count - 1; i++)
                 {
-                    p[i*2] = (int)Vertices[i].X;
-                    p[i*2 + 1] = (int)Vertices[i].Y;
+                    p[i * 2] = (int)Vertices[i].X;
+                    p[i * 2 + 1] = (int)Vertices[i].Y;
                 };
                 return p;
             }
@@ -114,8 +113,8 @@ namespace PolygonCollision
         {
             get
             {
-                float vc = Vertices.Count-1;
-                Vector total = new Vector(0,0);
+                float vc = Vertices.Count - 1;
+                Vector total = new Vector(0, 0);
                 for (int i = 0; i < vc; i++)
                 {
                     total += Vertices[i];
@@ -153,13 +152,13 @@ namespace PolygonCollision
         /// <returns></returns>
         public Polygon Offseted(Vector offset)
         {
-            Polygon np = new Polygon(); 
+            Polygon np = new Polygon();
             foreach (Vector v in Vertices)
             {
                 np.AddVertex(v + offset);
             }
             return np;
-        }      
+        }
 
         public void Rotate(float angle)
         {
@@ -195,27 +194,16 @@ namespace PolygonCollision
             return result;
         }
 
-        [Obsolete]
-        public GraphicsPath toGraphicsPath()
-        {
-            List<PointF> p = Vertices.ConvertAll(new Converter<Vector, PointF>(Vector.asPointF));
-
-            List<byte> pp = new List<byte>() { (byte)PathPointType.Start };
-            for (int i = 0; i < p.Count - 2; i++)
-            {
-                pp.Add((byte)PathPointType.Line);
-            }
-            pp.Add((byte)PathPointType.CloseSubpath);
-
-            return new GraphicsPath(p.ToArray(), pp.ToArray());
-        }
-
         // POLYGON/POINT
         // only needed if you're going to check if the circle
         // is INSIDE the polygon
-        public bool Collides(Vector p)
+        public PolygonCollisionResult Collides(Vector p)
         {
-            bool collision = false;
+            PolygonCollisionResult collision = new PolygonCollisionResult
+            {
+                Intersect = false,
+                WillIntersect = false
+            };
 
             // go through each of the vertices, plus the next
             // vertex in the list
@@ -238,9 +226,56 @@ namespace PolygonCollision
                 if (((vc.Y > p.Y && vn.Y < p.Y) || (vc.Y < p.Y && vn.Y > p.Y)) &&
                      (p.X < (vn.X - vc.X) * (p.Y - vc.Y) / (vn.Y - vc.Y) + vc.X))
                 {
-                    collision = !collision;
+                    collision.Intersect = !collision.Intersect;
                 }
             }
+            return collision;
+        }
+
+        /// <summary>
+        /// Whether this polygon collides with circle
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns></returns>
+        public PolygonCollisionResult Collides(Circle c)
+        {
+            PolygonCollisionResult collision = new PolygonCollisionResult
+            {
+                Intersect = false,
+                WillIntersect = false
+            };
+            // go through each of the Vertices, plus
+            // the next vertex in the list
+            int next;
+            for (int current = 0; current < Vertices.Count; current++)
+            {
+
+                // get next vertex in list
+                // if we've hit the end, wrap around to 0
+                next = current + 1;
+                if (next == Vertices.Count) next = 0;
+
+                // get the Vectors at our current position
+                // this makes our if statement a little cleaner
+                Vector vc = Vertices[current];    // c for "current"
+                Vector vn = Vertices[next];       // n for "next"
+
+                // check for collision between the circle and
+                // a line formed between the two Vertices
+                collision.Intersect = c.Collides(vc, vn);
+                if (collision.Intersect) return collision;
+            }
+
+            // the above algorithm only checks if the circle
+            // is touching the edges of the polygon – in most
+            // cases this is enough, but you can un-comment the
+            // following code to also test if the center of the
+            // circle is inside the polygon
+
+            // bool centerInside = polygonPoint(Vertices, cx,cy);
+            // if (centerInside) return true;
+
+            // otherwise, after all that, return false
             return collision;
         }
 
@@ -372,49 +407,6 @@ namespace PolygonCollision
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Whether this polygon collides with circle
-        /// </summary>
-        /// <param name="c"></param>
-        /// <returns></returns>
-        public bool Collides(Circle c)
-        {
-
-            // go through each of the Vertices, plus
-            // the next vertex in the list
-            int next;
-            for (int current = 0; current < Vertices.Count; current++)
-            {
-
-                // get next vertex in list
-                // if we've hit the end, wrap around to 0
-                next = current + 1;
-                if (next == Vertices.Count) next = 0;
-
-                // get the Vectors at our current position
-                // this makes our if statement a little cleaner
-                Vector vc = Vertices[current];    // c for "current"
-                Vector vn = Vertices[next];       // n for "next"
-
-                // check for collision between the circle and
-                // a line formed between the two Vertices
-                bool collision = c.Collides(vc, vn);
-                if (collision) return true;
-            }
-
-            // the above algorithm only checks if the circle
-            // is touching the edges of the polygon – in most
-            // cases this is enough, but you can un-comment the
-            // following code to also test if the center of the
-            // circle is inside the polygon
-
-            // bool centerInside = polygonPoint(Vertices, cx,cy);
-            // if (centerInside) return true;
-
-            // otherwise, after all that, return false
-            return false;
         }
     }
 }

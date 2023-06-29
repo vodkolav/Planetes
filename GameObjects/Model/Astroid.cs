@@ -7,7 +7,7 @@ namespace GameObjects
 {
     public enum AstType { Rubble, Ammo, Health };
 
-    public class Astroid
+    public class Astroid : ICollideable
     {
         [JsonIgnore]
         public float Size { get { return Body.R * 2; } }
@@ -70,43 +70,45 @@ namespace GameObjects
             }
         } 
 
-        public void Collides(Player p)
+        public bool Collides(Astroid a)
         {
-            if (p.Jet.Collides(this))
+            return false;
+        }
 
-            {
-                //TODO: move this to HandleCollision()
-                HasHit = true;
-                if (Type == AstType.Ammo)
-                {
-                    p.Recharge((int)Size);
-                }
-                else if (Type == AstType.Health)
-                {
-                    p.Heal(1);
-                }
-                else
-                    p.Hit((int)Size);
-            }
+        public bool Collides(Jet j)
+        {
+            return j.Hull.Collides(Body).Intersect || j.Cockpit.Collides(Body).Intersect;
+        }
+
+        public PolygonCollisionResult Collides(Wall w)
+        {
+            return w.Body.Collides(Pos);
         }
 
         public void Move(GameState gameObjects)
         {
-            gameObjects.players.ForEach(Collides);
-
             //Asteroid is out of world bounds
             if (Pos.X + Size > gameObjects.World.size.Width || Pos.X < 0 || Pos.Y > gameObjects.World.size.Height || Pos.Y < 0)
             {
                 HasHit = true;
+                return;
             }
 
-
+            foreach (Player p in gameObjects.players)
+            {
+                if (Collides(p.Jet))
+                {
+                    HandleCollision(p);
+                    return;
+                }
+            }
 
             foreach (Wall w in gameObjects.World.Walls)
             {
-                if (w.Body.Collides(Pos))
+                if (Collides(w).Intersect)
                 {
                     HasHit = true;
+                    return;
                 }
             }
             Offset(Speed);
@@ -115,6 +117,21 @@ namespace GameObjects
         private void Offset(Vector by)
         {
             Body.Offset(by);
+        }
+
+        public void HandleCollision(Player p)
+        {
+            HasHit = true;
+            if (Type == AstType.Ammo)
+            {
+                p.Recharge((int)Size);
+            }
+            else if (Type == AstType.Health)
+            {
+                p.Heal(1);
+            }
+            else
+                p.Hit((int)Size);
         }
     }
 }
