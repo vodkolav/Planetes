@@ -83,7 +83,7 @@ namespace GameObjects
         {
             int playerID = R.Next(1_000_000, 9_999_999); //GetHashCode();
             Player newplayer = new Player(playerID, ConnectionID, playerInfo, gameObjects);
-            gameObjects.players.Add(newplayer);
+            gameObjects.Players.Add(newplayer);
             //string gobj = JsonConvert.SerializeObject(gameObjects); //only for debugging - to check what got serialized
             gameObjects.Jets.Add(newplayer.Jet);
             return playerID;
@@ -96,7 +96,7 @@ namespace GameObjects
         /// <exception cref="IndexOutOfRangeException"></exception>
         public void AddBot<T>() where T : Bot, new()
         {
-            if (gameObjects.players.Count > 8)
+            if (gameObjects.Players.Count > 8)
             {
                 throw new IndexOutOfRangeException("There can only be 9 players in a game ");
             }
@@ -128,14 +128,14 @@ namespace GameObjects
 
         internal void Leave(int playerID)
         {
-            Player pl = gameObjects.players.Single(p => p.ID == playerID);
+            Player pl = gameObjects.Players.Single(p => p.ID == playerID);
             Leave(pl);
         }
 
         internal void Leave(Player pl)
         {
             GameConfig.ReturnColor(pl.Color);
-            gameObjects.players.RemoveAll(p => p.ID == pl.ID);
+            gameObjects.Players.RemoveAll(p => p.ID == pl.ID);
             gameObjects.Jets.RemoveAll(j => j == pl.Jet);
             hubContext.Clients.All.UpdateLobby(gameObjects);
         }

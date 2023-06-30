@@ -322,11 +322,11 @@ namespace GameObjects
             }
 
             //aiming at opponent tactic
-            if (Jet.Pos.Y - gameObjects.players[0].Jet.Pos.Y < -20)
+            if (Jet.Pos.Y - gameObjects.Players[0].Jet.Pos.Y < -20)
             {
                 Press(HOTAS.Down);
             }
-            else if (Jet.Pos.Y - gameObjects.players[0].Jet.Pos.Y > 20)
+            else if (Jet.Pos.Y - gameObjects.Players[0].Jet.Pos.Y > 20)
             {
                 Press(HOTAS.Up);
             }
@@ -337,7 +337,7 @@ namespace GameObjects
             }
 
             //shoot at opponent tactic
-            if (Math.Abs(Jet.Pos.Y - gameObjects.players[0].Jet.Pos.Y) < 20)
+            if (Math.Abs(Jet.Pos.Y - gameObjects.Players[0].Jet.Pos.Y) < 20)
             {
                 Press(HOTAS.Shoot);
             }
@@ -359,7 +359,7 @@ namespace GameObjects
         {
 
 
-            if (Jet.Pos.Y < gameObjects.players[0].Jet.Pos.Y)
+            if (Jet.Pos.Y < gameObjects.Players[0].Jet.Pos.Y)
             {
                 Yoke.Press(HOTAS.Up);
             }
@@ -368,7 +368,7 @@ namespace GameObjects
                 Yoke.Press(HOTAS.Down);
             }
 
-            if (Jet.Pos.Y - gameObjects.players[0].Jet.Pos.Y < 50)
+            if (Jet.Pos.Y - gameObjects.Players[0].Jet.Pos.Y < 50)
             {
                 Yoke.Press(HOTAS.Shoot);
             }

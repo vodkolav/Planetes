@@ -21,7 +21,7 @@ namespace GameObjects
         {
             try
             {              
-                _gameServer.gameObjects.players.Single(p => p.ID == who).Act(command);
+                _gameServer.gameObjects.Players.Single(p => p.ID == who).Act(command);
             }
             catch (Exception e)
             {
@@ -33,7 +33,7 @@ namespace GameObjects
         {
             try
             {                
-                _gameServer.gameObjects.players.Single(p => p.ID == who).Act(command);
+                _gameServer.gameObjects.Players.Single(p => p.ID == who).Act(command);
             }
             catch (Exception e)
             {

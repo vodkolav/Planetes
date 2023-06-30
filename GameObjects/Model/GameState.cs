@@ -15,7 +15,7 @@ namespace GameObjects
 
         public int frameNum { get; set; }
 
-        public List<Player> players { get; set; } //TODO: capitalize players variable
+        public List<Player> Players { get; set; }
 
         public List<Jet> Jets { get; set; }
 
@@ -28,7 +28,7 @@ namespace GameObjects
         public GameState()
         {
             World = new Map(GameConfig.WorldSize);
-            players = new List<Player>();
+            Players = new List<Player>();
             Astroids = new List<Astroid>();
             Bullets = new List<Bullet>();
             Jets = new List<Jet>();
@@ -44,7 +44,7 @@ namespace GameObjects
             {
                 Jets.ForEach(j => j.Move(this));
 
-                players.ForEach (p => p.Shoot(this));
+                Players.ForEach (p => p.Shoot(this));
 
                 Bullets.ForEach(b => b.Move(this));
                 Bullets.RemoveAll(b => b.HasHit);
@@ -63,12 +63,12 @@ namespace GameObjects
         public Player Reap()
         {
             Player loser;
-            if ((loser = players.FirstOrDefault(p => !p.isAlive)) != null)
+            if ((loser = Players.FirstOrDefault(p => !p.isAlive)) != null)
             {
-                players.Remove(loser);
+                Players.Remove(loser);
                 //Must remove a dead player from all other players enemies lists,
                 //otherwise from the point of view of the bullets the dead one still exists 
-                players.ForEach(p => p.Enemies.Remove(loser));               
+                Players.ForEach(p => p.Enemies.Remove(loser));               
                 return loser;
             }
             return null;
@@ -77,9 +77,9 @@ namespace GameObjects
         public void InitFeudingParties()
         {
             //simplest case: Free-For-All (All-Against-All)
-            foreach (Player p1 in players)
+            foreach (Player p1 in Players)
             {
-                foreach (Player p2 in players)
+                foreach (Player p2 in Players)
                 {
                     p1.FeudWith(p2);
                 }

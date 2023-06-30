@@ -94,7 +94,7 @@ namespace GameObjects
                 return;
             }
 
-            foreach (Player p in gameObjects.players)
+            foreach (Player p in gameObjects.Players)
             {
                 if (Collides(p.Jet))
                 {

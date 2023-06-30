@@ -35,7 +35,7 @@ namespace PlanetesWPF
         {
             try
             {
-                Player playerstate = C.gameObjects.players.SingleOrDefault(p => p.ID == playerID);
+                Player playerstate = C.gameObjects.Players.SingleOrDefault(p => p.ID == playerID);
                 if (playerstate != null)
                     lock (C.gameObjects)
                     {

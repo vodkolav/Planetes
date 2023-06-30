@@ -23,7 +23,7 @@ namespace GameObjects
 
         public GameState gameObjects { get; set; }
 
-        public Player Me { get { return gameObjects.players.SingleOrDefault(p => p.ID == PlayerId); } }
+        public Player Me { get { return gameObjects.Players.SingleOrDefault(p => p.ID == PlayerId); } }
 
         public bool GameOn { get { return gameObjects != null && gameObjects.GameOn; } }
 

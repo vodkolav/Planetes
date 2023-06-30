@@ -29,8 +29,8 @@ namespace Planetes
             }
             else
             {
-                state.players.ForEach(p => Console.WriteLine(p.Name));
-                players = new BindingList<Player>(state.players);
+                state.Players.ForEach(p => Console.WriteLine(p.Name));
+                players = new BindingList<Player>(state.Players);
                 playerBindingSource = new BindingSource(players, null);
                 dgvwPlayers.DataSource = playerBindingSource;
                 playerBindingSource.ResetBindings(false);

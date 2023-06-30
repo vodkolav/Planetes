@@ -37,7 +37,7 @@ namespace PlanetesWPF
             Dispatcher.BeginInvoke(new System.Action(() =>
             {
                 players.Clear();
-                go.players.ForEach(p => players.Add(p));
+                go.Players.ForEach(p => players.Add(p));
             }
             ));
         }

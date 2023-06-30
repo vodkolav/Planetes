@@ -94,7 +94,7 @@ namespace PlanetesWPF
 
         public void bindHUDS()
         {            
-            foreach (Player p in C.gameObjects.players)
+            foreach (Player p in C.gameObjects.Players)
             {
                 if (p.ID == C.PlayerId)
                 {
