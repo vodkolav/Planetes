@@ -1,10 +1,4 @@
 ﻿using PolygonCollision;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
 
@@ -29,7 +23,7 @@ namespace PlanetesWPF
         public void DrawRay(System.Drawing.Color c, Ray ray)
         {
             ray = ray.Offseted(ViewPortOffset);
-            Vector End = ray.Pos - ray.Tail;
+            Vector End = ray.Pos - ray.Tail*0.5;
             B.DrawLineAa((int)ray.Pos.X, (int)ray.Pos.Y, (int)End.X, (int)End.Y, System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B),ray.Size);
         }
 

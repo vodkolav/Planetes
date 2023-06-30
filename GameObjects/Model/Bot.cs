@@ -182,7 +182,7 @@ namespace GameObjects
             try
             {
                 //asteroid evasion tactic
-                Astroid astClosest = gameObjects.Astroids.Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
+                Astroid astClosest = gameObjects.Astroids.Aggregate((curMin, x) => curMin == null || Jet.Dist(x) < Jet.Dist(curMin) ? x : curMin);
 
                 if (astClosest.Pos.X - astClosest.Size * 10 < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X && astClosest.Type == AstType.Rubble)
                 {
@@ -208,8 +208,8 @@ namespace GameObjects
                 //bullet evasion tactic (not good yet) Where(b=> b.Pos.X + 50 > Jet.Pos.X)
 
                 //this is wrong - I dont need to evade my own bullets
-                Bullet bulClosest = Me.Bullets
-                    .Aggregate((curMin, b) => (curMin == null || (Jet.Dist(b)) < Jet.Dist(curMin) ? b : curMin));
+                Bullet bulClosest = gameObjects.Bullets.Where(b => Me.Enemies.Contains(b.Owner))
+                    .Aggregate((curMin, x) => curMin == null || Jet.Dist(x) < Jet.Dist(curMin) ? x : curMin);
                 if (Jet.Pos.Y < bulClosest.Pos.Y && bulClosest.Pos.Y < Jet.Pos.Y + 50)
                 {
                     Press(HOTAS.Down);
@@ -301,9 +301,8 @@ namespace GameObjects
             try
             {
                 //bullet evasion tactic (not good yet)
-                Bullet bulClosest = Me.Bullets //wrong again - no need to evade my own bullets
-                                               //.Where(b => b.Shooter == Enemy)
-                    .Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
+                Bullet bulClosest = gameObjects.Bullets.Where(b => Me.Enemies.Contains(b.Owner))
+                    .Aggregate((curMin, x) => curMin == null || Jet.Dist(x) < Jet.Dist(curMin) ? x : curMin);
 
                 if (bulClosest.Pos.Y > Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
                 {

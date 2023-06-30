@@ -137,9 +137,17 @@ namespace GameObjects
             }
             lock (gameObjects)
             {
-                foreach (Player p in gameObjects.players)
+                foreach (Jet j in gameObjects.Jets)
                 {
-                    p.Draw();
+                    j.Draw();
+                }
+            }
+
+            lock (gameObjects)
+            {
+                foreach (Bullet b in gameObjects.Bullets)
+                {
+                    b.Draw();
                 }
             }
             lock (gameObjects)

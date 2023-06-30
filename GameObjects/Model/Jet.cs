@@ -35,18 +35,19 @@ namespace GameObjects
 
         public Jet(Player owner, Color color)
         {
+            double l = 0.8; 
             Hull = new Polygon();
-            Hull.AddVertex(new Vector(50, 40));
-            Hull.AddVertex(new Vector(100, 50));
-            Hull.AddVertex(new Vector(100, 70));
-            Hull.AddVertex(new Vector(50, 80));
-            Hull.AddVertex(new Vector(50, 40));
+            Hull.AddVertex(new Vector(0, 0)*l);
+            Hull.AddVertex(new Vector(50, 10) * l);//
+            Hull.AddVertex(new Vector(50, 30) * l);//
+            Hull.AddVertex(new Vector(0, 40) * l);
+            Hull.AddVertex(new Vector(0, 0) * l);
 
             Cockpit = new Polygon();
-            Cockpit.AddVertex(new Vector(100, 50));
-            Cockpit.AddVertex(new Vector(130, 60));
-            Cockpit.AddVertex(new Vector(100, 70));
-            Cockpit.AddVertex(new Vector(100, 50));
+            Cockpit.AddVertex(new Vector(50, 10) * l);//
+            Cockpit.AddVertex(new Vector(80, 20) * l);
+            Cockpit.AddVertex(new Vector(50, 30) * l);//
+            Cockpit.AddVertex(new Vector(50, 10) * l);
 
             Owner = owner;
             Offset(new Vector(GameConfig.TossPoint));
@@ -55,7 +56,7 @@ namespace GameObjects
             Aim = new Vector(1, 0);
             Color = color;
             Thrust = GameConfig.Thrust;
-            Cooldown = 3;
+            Cooldown = 2;
         }
 
         public void Offset(Vector by)
@@ -142,26 +143,13 @@ namespace GameObjects
            
             Rotate(Aim);
 
+            Owner.viewPort.Update();            
         }
 
         public void Bounce(Vector normal)
         {
             //TODO: rename speed to velocity
             Speed -= 2 * Speed.Dot(normal) * normal;
-        }
-
-        public void Shoot(int timeElapsed)
-        {
-            if (Owner.Ammo != 0 && timeElapsed > LastFired + Cooldown)
-            {
-                LastFired = timeElapsed;
-                Bullet bullet = new Bullet(Owner, Owner.Jet.Gun, speed: Bearing.GetNormalized() * Bullet.linearSpeed /*+ Speed*/, size: 3, color: Color);
-                lock (Owner.gameState)
-                {
-                    Owner.Bullets.Add(bullet);
-                }
-                Owner.Ammo--;
-            }
         }
 
         public void Draw()

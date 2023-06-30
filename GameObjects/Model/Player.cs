@@ -30,7 +30,7 @@ namespace GameObjects
 
         public List<Player> Enemies { get; set; }
         public Jet Jet { get; set; }
-        public List<Bullet> Bullets { get; set; }
+
         public Vector Acceleration;
         public bool KeyShoot { get; set; }
         [JsonIgnore]
@@ -78,7 +78,6 @@ namespace GameObjects
             Ammo = ammo;
             MaxAmmo = ammo;
             Jet = new Jet(this, color);
-            Bullets = new List<Bullet>();
             Enemies = new List<Player>();
             gameState = game;
             Acceleration = new Vector();
@@ -217,20 +216,18 @@ namespace GameObjects
             Jet.Aim = (Vector)argument - (viewPort.Size * .5);
         }
 
-        public void Move()
-        {
-            Jet.Move(gameState);
-            viewPort.Update();
-            Shoot(gameState.frameNum);
-            //check wheteher we've hit some enemies
-            Bullets.ForEach(b => b.Move(gameState));
-            Bullets.RemoveAll(b => b.HasHit);
-        }
-
-        public virtual void Shoot(int timeElapsed)
+        public virtual void Shoot(GameState gameObjects)
         {
             if (KeyShoot)
-                Jet.Shoot(timeElapsed);
+            {
+                if (Ammo != 0 && gameObjects.frameNum > Jet.LastFired + Jet.Cooldown)
+                {
+                    Jet.LastFired = gameObjects.frameNum;
+                    Bullet bullet = new Bullet(this, Jet.Gun, speed: Jet.Bearing.GetNormalized() * Bullet.linearSpeed /*+ Speed*/, size: 3, color: Color);
+                    gameObjects.Bullets.Add(bullet);
+                    Ammo--;
+                }
+            }
         }
 
         internal void Hit(int points)
@@ -241,12 +238,5 @@ namespace GameObjects
                 isAlive = false;
 
         }
-
-        internal void Draw()
-        {
-            Jet.Draw();
-            Bullets.ForEach(b => b.Draw());
-        }
-
     }
 }

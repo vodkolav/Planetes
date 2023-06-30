@@ -85,7 +85,7 @@ namespace GameObjects
             Player newplayer = new Player(playerID, ConnectionID, playerInfo, gameObjects);
             gameObjects.players.Add(newplayer);
             //string gobj = JsonConvert.SerializeObject(gameObjects); //only for debugging - to check what got serialized
-
+            gameObjects.Jets.Add(newplayer.Jet);
             return playerID;
         }
 
@@ -136,6 +136,7 @@ namespace GameObjects
         {
             GameConfig.ReturnColor(pl.Color);
             gameObjects.players.RemoveAll(p => p.ID == pl.ID);
+            gameObjects.Jets.RemoveAll(j => j == pl.Jet);
             hubContext.Clients.All.UpdateLobby(gameObjects);
         }
 
@@ -227,7 +228,7 @@ namespace GameObjects
 
                     dt = DateTime.UtcNow;
 
-                    //reap dead losers, if any
+                    //reap dead losers, if any // TODO: move this part into gameObjects.Frame()
                     if ((loser = gameObjects.Reap()) != null)
                     {
                         Notify(loser, Notification.DeathNotice, "YOU DIED");
