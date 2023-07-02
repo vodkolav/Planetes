@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace GameObjects
 {
@@ -56,10 +55,18 @@ namespace GameObjects
         {
             get
             {
-                return gameObjects.Astroids.Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
+                return gameObjects.Astroids.Aggregate((curMin, x) => curMin == null ||Jet.Dist(x) < Jet.Dist(curMin) ? x : curMin);
             }
         }
 
+        public Bullet ClosestBullet
+        {
+            get
+            {
+                return gameObjects.Bullets.Where(b => Me.Enemies.Contains(b.Owner)) //TODO:this is wrong - I dont need to evade my own bullets
+                    .Aggregate((curMin, x) => curMin == null || Jet.Dist(x) < Jet.Dist(curMin) ? x : curMin);
+            }
+        }
 
         protected virtual HOTAS pickOpposite(HOTAS k)
         {
@@ -182,7 +189,7 @@ namespace GameObjects
             try
             {
                 //asteroid evasion tactic
-                Astroid astClosest = gameObjects.Astroids.Aggregate((curMin, x) => curMin == null || Jet.Dist(x) < Jet.Dist(curMin) ? x : curMin);
+                Astroid astClosest = ClosestAsteroid;
 
                 if (astClosest.Pos.X - astClosest.Size * 10 < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X && astClosest.Type == AstType.Rubble)
                 {
@@ -207,9 +214,7 @@ namespace GameObjects
             {
                 //bullet evasion tactic (not good yet) Where(b=> b.Pos.X + 50 > Jet.Pos.X)
 
-                //this is wrong - I dont need to evade my own bullets
-                Bullet bulClosest = gameObjects.Bullets.Where(b => Me.Enemies.Contains(b.Owner))
-                    .Aggregate((curMin, x) => curMin == null || Jet.Dist(x) < Jet.Dist(curMin) ? x : curMin);
+                var bulClosest = ClosestBullet;
                 if (Jet.Pos.Y < bulClosest.Pos.Y && bulClosest.Pos.Y < Jet.Pos.Y + 50)
                 {
                     Press(HOTAS.Down);
@@ -301,8 +306,7 @@ namespace GameObjects
             try
             {
                 //bullet evasion tactic (not good yet)
-                Bullet bulClosest = gameObjects.Bullets.Where(b => Me.Enemies.Contains(b.Owner))
-                    .Aggregate((curMin, x) => curMin == null || Jet.Dist(x) < Jet.Dist(curMin) ? x : curMin);
+                Bullet bulClosest = ClosestBullet;
 
                 if (bulClosest.Pos.Y > Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
                 {

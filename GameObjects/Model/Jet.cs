@@ -7,7 +7,7 @@ namespace GameObjects
     [JsonObject(IsReference = true)]
     public class Jet : ICollideable
     {
-        public Vector Pos { get => Hull.Center; }
+        public override Vector Pos { get => Hull.Center; }
 
         public Vector Speed { get; set; }
 
@@ -25,13 +25,13 @@ namespace GameObjects
 
         public Polygon Cockpit { get; set; }
 
-        public Player Owner { get; set; }
-
         public Vector Gun { get { return Cockpit.Vertices[1]; } }
 
         public int LastFired { get; set; }
 
         public int Cooldown { get; set; }
+        [JsonIgnore]
+        public override bool HasHit { get => false; set { } }
 
         public Jet(Player owner, Color color)
         {
@@ -74,32 +74,13 @@ namespace GameObjects
             Cockpit.RotateAt(diff, Hull.Center);
         }
 
-        public float Dist(Astroid a)
+        public override PolygonCollisionResult Collides(Jet j)
         {
-            return Pos.Dist(a.Pos);
+            // Jets don't collide with other Jets. they might later.
+            return PolygonCollisionResult.noCollision;
         }
 
-        public float Dist(Bullet b)
-        {
-            return Pos.Dist(b.Pos);
-        }
-
-        public float Dist(Jet j)
-        {
-            return Pos.Dist(j.Pos);
-        }
-
-        public bool Collides(Astroid a)
-        {
-            return false;
-        }
-
-        public bool Collides(Jet j)
-        {
-            return false ;
-        }
-
-        public PolygonCollisionResult Collides(Wall w)
+        public override PolygonCollisionResult Collides(Wall w)
         {
             PolygonCollisionResult r = Hull.Collides(w.Body, Speed);
             if (r.WillIntersect)
@@ -112,7 +93,7 @@ namespace GameObjects
             }
         }
 
-        public void Move(GameState gO)
+        public override  void Move(GameState gO)
         {
             Vector newSpeed = Speed + Acceleration * Thrust ;
             //Physics Police            
@@ -126,20 +107,7 @@ namespace GameObjects
                 Speed = newSpeed.GetNormalized() * GameConfig.Lightspeed;
             }
 
-            PolygonCollisionResult r;
-            foreach (Wall w in gO.World.Walls)
-            {
-                r = Collides(w);
-                if (r.WillIntersect)
-                {
-                    Offset(r.MinimumTranslationVector);
-                    Bounce(r.translationAxis);
-                    break;
-                }
-            }
             Offset(Speed);
-
-            //Rotate
            
             Rotate(Aim);
 
@@ -152,7 +120,7 @@ namespace GameObjects
             Speed -= 2 * Speed.Dot(normal) * normal;
         }
 
-        public void Draw()
+        public override void Draw()
         {
             Hull.Draw(Color);
             Cockpit.Draw(Color.Gray);
@@ -161,6 +129,12 @@ namespace GameObjects
         public override string ToString()
         {
             return "Speed: " + Speed.ToString() + " |Acc:" + Acceleration.ToString();
+        }
+
+        public override void HandleCollision(Wall w , PolygonCollisionResult r)
+        {
+            Offset(r.MinimumTranslationVector);
+            Bounce(r.translationAxis);
         }
     }
 }

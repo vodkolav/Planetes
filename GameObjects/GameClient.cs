@@ -27,6 +27,9 @@ namespace GameObjects
 
         public bool GameOn { get { return gameObjects != null && gameObjects.GameOn; } }
 
+        DateTime StartTime { get; set; }
+
+       // StreamWriter writer;
 
         public GameClient(IUI owner)
         {
@@ -52,6 +55,10 @@ namespace GameObjects
 
                 await Proxy.Invoke<GameState>("JoinLobby", new object[] { info });
 
+               // use this code to investigate problems when signalR ceases to receive model updates from server
+               // Conn.TraceLevel = TraceLevels.Events;
+               // writer = new StreamWriter($"..\\..\\ClientLog_{Me.ID}.txt");                
+               // Conn.TraceWriter = writer;
             }
             catch (Exception e)
             {
@@ -75,8 +82,8 @@ namespace GameObjects
 
         public void UpdateLobby(GameState go)
         {
-            UI.UpdateLobby(go);
             gameObjects = go;
+            UI.UpdateLobby(gameObjects);
         }
 
         public void Notify(Notification type, string message)
@@ -120,6 +127,7 @@ namespace GameObjects
             Yoke.bindWASD();
             Yoke.bindMouse();
             UI.Start();
+            StartTime = DateTime.Now;
         }
 
         public void Draw()
@@ -129,33 +137,18 @@ namespace GameObjects
             /*  Walls = gameState.World.Walls.Where(w => w.Body.Collides(Body, velocity).Intersect).ToList();
             Players = gameState.players.Where(p => p.Jet.Collides(Body) || p.Bullets.Any(b => Body.Collides(b.Pos))).ToList();
             Astroids = gameState.Astroids.Where(a => !Body.Collides(a.Body)).ToList(); // TODO: understand why Collides here is supposed to be negated? */
+            Logger.Log("Draw FPS: " + gameObjects.frameNum / (DateTime.Now - StartTime).TotalSeconds, LogLevel.Status);
 
             lock (gameObjects)
             {
                 DrawingContext.GraphicsContainer.ViewPortOffset = -Me.viewPort.Origin;
 
                 gameObjects.World.Draw();
-            }
-            lock (gameObjects)
-            {
-                foreach (Jet j in gameObjects.Jets)
-                {
-                    j.Draw();
-                }
-            }
 
-            lock (gameObjects)
-            {
-                foreach (Bullet b in gameObjects.Bullets)
+                foreach ( ICollideable j in gameObjects.Entities)
                 {
-                    b.Draw();
-                }
-            }
-            lock (gameObjects)
-            {
-                foreach (Astroid a in gameObjects.Astroids)
-                {
-                    a.Draw();
+                    //Logger.Log("drawing frame " + gameObjects.frameNum, LogLevel.Status);
+                    j.Draw();
                 }
             }
         }

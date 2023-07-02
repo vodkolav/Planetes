@@ -63,9 +63,17 @@ namespace PolygonCollision
             return false;
         }
 
-        public bool Collides(Ray l)
+        public PolygonCollisionResult Collides(Ray l)
         {
-            return (l.Pos - Pos).Magnitude < R;
+            
+            bool t = (l.Pos - Pos).Magnitude < R;
+            PolygonCollisionResult result = new PolygonCollisionResult()
+            {
+                Intersect = t,
+                WillIntersect = t,
+            };
+
+            return result;
         }
     }
 }

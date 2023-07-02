@@ -15,6 +15,11 @@ namespace PolygonCollision
         public bool Intersect; // Are the polygons currently intersecting
         public Vector MinimumTranslationVector; // The translation to apply to polygon A to push the polygons appart.
         public Vector translationAxis;
+        public static  PolygonCollisionResult noCollision { get; } = new PolygonCollisionResult()
+        {
+            WillIntersect = false,
+            Intersect = false
+        };
     }
 
     public class Polygon
@@ -194,6 +199,11 @@ namespace PolygonCollision
             return result;
         }
 
+        public PolygonCollisionResult Collides(Ray r)
+        {
+            return Collides(r.Pos);
+        }
+
         // POLYGON/POINT
         // only needed if you're going to check if the circle
         // is INSIDE the polygon
@@ -227,6 +237,7 @@ namespace PolygonCollision
                      (p.X < (vn.X - vc.X) * (p.Y - vc.Y) / (vn.Y - vc.Y) + vc.X))
                 {
                     collision.Intersect = !collision.Intersect;
+                    collision.WillIntersect = !collision.WillIntersect;
                 }
             }
             return collision;
@@ -263,6 +274,7 @@ namespace PolygonCollision
                 // check for collision between the circle and
                 // a line formed between the two Vertices
                 collision.Intersect = c.Collides(vc, vn);
+                collision.WillIntersect = collision.Intersect;
                 if (collision.Intersect) return collision;
             }
 

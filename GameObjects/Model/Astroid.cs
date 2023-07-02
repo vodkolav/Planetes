@@ -13,10 +13,11 @@ namespace GameObjects
         public float Size { get { return Body.R * 2; } }
         public Circle Body { get; set; }
         public Vector Speed { get; set; }
+
         [JsonIgnore]
-        public Vector Pos { get { return Body.Pos; } set { Body.Pos = value; } }
+        public override Vector Pos { get { return Body.Pos; } set { Body.Pos = value; } }
         public AstType Type { get; set; }
-        public bool HasHit { get; set; }
+        public override Player Owner { get; set; }
 
         public void TossType(Random random)
         {
@@ -62,7 +63,7 @@ namespace GameObjects
             HasHit = false;
         }
 
-        public void Draw()
+        public override void Draw()
         {
             if (!HasHit)
             {
@@ -70,46 +71,28 @@ namespace GameObjects
             }
         } 
 
-        public bool Collides(Astroid a)
+        public override PolygonCollisionResult Collides(Jet j)
         {
-            return false;
+            PolygonCollisionResult r = j.Hull.Collides(Body);
+            if (r.WillIntersect)
+            {
+                return r;
+            }
+            else
+            {
+                return j.Cockpit.Collides(Body);
+            }
         }
 
-        public bool Collides(Jet j)
-        {
-            return j.Hull.Collides(Body).Intersect || j.Cockpit.Collides(Body).Intersect;
-        }
 
-        public PolygonCollisionResult Collides(Wall w)
-        {
-            return w.Body.Collides(Pos);
-        }
 
-        public void Move(GameState gameObjects)
+        public override void Move(GameState gameObjects)
         {
             //Asteroid is out of world bounds
             if (Pos.X + Size > gameObjects.World.size.Width || Pos.X < 0 || Pos.Y > gameObjects.World.size.Height || Pos.Y < 0)
             {
                 HasHit = true;
                 return;
-            }
-
-            foreach (Player p in gameObjects.Players)
-            {
-                if (Collides(p.Jet))
-                {
-                    HandleCollision(p);
-                    return;
-                }
-            }
-
-            foreach (Wall w in gameObjects.World.Walls)
-            {
-                if (Collides(w).Intersect)
-                {
-                    HasHit = true;
-                    return;
-                }
             }
             Offset(Speed);
         }
@@ -119,19 +102,19 @@ namespace GameObjects
             Body.Offset(by);
         }
 
-        public void HandleCollision(Player p)
+        public override void HandleCollision(Jet j, PolygonCollisionResult r)
         {
             HasHit = true;
             if (Type == AstType.Ammo)
             {
-                p.Recharge((int)Size);
+                j.Owner.Recharge((int)Size);
             }
             else if (Type == AstType.Health)
             {
-                p.Heal(1);
+                j.Owner.Heal(1);
             }
             else
-                p.Hit((int)Size);
+                j.Owner.Hit((int)Size);
         }
     }
 }

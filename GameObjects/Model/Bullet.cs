@@ -7,7 +7,7 @@ namespace GameObjects
     [JsonObject(IsReference = true)]
     public class Bullet : ICollideable
     {
-        public Vector Pos { get => Body.Pos; set => Body.Pos = value; }     
+        public override Vector Pos { get => Body.Pos; set => Body.Pos = value; }     
         
         public static int linearSpeed = 20;
 
@@ -19,9 +19,7 @@ namespace GameObjects
 
         public Color Color { get; set; }
 
-        public Player Owner { get; set; }
 
-        public bool HasHit { get; set; }
 
         public int Power { get; set; } = 1;
 
@@ -33,23 +31,26 @@ namespace GameObjects
             HasHit = false;
         }   
 
-        public bool Collides(Astroid a)
+        public override PolygonCollisionResult Collides(Astroid a)
         {
             return a.Body.Collides(Body);
         }
 
-        public PolygonCollisionResult Collides(Wall w)
+        public override PolygonCollisionResult Collides(Jet j)
         {
-             return w.Body.Collides(Pos);
+            PolygonCollisionResult r = j.Hull.Collides(Body);
+            if (r.WillIntersect)
+            {
+                return r;
+            }
+            else
+            {
+                return j.Cockpit.Collides(Body);
+            }
         }
 
-        public bool Collides(Jet j)
-        {
-            return j.Hull.Collides(Pos).Intersect || j.Cockpit.Collides(Pos).Intersect;
-        }
 
-
-        public void Draw()
+        public override void Draw()
         {
             if (!HasHit)
             {
@@ -57,43 +58,13 @@ namespace GameObjects
             }
         }
 
-        public void Move(GameState gameObjects)
+        public override void Move(GameState gameObjects)
         {
             //check whether a bullet is way outside of world - can remove it then
             if (Pos.Magnitude > new Vector(gameObjects.World.size).Magnitude * 2)
             {
                 HasHit = true;
                 return;
-            }
-
-            //check for collision with wall
-            foreach (Wall w in gameObjects.World.Walls)
-            {
-                if (Collides(w).Intersect)
-                {
-                    HasHit = true;
-                    return;
-                }
-            }
-
-            foreach (Player e in Owner.Enemies)
-            {
-                if (Collides(e.Jet))
-                {
-                    HasHit = true;
-                    e.Hit(Power);
-                    return;
-                }
-            }
-
-            foreach (Astroid ast in gameObjects.Astroids)
-            {
-                if (Collides(ast))
-                {
-                    HasHit = true;
-                    ast.HasHit = true;
-                    return;
-                }
             }
             Offset(Speed);
         }
@@ -102,7 +73,5 @@ namespace GameObjects
         {
            Body.Offset(by);
         }
-
-
     }
 }

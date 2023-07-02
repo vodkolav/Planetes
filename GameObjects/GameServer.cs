@@ -44,6 +44,10 @@ namespace GameObjects
 
         public GameServer()
         {
+            thrdGameLoop = new Thread(GameLoop)
+            {
+                Name = "GameLoop"
+            };
             gameObjects = new GameState();
             Bots = new List<Bot>();
             messageQ = new BlockingCollection<Tuple<string, Notification, string>>();
@@ -85,7 +89,7 @@ namespace GameObjects
             Player newplayer = new Player(playerID, ConnectionID, playerInfo, gameObjects);
             gameObjects.Players.Add(newplayer);
             //string gobj = JsonConvert.SerializeObject(gameObjects); //only for debugging - to check what got serialized
-            gameObjects.Jets.Add(newplayer.Jet);
+            gameObjects.Entities.Add(newplayer.Jet);
             return playerID;
         }
 
@@ -135,8 +139,8 @@ namespace GameObjects
         internal void Leave(Player pl)
         {
             GameConfig.ReturnColor(pl.Color);
+            gameObjects.Entities.RemoveAll(j => j.Owner.ID == pl.ID);
             gameObjects.Players.RemoveAll(p => p.ID == pl.ID);
-            gameObjects.Jets.RemoveAll(j => j == pl.Jet);
             hubContext.Clients.All.UpdateLobby(gameObjects);
         }
 
@@ -162,10 +166,7 @@ namespace GameObjects
         public void Start()
         {
             gameObjects.InitFeudingParties();
-            thrdGameLoop = new Thread(GameLoop)
-            {
-                Name = "GameLoop"
-            };
+            gameObjects.StartTime = DateTime.Now;
             thrdGameLoop.Start();
             Logger.Log("Fight!", LogLevel.Info);
             gameObjects.GameOn = true;
@@ -175,7 +176,6 @@ namespace GameObjects
         /// <summary>
         /// Define enemies for each player
         /// </summary>
-
         public void Stop(string message = "Game aborted")
         {
             // Signal the shutdown event

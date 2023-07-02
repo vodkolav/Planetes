@@ -11,7 +11,7 @@ namespace GameObjects
 
         public static Size WorldSize { get { return new Size(2500, 1200); } }
 
-        public static TimeSpan FrameInterval { get { return new TimeSpan(0, 0, 0, 0, 16); } }
+        public static TimeSpan FrameInterval { get { return new TimeSpan(0, 0, 0, 0, 20); } } 
 
         public static int WallWidth { get { return 30; } }
 

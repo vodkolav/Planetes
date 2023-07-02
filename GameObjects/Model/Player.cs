@@ -18,8 +18,7 @@ namespace GameObjects
     [JsonObject(IsReference = true)]
     public class Player
     {
-        public int ID { get; set; }
-        [JsonIgnore]
+        public int ID { get; set; }        
         public string ConnectionID { get; set; }
         public string Name { get; set; }
         public Color Color { get { return Jet.Color; } }
@@ -44,6 +43,11 @@ namespace GameObjects
 
         public void Act(Tuple<Action, HOTAS> instruction)
         {
+            if (Name == "WPFplayer")
+            {
+                Logger.Log("sent command: " + instruction.ToString(), LogLevel.Info);
+                //Logger.Log("Acceleration: " + Acceleration.ToString(), LogLevel.Info);
+            }
             actionMapping[instruction.Item1](instruction.Item2);
         }
 
@@ -165,11 +169,6 @@ namespace GameObjects
                     }
             }
             Jet.Acceleration = Acceleration;
-
-            if (Name == "Human")
-            {
-                Console.WriteLine("Acceleration: " + Acceleration.ToString());
-            }
         }
 
         public virtual void Release(object argument)
@@ -224,7 +223,7 @@ namespace GameObjects
                 {
                     Jet.LastFired = gameObjects.frameNum;
                     Bullet bullet = new Bullet(this, Jet.Gun, speed: Jet.Bearing.GetNormalized() * Bullet.linearSpeed /*+ Speed*/, size: 3, color: Color);
-                    gameObjects.Bullets.Add(bullet);
+                    gameObjects.Entities.Add(bullet);
                     Ammo--;
                 }
             }
