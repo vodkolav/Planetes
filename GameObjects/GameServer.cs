@@ -58,11 +58,11 @@ namespace GameObjects
                 // to allow doing this, run in cmd as administrator:
                 // netsh http add urlacl http://*:2861/ user=host\user
                 webapp = WebApp.Start<Startup>("http://*:" + port);
-                Console.WriteLine(string.Format("Lobby open at {0}", URL));
+                Logger.Log(string.Format("Lobby open at {0}", URL), LogLevel.Info);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Log(ex, LogLevel.Debug);
             }
         }
 
@@ -167,7 +167,7 @@ namespace GameObjects
                 Name = "GameLoop"
             };
             thrdGameLoop.Start();
-            Console.WriteLine("Fight!");
+            Logger.Log("Fight!", LogLevel.Info);
             gameObjects.GameOn = true;
             hubContext.Clients.All.Start();
         }
@@ -180,7 +180,7 @@ namespace GameObjects
         {
             // Signal the shutdown event
             _shutdownEvent.Set();
-            Console.WriteLine(message);
+            Logger.Log(message, LogLevel.Info);
 
             gameObjects.GameOn = false;
             //if (thrdGameLoop != null)
@@ -197,13 +197,13 @@ namespace GameObjects
         public void Pause()
         {
             _pauseEvent.Reset();
-            Console.WriteLine("Game paused");
+            Logger.Log("Game paused", LogLevel.Info);
         }
 
         public void Resume()
         {
             _pauseEvent.Set();
-            Console.WriteLine("Game resumed");
+            Logger.Log("Game resumed", LogLevel.Info);
         }
 
         private async void GameLoop()
@@ -241,12 +241,12 @@ namespace GameObjects
 
                     tdiff = DateTime.UtcNow - dt;
                     Thread.Sleep((GameState.FrameInterval - tdiff).Duration()); //this is bad. There should be timer instead
-                    //Console.WriteLine("frameNum: " + gameObjects.frameNum);// + "| " + tdiff.ToString()
+                    //Logger.Log("frameNum: " + gameObjects.frameNum, LogLevel.Status);// + "| " + tdiff.ToString()
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Logger.Log(e, LogLevel.Debug);
             }
         }
 

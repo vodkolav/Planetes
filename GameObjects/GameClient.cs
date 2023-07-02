@@ -55,7 +55,7 @@ namespace GameObjects
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Logger.Log(e, LogLevel.Debug);
             }
         }
 
@@ -66,6 +66,7 @@ namespace GameObjects
 
         public void updateGameState(GameState go)
         {
+            //Logger.Log("received model for frame " + go.frameNum, LogLevel.Status);
             lock (gameObjects)
             {
                 gameObjects = go;

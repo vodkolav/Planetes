@@ -114,11 +114,11 @@ namespace GameObjects
                     Thread.Sleep(ReactionInterval - tdiff);//this is bad. There should be timer instead
 
                 }
-                Console.WriteLine("A BOT HAS DIED");
+                Logger.Log("A BOT HAS DIED", LogLevel.Info);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Logger.Log(e, LogLevel.Debug);
             }
         }
 
@@ -199,7 +199,7 @@ namespace GameObjects
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Logger.Log(e, LogLevel.Debug);
             }
 
 
@@ -225,7 +225,7 @@ namespace GameObjects
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Logger.Log(e, LogLevel.Debug);
             }
 
             //aiming at opponent tactic
@@ -293,9 +293,9 @@ namespace GameObjects
                     Release(HOTAS.Right);
                 }
             }
-            catch
+            catch (Exception e)
             {
-
+                Logger.Log(e, LogLevel.Debug);
             }
 
             try
@@ -317,8 +317,9 @@ namespace GameObjects
                     Release(HOTAS.Up);
                 }
             }
-            catch
+            catch (Exception e)
             {
+                Logger.Log(e, LogLevel.Debug);
             }
 
             //aiming at opponent tactic

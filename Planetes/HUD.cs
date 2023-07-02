@@ -47,7 +47,7 @@ namespace Planetes
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Logger.Log(e, LogLevel.Debug);
             }
         }
     }

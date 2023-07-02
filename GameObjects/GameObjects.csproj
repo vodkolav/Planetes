@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DummyPlug.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="Model\Astroid.cs" />
     <Compile Include="Model\Bot.cs" />
     <Compile Include="Model\Bullet.cs" />

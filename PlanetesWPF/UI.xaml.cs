@@ -88,8 +88,8 @@ namespace PlanetesWPF
         public void AnnounceDeath(string message)
         {
             Billboard B = new Billboard();
-            B.Show();          
-            Console.WriteLine(message);
+            B.Show();
+            Logger.Log(message,LogLevel.Info);
         }
 
         public void bindHUDS()
@@ -111,8 +111,13 @@ namespace PlanetesWPF
 
         public void CloseLobby()
         {
-            L.Close();
+            Dispatcher.BeginInvoke(new System.Action(() =>
+            {
+                L.Close();
+            }
+            ));
         }
+
 
         internal void AddBot()
         {
@@ -132,7 +137,7 @@ namespace PlanetesWPF
             }
             else
             {
-                Console.WriteLine("You can only kick yourself");
+                Logger.Log("You can only kick yourself", LogLevel.Info);
             }
         }
 
@@ -155,6 +160,7 @@ namespace PlanetesWPF
                 using (B.GetBitmapContext())
                 {
                     C.Draw();
+
                 }
             }
             foreach (var hud in wpHUDs.Children)
@@ -240,7 +246,7 @@ namespace PlanetesWPF
             }
             else
             {
-                Console.WriteLine("You are not the server, you can't stop it");
+                Logger.Log("You are not the server, you can't stop it", LogLevel.Info);
             }
         }
 

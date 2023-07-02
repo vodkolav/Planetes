@@ -82,11 +82,10 @@ namespace Planetes
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.Message);
+                    Logger.Log(e, LogLevel.Info);
                 }
             }
         }
-
 
         public void StartGraphics()
         {
@@ -154,7 +153,7 @@ namespace Planetes
             }
             else
             {
-                Console.WriteLine("You are not the server, you can't add bots");
+                Logger.Log("You are not the server, you can't add bots", LogLevel.Info);
             }
 
         }
@@ -167,7 +166,7 @@ namespace Planetes
             }
             else
             {
-                Console.WriteLine("You can only kick yourself");
+                Logger.Log("You can only kick yourself", LogLevel.Info);
             }
         }
 
@@ -281,7 +280,7 @@ namespace Planetes
             }
             else
             {
-                Console.WriteLine("You are not the server, you can't stop it");
+                Logger.Log("You are not the server, you can't stop it", LogLevel.Info);
             }
         }
 

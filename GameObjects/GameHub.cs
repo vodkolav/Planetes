@@ -25,7 +25,7 @@ namespace GameObjects
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Logger.Log(e, LogLevel.Debug);
             }            
         }
         
@@ -37,7 +37,7 @@ namespace GameObjects
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Logger.Log(e, LogLevel.Debug);
             }
         }
 
@@ -80,8 +80,7 @@ namespace GameObjects
         {
             //string name = Context.User.Identity.Name;
             //_connections.Remove(name, Context.ConnectionId);
-
-            Console.WriteLine("disconnected");
+            Logger.Log("disconnected", LogLevel.Info);            
             return Clients.All.disconnected("diconnected");
         }
 
