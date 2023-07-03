@@ -2,8 +2,7 @@
 using PolygonCollision;
 
 namespace GameObjects
-{ 
-    //not quite sure it's supposed to be interface. maybe abstract class
+{
     [JsonObject(IsReference = true)]
     public abstract class ICollideable
     {
@@ -18,6 +17,18 @@ namespace GameObjects
         {
             return w.Body.Collides(Pos);
         }
+
+        public PolygonCollisionResult Collides(Map WorldEdge)
+        {
+            //Object is out of world bounds
+            if (Pos.X > WorldEdge.size.Width || Pos.X < 0 || Pos.Y > WorldEdge.size.Height || Pos.Y < 0)
+            {
+                return PolygonCollisionResult.yesCollision;
+            }
+            return PolygonCollisionResult.noCollision;
+        }
+
+        public abstract void HandleCollision(Map WorldEdge, PolygonCollisionResult r);
 
         public virtual void HandleCollision(Wall w, PolygonCollisionResult r)
         {
@@ -52,15 +63,7 @@ namespace GameObjects
             return Pos.Dist(a.Pos);
         }
 
-        public virtual void Move(GameState gameObjects)
-        {
-            
-        }
-
-        public virtual void Draw()
-        {
-
-        }
-
+        public abstract void Move(GameState gameObjects);
+        public abstract void Draw();
     }
 }

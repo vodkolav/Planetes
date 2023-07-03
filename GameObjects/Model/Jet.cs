@@ -142,5 +142,10 @@ namespace GameObjects
             Offset(r.MinimumTranslationVector);
             Bounce(r.translationAxis);
         }
+
+        public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)
+        {
+            Bounce(-Speed);
+        }
     }
 }

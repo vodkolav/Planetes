@@ -88,12 +88,6 @@ namespace GameObjects
 
         public override void Move(GameState gameObjects)
         {
-            //Asteroid is out of world bounds
-            if (Pos.X + Size > gameObjects.World.size.Width || Pos.X < 0 || Pos.Y > gameObjects.World.size.Height || Pos.Y < 0)
-            {
-                HasHit = true;
-                return;
-            }
             Offset(Speed);
         }
 
@@ -115,6 +109,11 @@ namespace GameObjects
             }
             else
                 j.Owner.Hit((int)Size);
+        }
+
+        public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)
+        {
+                HasHit = true;
         }
     }
 }

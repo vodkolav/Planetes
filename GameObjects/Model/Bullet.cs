@@ -64,19 +64,18 @@ namespace GameObjects
         }
 
         public override void Move(GameState gameObjects)
-        {
-            //check whether a bullet is way outside of world - can remove it then
-            if (Pos.Magnitude > new Vector(gameObjects.World.size).Magnitude * 2)
-            {
-                HasHit = true;
-                return;
-            }
+        { 
             Offset(Speed);
         }
 
         public void Offset(Vector by)
         {
            Body.Offset(by);
+        }
+
+        public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)
+        {
+            HasHit = true;
         }
     }
 }

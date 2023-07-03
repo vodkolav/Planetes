@@ -55,6 +55,17 @@ namespace GameObjects
 
                 Entities.ForEach(j => j.Move(this));
 
+                //check for collision of all objects with World bounds
+                foreach (ICollideable e in Entities)
+                {
+                    r = e.Collides(World);
+                    if (r.Intersect)
+                    {
+                        e.HandleCollision(World, r);
+                        break;
+                    }
+                }
+
                 //check for collision of Bullets Astroids and Jets with Walls
                 foreach (Wall w in World.Walls)
                 {           

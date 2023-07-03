@@ -20,6 +20,12 @@ namespace PolygonCollision
             WillIntersect = false,
             Intersect = false
         };
+
+        public static PolygonCollisionResult yesCollision { get; } = new PolygonCollisionResult()
+        {
+            WillIntersect = true,
+            Intersect = true
+        };
     }
 
     public class Polygon

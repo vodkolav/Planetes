@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using PolygonCollision;
 using Microsoft.AspNet.SignalR.Client.Transports;
-using System.IO;
 
 namespace GameObjects
 {
