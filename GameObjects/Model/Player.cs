@@ -32,6 +32,7 @@ namespace GameObjects
 
         public Vector Acceleration;
         public bool KeyShoot { get; set; }
+
         [JsonIgnore]
         public GameState gameState { get; set; }
         [JsonIgnore]
@@ -164,7 +165,7 @@ namespace GameObjects
                     }
                 case HOTAS.Brake:
                     {
-                        Acceleration = -Jet.Speed * 0.3;
+                        Jet.KeyBrake = true;
                         break;
                     }
             }
@@ -202,8 +203,7 @@ namespace GameObjects
                     }
                 case HOTAS.Brake:
                     {
-                        Acceleration.X = 0;
-                        Acceleration.Y = 0;                       
+                        Jet.KeyBrake = false;
                         break;
                     }
             }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using PolygonCollision;
 using Microsoft.AspNet.SignalR.Client.Transports;
+using System.IO;
 
 namespace GameObjects
 {
@@ -29,7 +30,7 @@ namespace GameObjects
 
         DateTime StartTime { get; set; }
 
-       // StreamWriter writer;
+        // StreamWriter writer;
 
         public GameClient(IUI owner)
         {
@@ -55,10 +56,10 @@ namespace GameObjects
 
                 await Proxy.Invoke<GameState>("JoinLobby", new object[] { info });
 
-               // use this code to investigate problems when signalR ceases to receive model updates from server
-               // Conn.TraceLevel = TraceLevels.Events;
-               // writer = new StreamWriter($"..\\..\\ClientLog_{Me.ID}.txt");                
-               // Conn.TraceWriter = writer;
+                 // use this code to investigate problems when signalR ceases to receive model updates from server
+/*               Conn.TraceLevel = TraceLevels.All;
+                 writer = new StreamWriter($"..\\..\\ClientLog_{Me.ID}.txt");                
+                 Conn.TraceWriter = writer;*/
             }
             catch (Exception e)
             {
@@ -145,7 +146,7 @@ namespace GameObjects
 
                 gameObjects.World.Draw();
 
-                foreach ( ICollideable j in gameObjects.Entities)
+                foreach (ICollideable j in gameObjects.Entities)
                 {
                     //Logger.Log("drawing frame " + gameObjects.frameNum, LogLevel.Status);
                     j.Draw();

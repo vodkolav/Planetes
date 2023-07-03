@@ -230,7 +230,7 @@ namespace GameObjects
             }
             catch (Exception e)
             {
-                Logger.Log(e, LogLevel.Debug);
+                Logger.Log(e, LogLevel.Warning);
             }
 
             //aiming at opponent tactic
@@ -323,7 +323,7 @@ namespace GameObjects
             }
             catch (Exception e)
             {
-                Logger.Log(e, LogLevel.Debug);
+                Logger.Log(e, LogLevel.Warning);
             }
 
             //aiming at opponent tactic

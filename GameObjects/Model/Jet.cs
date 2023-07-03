@@ -29,6 +29,7 @@ namespace GameObjects
 
         public int LastFired { get; set; }
 
+        public bool KeyBrake { get; set; }
         public int Cooldown { get; set; }
         [JsonIgnore]
         public override bool HasHit { get => false; set { } }
@@ -95,6 +96,11 @@ namespace GameObjects
 
         public override  void Move(GameState gO)
         {
+            if (KeyBrake)
+            {
+                Acceleration = -Speed * 0.5;
+            }
+
             Vector newSpeed = Speed + Acceleration * Thrust ;
             //Physics Police            
 

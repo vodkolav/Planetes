@@ -31,6 +31,7 @@ namespace GameObjects
         [JsonProperty(ItemTypeNameHandling = TypeNameHandling.Auto)]
         public List<ICollideable> Entities { get; set; }
 
+        [JsonIgnore]
         public Map World { get; set; }
 
         public GameState()

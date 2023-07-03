@@ -49,6 +49,11 @@ namespace GameObjects
             }
         }
 
+        public override void HandleCollision(Jet j, PolygonCollisionResult r)
+        {
+            HasHit = true;
+            j.Owner.Hit(Power);
+        }
 
         public override void Draw()
         {
