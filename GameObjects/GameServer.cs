@@ -48,7 +48,7 @@ namespace GameObjects
             {
                 Name = "GameLoop"
             };
-            gameObjects = new GameState();
+            gameObjects = new GameState(GameConfig.WorldSize);
             Bots = new List<Bot>();
             messageQ = new BlockingCollection<Tuple<string, Notification, string>>();
             hubContext = GlobalHost.ConnectionManager.GetHubContext<GameHub>();

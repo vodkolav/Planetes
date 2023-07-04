@@ -23,7 +23,7 @@ namespace GameObjects
         public PolygonCollisionResult Collides(Map WorldEdge)
         {
             //Object is out of world bounds
-            if (Pos.X > WorldEdge.size.Width || Pos.X < 0 || Pos.Y > WorldEdge.size.Height || Pos.Y < 0)
+            if (Pos.X > WorldEdge.Size.Width || Pos.X < 0 || Pos.Y > WorldEdge.Size.Height || Pos.Y < 0)
             {
                 return PolygonCollisionResult.yesCollision;
             }

@@ -2,6 +2,7 @@
 using PolygonCollision;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 
 namespace GameObjects
@@ -31,13 +32,24 @@ namespace GameObjects
         [JsonProperty(ItemTypeNameHandling = TypeNameHandling.Auto)]
         public List<ICollideable> Entities { get; set; }
 
-        [JsonIgnore]
         public Map World { get; set; }
+
+        public bool ShouldSerializeWorld()
+        {
+            // don't remove! even though it has 0 references, this function is essential
+            // We need to serialize the World only in lobby phase. 
+            // Since the worlds is static, once the game has started, no need to send World to clients anymore
+            return !GameOn;
+        }
 
         public GameState()
         {
+        }
+
+            public GameState(Size worldSize)
+        {
             Entities = new List<ICollideable>();
-            World = new Map(GameConfig.WorldSize);
+            World = new Map(worldSize);
             Players = new List<Player>();
             frameNum = 0;
         }
@@ -115,7 +127,7 @@ namespace GameObjects
                 //Spawn asteroid after timeout
                 if (frameNum % GameConfig.AsteroidTimeout == 0)
                 {
-                    Entities.Add(new Astroid(World.size));
+                    Entities.Add(new Astroid(World.Size));
                 }
             }
         }        

@@ -30,12 +30,13 @@ namespace PlanetesWPF
         public void FillEllipse(System.Drawing.Color c, Circle circ)
         {
             circ = circ.Offseted(ViewPortOffset);
-            B.FillEllipseCentered((int)circ.Pos.X, (int)circ.Pos.Y, (int)circ.R/2, (int)circ.R/2, System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B));
+            B.FillEllipseCentered((int)circ.Pos.X, (int)circ.Pos.Y, (int)circ.R / 2, (int)circ.R / 2, System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B));
         }
 
         public void FillPolygon(System.Drawing.Color c, Polygon poly)
         {
             B.FillPolygon(poly.Offseted(ViewPortOffset).ints, System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B));
+            B.DrawPolylineAa(poly.Offseted(ViewPortOffset).ints, System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B));
         }
     }
 }

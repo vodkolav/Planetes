@@ -51,6 +51,11 @@ namespace GameObjects
             return Body.Collides(entity.BoundingCirc);
         }
 
+        internal PolygonCollisionResult Collides(Star entity)
+        {
+            return Body.Collides(entity.BoundingCirc);
+        }
+
         public ViewPort(Player player) 
         {
             velocity = new Vector(0,0);

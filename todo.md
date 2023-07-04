@@ -1,5 +1,6 @@
 ﻿TODO:
 Features:
+	do pretty md formatting of this todo doc
 	implement pause
 	implement ability to update player's info in lobby 	
 	implement game configuration 
@@ -27,6 +28,7 @@ Gameplay:
 	implement gravity
 
 DONE:
+	add stars in the background
 	enable shooting
 	enable HUD
 	remove unnecessary usings

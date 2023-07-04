@@ -23,6 +23,8 @@ namespace GameObjects
 
         public GameState gameObjects { get; set; }
 
+        public Map World { get; set; }
+
         public Player Me { get { return gameObjects.Players.SingleOrDefault(p => p.ID == PlayerId); } }
 
         public bool GameOn { get { return gameObjects != null && gameObjects.GameOn; } }
@@ -43,7 +45,7 @@ namespace GameObjects
                 Conn = new HubConnection(URL);
                 Proxy = Conn.CreateHubProxy("GameHub");
                 Proxy.On<GameState>("UpdateModel", updateGameState);
-                Proxy.On<GameState>("UpdateLobby", (go) => UpdateLobby(go));
+                Proxy.On<GameState>("UpdateLobby", UpdateLobby);
                 Proxy.On<int>("JoinedLobby", (pID) => PlayerId = pID);
                 Proxy.On<Notification, string>("Notify", Notify);
                 Proxy.On("Start", Start);
@@ -83,6 +85,7 @@ namespace GameObjects
         public void UpdateLobby(GameState go)
         {
             gameObjects = go;
+            World = gameObjects.World;
             UI.UpdateLobby(gameObjects);
         }
 
@@ -145,10 +148,16 @@ namespace GameObjects
             {
                 DrawingContext.GraphicsContainer.ViewPortOffset = -Me.viewPort.Origin;
 
-                gameObjects.World.Draw();
+                World.Draw();
+
+                foreach (Star s in World.Stars.Where(s => Me.viewPort.Collides(s).Intersect))
+                {
+                    s.Draw();
+                }
+
 
                 //TODO: Make Wall also collidable
-                foreach (Wall w in gameObjects.World.Walls.Where(w => Me.viewPort.Collides(w).Intersect))
+                foreach (Wall w in World.Walls.Where(w => Me.viewPort.Collides(w).Intersect))
                 {
                     w.Draw();
                 }         

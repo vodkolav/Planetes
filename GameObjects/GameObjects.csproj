@@ -75,6 +75,7 @@
     <Compile Include="Model\Jet.cs" />
     <Compile Include="Model\Map.cs" />
     <Compile Include="Model\Player.cs" />
+    <Compile Include="Model\Star.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="Model\Wall.cs" />
