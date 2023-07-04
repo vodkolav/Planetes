@@ -31,6 +31,9 @@ namespace GameObjects
 
         public bool KeyBrake { get; set; }
         public int Cooldown { get; set; }
+
+        public override Circle BoundingCirc { get { return new Circle(Pos, (Gun - Pos).Magnitude); } }
+
         [JsonIgnore]
         public override bool HasHit { get => false; set { } }
 

@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using PolygonCollision;
 using System.Drawing;
+using System.Linq;
 
 namespace GameObjects
 {
@@ -12,6 +13,14 @@ namespace GameObjects
                
         public Polygon Body { get; set; }
 
+        public Circle BoundingCirc
+        {
+            get 
+            {
+                float r = Body.Vertices.Max(v => (v - Body.Center).Magnitude);                
+                return new Circle(Body.Center, r); 
+            }
+        }
 
         public Wall(Point from, Point to, Color color, int width = 20)
         {

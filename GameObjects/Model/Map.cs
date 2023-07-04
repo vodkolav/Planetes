@@ -33,8 +33,7 @@ namespace GameObjects
 
         public void Draw()
         {
-            DrawingContext.GraphicsContainer.Clear();
-            Walls.ForEach(w => w.Draw());
+            DrawingContext.GraphicsContainer.Clear();            
         }
 
         public List<Wall> LoadDefault2()

@@ -15,6 +15,9 @@ namespace GameObjects
         public Vector Speed { get; set; }
 
         [JsonIgnore]
+        public override Circle BoundingCirc { get { return Body; } }
+
+        [JsonIgnore]
         public override Vector Pos { get { return Body.Pos; } set { Body.Pos = value; } }
         public AstType Type { get; set; }
         public override Player Owner { get; set; }

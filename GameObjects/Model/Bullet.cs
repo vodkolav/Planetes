@@ -19,8 +19,6 @@ namespace GameObjects
 
         public Color Color { get; set; }
 
-
-
         public int Power { get; set; } = 1;
 
         public Bullet(Player owner, Vector pos, Vector speed, int size, Color color)

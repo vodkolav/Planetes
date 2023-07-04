@@ -137,7 +137,9 @@ namespace GameObjects
             /*  Walls = gameState.World.Walls.Where(w => w.Body.Collides(Body, velocity).Intersect).ToList();
             Players = gameState.players.Where(p => p.Jet.Collides(Body) || p.Bullets.Any(b => Body.Collides(b.Pos))).ToList();
             Astroids = gameState.Astroids.Where(a => !Body.Collides(a.Body)).ToList(); // TODO: understand why Collides here is supposed to be negated? */
-            Logger.Log("Draw FPS: " + gameObjects.frameNum / (DateTime.Now - StartTime).TotalSeconds, LogLevel.Status);
+            //Logger.Log("Draw FPS: " + gameObjects.frameNum / (DateTime.Now - StartTime).TotalSeconds, LogLevel.Status);
+            //Logger.Log("Me.Pos " + Me.Jet.Pos + " |VP: " + Me.viewPort, LogLevel.Status);
+            //Logger.Log("drawing frame " + gameObjects.frameNum, LogLevel.Status);
 
             lock (gameObjects)
             {
@@ -145,10 +147,15 @@ namespace GameObjects
 
                 gameObjects.World.Draw();
 
-                foreach (ICollideable j in gameObjects.Entities)
+                //TODO: Make Wall also collidable
+                foreach (Wall w in gameObjects.World.Walls.Where(w => Me.viewPort.Collides(w).Intersect))
                 {
-                    //Logger.Log("drawing frame " + gameObjects.frameNum, LogLevel.Status);
-                    j.Draw();
+                    w.Draw();
+                }         
+
+                foreach (ICollideable j in gameObjects.Entities.Where(e => Me.viewPort.Collides(e).Intersect))
+                {                    
+                    j.Draw(); 
                 }
             }
         }

@@ -4,7 +4,7 @@ using PolygonCollision;
 namespace GameObjects
 {
     [JsonObject(IsReference = true)]
-    public abstract class ICollideable
+    public abstract class ICollideable //TODO: make this a gameObject : ICollidable class 
     {
 
         public virtual Player Owner { get; set; }
@@ -12,6 +12,8 @@ namespace GameObjects
         public virtual Vector Pos { get; set; }
 
         public virtual bool HasHit { get; set; }
+
+        public virtual Circle BoundingCirc { get { return new Circle(Pos, 10); }}
 
         public virtual PolygonCollisionResult Collides(Wall w)
         {

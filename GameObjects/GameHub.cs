@@ -51,7 +51,6 @@ namespace GameObjects
             int playerID = _gameServer.Join( Context.ConnectionId, playerInfo);
             Clients.Client(Context.ConnectionId).JoinedLobby(playerID);
             Clients.All.UpdateLobby(_gameServer.gameObjects);
-            //Clients.All.UpdateModel(_gameServer.gameObjects);
         }
 
 

@@ -194,6 +194,7 @@ namespace PlanetesWPF
         {                                    
             B = BitmapFactory.New((int)Visor.Width, (int)Visor.Height);
             Visor.Source = B;
+            Visor.Cursor = Cursors.Cross;
             PolygonCollision.DrawingContext.GraphicsContainer = new WPFGraphicsContainer(B);
             RC = new RecorderController(B);
             bindHUDS();
