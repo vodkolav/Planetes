@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace GameObjects
 {
@@ -56,10 +55,18 @@ namespace GameObjects
         {
             get
             {
-                return gameObjects.Astroids.Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
+                return gameObjects.Astroids.Aggregate((curMin, x) => curMin == null ||Jet.Dist(x) < Jet.Dist(curMin) ? x : curMin);
             }
         }
 
+        public Bullet ClosestBullet
+        {
+            get
+            {
+                return gameObjects.Bullets.Where(b => Me.Enemies.Contains(b.Owner)) //TODO:this is wrong - I dont need to evade my own bullets
+                    .Aggregate((curMin, x) => curMin == null || Jet.Dist(x) < Jet.Dist(curMin) ? x : curMin);
+            }
+        }
 
         protected virtual HOTAS pickOpposite(HOTAS k)
         {
@@ -114,11 +121,11 @@ namespace GameObjects
                     Thread.Sleep(ReactionInterval - tdiff);//this is bad. There should be timer instead
 
                 }
-                Console.WriteLine("A BOT HAS DIED");
+                Logger.Log("A BOT HAS DIED", LogLevel.Info);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Logger.Log(e, LogLevel.Debug);
             }
         }
 
@@ -182,7 +189,7 @@ namespace GameObjects
             try
             {
                 //asteroid evasion tactic
-                Astroid astClosest = gameObjects.Astroids.Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
+                Astroid astClosest = ClosestAsteroid;
 
                 if (astClosest.Pos.X - astClosest.Size * 10 < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X && astClosest.Type == AstType.Rubble)
                 {
@@ -199,7 +206,7 @@ namespace GameObjects
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Logger.Log(e, LogLevel.Debug);
             }
 
 
@@ -207,9 +214,7 @@ namespace GameObjects
             {
                 //bullet evasion tactic (not good yet) Where(b=> b.Pos.X + 50 > Jet.Pos.X)
 
-                //this is wrong - I dont need to evade my own bullets
-                Bullet bulClosest = Me.Bullets
-                    .Aggregate((curMin, b) => (curMin == null || (Jet.Dist(b)) < Jet.Dist(curMin) ? b : curMin));
+                var bulClosest = ClosestBullet;
                 if (Jet.Pos.Y < bulClosest.Pos.Y && bulClosest.Pos.Y < Jet.Pos.Y + 50)
                 {
                     Press(HOTAS.Down);
@@ -225,7 +230,7 @@ namespace GameObjects
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Logger.Log(e, LogLevel.Warning);
             }
 
             //aiming at opponent tactic
@@ -293,17 +298,15 @@ namespace GameObjects
                     Release(HOTAS.Right);
                 }
             }
-            catch
+            catch (Exception e)
             {
-
+                Logger.Log(e, LogLevel.Debug);
             }
 
             try
             {
                 //bullet evasion tactic (not good yet)
-                Bullet bulClosest = Me.Bullets //wrong again - no need to evade my own bullets
-                                               //.Where(b => b.Shooter == Enemy)
-                    .Aggregate((curMin, x) => (curMin == null || (Jet.Dist(x)) < Jet.Dist(curMin) ? x : curMin));
+                Bullet bulClosest = ClosestBullet;
 
                 if (bulClosest.Pos.Y > Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
                 {
@@ -318,16 +321,17 @@ namespace GameObjects
                     Release(HOTAS.Up);
                 }
             }
-            catch
+            catch (Exception e)
             {
+                Logger.Log(e, LogLevel.Warning);
             }
 
             //aiming at opponent tactic
-            if (Jet.Pos.Y - gameObjects.players[0].Jet.Pos.Y < -20)
+            if (Jet.Pos.Y - gameObjects.Players[0].Jet.Pos.Y < -20)
             {
                 Press(HOTAS.Down);
             }
-            else if (Jet.Pos.Y - gameObjects.players[0].Jet.Pos.Y > 20)
+            else if (Jet.Pos.Y - gameObjects.Players[0].Jet.Pos.Y > 20)
             {
                 Press(HOTAS.Up);
             }
@@ -338,7 +342,7 @@ namespace GameObjects
             }
 
             //shoot at opponent tactic
-            if (Math.Abs(Jet.Pos.Y - gameObjects.players[0].Jet.Pos.Y) < 20)
+            if (Math.Abs(Jet.Pos.Y - gameObjects.Players[0].Jet.Pos.Y) < 20)
             {
                 Press(HOTAS.Shoot);
             }
@@ -360,7 +364,7 @@ namespace GameObjects
         {
 
 
-            if (Jet.Pos.Y < gameObjects.players[0].Jet.Pos.Y)
+            if (Jet.Pos.Y < gameObjects.Players[0].Jet.Pos.Y)
             {
                 Yoke.Press(HOTAS.Up);
             }
@@ -369,7 +373,7 @@ namespace GameObjects
                 Yoke.Press(HOTAS.Down);
             }
 
-            if (Jet.Pos.Y - gameObjects.players[0].Jet.Pos.Y < 50)
+            if (Jet.Pos.Y - gameObjects.Players[0].Jet.Pos.Y < 50)
             {
                 Yoke.Press(HOTAS.Shoot);
             }

@@ -29,7 +29,7 @@ namespace Planetes
         {
             try
             {
-                Player playerstate = C.gameObjects.players.SingleOrDefault(p => p.ID == playerID);
+                Player playerstate = C.gameObjects.Players.SingleOrDefault(p => p.ID == playerID);
                 if (playerstate != null)
                     lock (C.gameObjects)
                     {
@@ -47,7 +47,7 @@ namespace Planetes
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Logger.Log(e, LogLevel.Debug);
             }
         }
     }

@@ -37,7 +37,7 @@ namespace PlanetesWPF
             Dispatcher.BeginInvoke(new System.Action(() =>
             {
                 players.Clear();
-                go.players.ForEach(p => players.Add(p));
+                go.Players.ForEach(p => players.Add(p));
             }
             ));
         }
@@ -60,7 +60,7 @@ namespace PlanetesWPF
             {
                 string mess = "Only the host can start the game";
                 MessageBox.Show(mess);
-                Console.WriteLine(mess);
+                Logger.Log(mess, LogLevel.Info);
             }
 
         }
@@ -74,7 +74,7 @@ namespace PlanetesWPF
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Wait a second!");
-                Console.WriteLine(ex.Message);
+                Logger.Log(ex, LogLevel.Debug);
             }          
         }
 
@@ -87,7 +87,7 @@ namespace PlanetesWPF
         private async void btnCancel_Click(object sender, RoutedEventArgs e)
         {
             await((UI)Owner).LeaveLobby();
-            Console.WriteLine("Ну нахер");
+            Logger.Log("Ну нахер", LogLevel.Info);
             DialogResult = false;
             Close();
         }

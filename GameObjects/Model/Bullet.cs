@@ -5,9 +5,9 @@ using System.Drawing;
 namespace GameObjects
 {
     [JsonObject(IsReference = true)]
-    public class Bullet
+    public class Bullet : ICollideable
     {
-        public Vector Pos { get => Body.Pos; }     
+        public override Vector Pos { get => Body.Pos; set => Body.Pos = value; }     
         
         public static int linearSpeed = 20;
 
@@ -19,23 +19,41 @@ namespace GameObjects
 
         public Color Color { get; set; }
 
-        public bool HasHit { get; set; }
-
         public int Power { get; set; } = 1;
 
-        public Bullet(Vector pos, Vector speed, int size, Color color)
+        public Bullet(Player owner, Vector pos, Vector speed, int size, Color color)
         {
+            Owner = owner;            
             Body = new Ray(pos, speed, size);
             Color = color;
             HasHit = false;
-        }
+        }   
 
-        public bool Collides(Astroid a)
+        public override PolygonCollisionResult Collides(Astroid a)
         {
             return a.Body.Collides(Body);
         }
 
-        public void Draw()
+        public override PolygonCollisionResult Collides(Jet j)
+        {
+            PolygonCollisionResult r = j.Hull.Collides(Body);
+            if (r.WillIntersect)
+            {
+                return r;
+            }
+            else
+            {
+                return j.Cockpit.Collides(Body);
+            }
+        }
+
+        public override void HandleCollision(Jet j, PolygonCollisionResult r)
+        {
+            HasHit = true;
+            j.Owner.Hit(Power);
+        }
+
+        public override void Draw()
         {
             if (!HasHit)
             {
@@ -43,40 +61,19 @@ namespace GameObjects
             }
         }
 
-        public void Move(GameState gameObjects)
-        {
-            //check for collision with wall
-            foreach (Wall w in gameObjects.World.Walls)
-            {
-                if (w.Body.Collides(Pos))
-                {
-                    HasHit = true;
-                    return;
-                }
-            }
-
-            //check whether a bullet as way outside of world - can remove it then
-            if (Pos.Magnitude > new Vector(gameObjects.World.size).Magnitude * 2)
-            {
-                HasHit = true;
-                return;
-            }
-
-            foreach (Astroid ast in gameObjects.Astroids)
-            {
-                if (Collides(ast))
-                {
-                    HasHit = true;
-                    ast.HasHit = true;
-                }
-            }
-
+        public override void Move(GameState gameObjects)
+        { 
             Offset(Speed);
         }
 
         public void Offset(Vector by)
         {
-           Body.Pos += by;
+           Body.Offset(by);
+        }
+
+        public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)
+        {
+            HasHit = true;
         }
     }
 }

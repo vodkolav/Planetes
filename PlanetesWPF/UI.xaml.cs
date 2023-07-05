@@ -88,13 +88,13 @@ namespace PlanetesWPF
         public void AnnounceDeath(string message)
         {
             Billboard B = new Billboard();
-            B.Show();          
-            Console.WriteLine(message);
+            B.Show();
+            Logger.Log(message,LogLevel.Info);
         }
 
         public void bindHUDS()
         {            
-            foreach (Player p in C.gameObjects.players)
+            foreach (Player p in C.gameObjects.Players)
             {
                 if (p.ID == C.PlayerId)
                 {
@@ -111,8 +111,13 @@ namespace PlanetesWPF
 
         public void CloseLobby()
         {
-            L.Close();
+            Dispatcher.BeginInvoke(new System.Action(() =>
+            {
+                L.Close();
+            }
+            ));
         }
+
 
         internal void AddBot()
         {
@@ -132,7 +137,7 @@ namespace PlanetesWPF
             }
             else
             {
-                Console.WriteLine("You can only kick yourself");
+                Logger.Log("You can only kick yourself", LogLevel.Info);
             }
         }
 
@@ -154,7 +159,8 @@ namespace PlanetesWPF
                 // Wrap updates in a GetContext call, to prevent invalidation and nested locking/unlocking during this block
                 using (B.GetBitmapContext())
                 {
-                    C.gameObjects.Draw(C.viewPort);
+                    C.Draw();
+
                 }
             }
             foreach (var hud in wpHUDs.Children)
@@ -188,6 +194,7 @@ namespace PlanetesWPF
         {                                    
             B = BitmapFactory.New((int)Visor.Width, (int)Visor.Height);
             Visor.Source = B;
+            Visor.Cursor = Cursors.Cross;
             PolygonCollision.DrawingContext.GraphicsContainer = new WPFGraphicsContainer(B);
             RC = new RecorderController(B);
             bindHUDS();
@@ -240,7 +247,7 @@ namespace PlanetesWPF
             }
             else
             {
-                Console.WriteLine("You are not the server, you can't stop it");
+                Logger.Log("You are not the server, you can't stop it", LogLevel.Info);
             }
         }
 

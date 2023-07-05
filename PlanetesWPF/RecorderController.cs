@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GameObjects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media.Imaging;
@@ -22,7 +23,7 @@ namespace PlanetesWPF
 
         internal void Start()
         {
-            //Console.WriteLine("Cassettes: "+ cassetes.Count());
+            Logger.Log("Cassettes: "+ cassetes.Count(),LogLevel.Info);
             current.Start();
         }
 

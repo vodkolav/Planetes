@@ -29,8 +29,8 @@ namespace Planetes
             }
             else
             {
-                state.players.ForEach(p => Console.WriteLine(p.Name));
-                players = new BindingList<Player>(state.players);
+                state.Players.ForEach(p => Logger.Log(p.Name, LogLevel.Info));
+                players = new BindingList<Player>(state.Players);
                 playerBindingSource = new BindingSource(players, null);
                 dgvwPlayers.DataSource = playerBindingSource;
                 playerBindingSource.ResetBindings(false);
@@ -62,14 +62,14 @@ namespace Planetes
             {
                 string mess = "Only the host can start the game";
                 MessageBox.Show(mess);
-                Console.WriteLine(mess);
+                Logger.Log(mess, LogLevel.Info);
             }
         }
 
         private async void btnCancel_Click(object sender, EventArgs e)
         {
             await ((Game)Owner).LeaveLobby();
-            Console.WriteLine("oops");
+            Logger.Log("oops", LogLevel.Info);
             DialogResult = DialogResult.Ignore;
             Close();
         }
@@ -77,12 +77,12 @@ namespace Planetes
         //purge these later
         private void playerBindingSource_ListChanged(object sender, ListChangedEventArgs e)
         {
-            Console.WriteLine("ListChanged");
+            Logger.Log("ListChanged", LogLevel.Info);
         }
 
         private void playerBindingSource_DataSourceChanged(object sender, EventArgs e)
         {
-            Console.WriteLine("DataSourceChanged");
+            Logger.Log("DataSourceChanged", LogLevel.Info);
         }
 
         private void dgvwPlayers_CellValueChanged(object sender, DataGridViewCellEventArgs e)

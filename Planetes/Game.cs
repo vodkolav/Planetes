@@ -82,11 +82,10 @@ namespace Planetes
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.Message);
+                    Logger.Log(e, LogLevel.Info);
                 }
             }
         }
-
 
         public void StartGraphics()
         {
@@ -105,7 +104,7 @@ namespace Planetes
 
         public void bindHUDS()
         {
-            foreach (Player p in C.gameObjects.players)
+            foreach (Player p in C.gameObjects.Players)
             {
                 if (p.ID == C.PlayerId)
                 {
@@ -135,7 +134,7 @@ namespace Planetes
               
         public void DrawGraphics()
         {
-            C.gameObjects.Draw(C.viewPort);
+            C.Draw();
             pbxWorld.Image = B;
             if (pbxWorld != null)
                 pbxWorld.Invoke(new System.Action(pbxWorld.Refresh));
@@ -148,7 +147,15 @@ namespace Planetes
 
         public void AddBot()
         {
-            S.AddBot();
+            if (isServer)
+            {
+                S.AddBot();
+            }
+            else
+            {
+                Logger.Log("You are not the server, you can't add bots", LogLevel.Info);
+            }
+
         }
 
         public void KickPlayer(Player kickedone)
@@ -159,7 +166,7 @@ namespace Planetes
             }
             else
             {
-                Console.WriteLine("You can only kick yourself");
+                Logger.Log("You can only kick yourself", LogLevel.Info);
             }
         }
 
@@ -273,7 +280,7 @@ namespace Planetes
             }
             else
             {
-                Console.WriteLine("You are not the server, you can't stop it");
+                Logger.Log("You are not the server, you can't stop it", LogLevel.Info);
             }
         }
 

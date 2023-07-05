@@ -7,12 +7,14 @@ using System.Windows.Forms;
 
 namespace GameObjects
 {
-    public enum HOTAS { Up, Down, Left, Right, Shoot, Aim, Brake };
+    public enum HOTAS { Up, Down, Left, Right, Shoot, Aim, Brake, Nothing };
     public class ControlPanel
     {
         private Dictionary<Keys, HOTAS> KeyBindings;
 
         private Dictionary<MouseButtons, HOTAS> MouseBindings;
+
+        private HOTAS LastPress { get; set; } = HOTAS.Nothing;
 
         private int PlayerID { get; set; }
 
@@ -66,14 +68,20 @@ namespace GameObjects
         }
         public void Press(HOTAS argument)
         {
-            if (isWorking)
+            if (isWorking && argument != LastPress)
+            {
+                LastPress = argument;
                 Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, HOTAS>(Action.Press, argument) });
+            }
         }
 
         public void Release(HOTAS argument)
         {
             if (isWorking)
+            {
+                LastPress = HOTAS.Nothing;
                 Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, HOTAS>(Action.Release, argument) });
+            }
         }
             
         public void Do(Action instruction, object argument)

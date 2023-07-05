@@ -60,7 +60,7 @@ namespace PlanetesWPF
         {            
             if (!IsRecording)
             {
-                Console.WriteLine("Recording game to gif...");
+                Logger.Log("Recording game to gif...", LogLevel.Info);
                 IsRecording = true;
                 ThreadPool.QueueUserWorkItem(new WaitCallback(Feed));
             }
@@ -78,15 +78,15 @@ namespace PlanetesWPF
             {
                 try
                 {
-                    Console.WriteLine("Saving Gif...");
+                    Logger.Log("Saving Gif...", LogLevel.Info);
                     Save(stream);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.Message);
+                    Logger.Log(e, LogLevel.Debug);
                 }
             }
-            Console.WriteLine("done saving");
+            Logger.Log("done saving", LogLevel.Debug); 
         }
 
         /// <summary>

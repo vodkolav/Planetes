@@ -18,8 +18,7 @@ namespace GameObjects
     [JsonObject(IsReference = true)]
     public class Player
     {
-        public int ID { get; set; }
-        [JsonIgnore]
+        public int ID { get; set; }        
         public string ConnectionID { get; set; }
         public string Name { get; set; }
         public Color Color { get { return Jet.Color; } }
@@ -30,9 +29,10 @@ namespace GameObjects
 
         public List<Player> Enemies { get; set; }
         public Jet Jet { get; set; }
-        public List<Bullet> Bullets { get; set; }
+
         public Vector Acceleration;
         public bool KeyShoot { get; set; }
+
         [JsonIgnore]
         public GameState gameState { get; set; }
         [JsonIgnore]
@@ -44,6 +44,11 @@ namespace GameObjects
 
         public void Act(Tuple<Action, HOTAS> instruction)
         {
+            if (Name == "WPFplayer")
+            {
+                Logger.Log("sent command: " + instruction.ToString(), LogLevel.Info);
+                //Logger.Log("Acceleration: " + Acceleration.ToString(), LogLevel.Info);
+            }
             actionMapping[instruction.Item1](instruction.Item2);
         }
 
@@ -68,7 +73,7 @@ namespace GameObjects
 
         }
 
-        public Player(int id, string connectionid, PlayerInfo Info, int health, int ammo, Point At, Color color, GameState game)
+        public Player(int id, string connectionid, PlayerInfo Info, int health, int ammo, Color color, GameState game)
         {
             ID = id;
             ConnectionID = connectionid;
@@ -77,8 +82,7 @@ namespace GameObjects
             MaxHealth = health;
             Ammo = ammo;
             MaxAmmo = ammo;
-            Jet = new Jet(At, color);
-            Bullets = new List<Bullet>();
+            Jet = new Jet(this, color);
             Enemies = new List<Player>();
             gameState = game;
             Acceleration = new Vector();
@@ -89,7 +93,7 @@ namespace GameObjects
 
         public Player(int id, string connectionid, PlayerInfo Info, GameState game) :
             this(id, connectionid, Info, health: GameConfig.StartingHP,
-                 GameConfig.StartingAmmo, GameConfig.TossPoint, GameConfig.TossColor, game)
+                 GameConfig.StartingAmmo, GameConfig.TossColor, game)
         {
 
         }
@@ -161,16 +165,11 @@ namespace GameObjects
                     }
                 case HOTAS.Brake:
                     {
-                        Acceleration = -Jet.Speed * 0.3;
+                        Jet.KeyBrake = true;
                         break;
                     }
             }
             Jet.Acceleration = Acceleration;
-
-            if (Name == "Human")
-            {
-                Console.WriteLine("Acceleration: " + Acceleration.ToString());
-            }
         }
 
         public virtual void Release(object argument)
@@ -204,8 +203,7 @@ namespace GameObjects
                     }
                 case HOTAS.Brake:
                     {
-                        Acceleration.X = 0;
-                        Acceleration.Y = 0;                       
+                        Jet.KeyBrake = false;
                         break;
                     }
             }
@@ -217,31 +215,18 @@ namespace GameObjects
             Jet.Aim = (Vector)argument - (viewPort.Size * .5);
         }
 
-        public void Move()
-        {
-            Jet.Move(gameState);
-
-            //check wheteher we've hit some enemies
-            foreach (Bullet b in Bullets)
-            {
-                foreach (Player e in Enemies)
-                {
-                    if (e.Jet.Collides(b))
-                    {
-                        b.HasHit = true;
-                        e.Hit(b.Power);
-                        break;
-                    }
-                }
-            }
-            Bullets.ForEach(b => b.Move(gameState));
-            Bullets.RemoveAll(b => b.HasHit);
-
-        }
-        public virtual void Shoot(int timeElapsed)
+        public virtual void Shoot(GameState gameObjects)
         {
             if (KeyShoot)
-                Jet.Shoot(this, timeElapsed);
+            {
+                if (Ammo != 0 && gameObjects.frameNum > Jet.LastFired + Jet.Cooldown)
+                {
+                    Jet.LastFired = gameObjects.frameNum;
+                    Bullet bullet = new Bullet(this, Jet.Gun, speed: Jet.Bearing.GetNormalized() * Bullet.linearSpeed /*+ Speed*/, size: 3, color: Color);
+                    gameObjects.Entities.Add(bullet);
+                    Ammo--;
+                }
+            }
         }
 
         internal void Hit(int points)
@@ -252,12 +237,5 @@ namespace GameObjects
                 isAlive = false;
 
         }
-
-        internal void Draw()
-        {
-            Jet.Draw();
-            Bullets.ForEach(b => b.Draw());
-        }
-
     }
 }

@@ -44,7 +44,11 @@ namespace GameObjects
 
         public GameServer()
         {
-            gameObjects = new GameState();
+            thrdGameLoop = new Thread(GameLoop)
+            {
+                Name = "GameLoop"
+            };
+            gameObjects = new GameState(GameConfig.WorldSize);
             Bots = new List<Bot>();
             messageQ = new BlockingCollection<Tuple<string, Notification, string>>();
             hubContext = GlobalHost.ConnectionManager.GetHubContext<GameHub>();
@@ -58,11 +62,11 @@ namespace GameObjects
                 // to allow doing this, run in cmd as administrator:
                 // netsh http add urlacl http://*:2861/ user=host\user
                 webapp = WebApp.Start<Startup>("http://*:" + port);
-                Console.WriteLine(string.Format("Lobby open at {0}", URL));
+                Logger.Log(string.Format("Lobby open at {0}", URL), LogLevel.Info);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Log(ex, LogLevel.Debug);
             }
         }
 
@@ -83,9 +87,9 @@ namespace GameObjects
         {
             int playerID = R.Next(1_000_000, 9_999_999); //GetHashCode();
             Player newplayer = new Player(playerID, ConnectionID, playerInfo, gameObjects);
-            gameObjects.players.Add(newplayer);
+            gameObjects.Players.Add(newplayer);
             //string gobj = JsonConvert.SerializeObject(gameObjects); //only for debugging - to check what got serialized
-
+            gameObjects.Entities.Add(newplayer.Jet);
             return playerID;
         }
 
@@ -96,7 +100,7 @@ namespace GameObjects
         /// <exception cref="IndexOutOfRangeException"></exception>
         public void AddBot<T>() where T : Bot, new()
         {
-            if (gameObjects.players.Count > 8)
+            if (gameObjects.Players.Count > 8)
             {
                 throw new IndexOutOfRangeException("There can only be 9 players in a game ");
             }
@@ -128,14 +132,15 @@ namespace GameObjects
 
         internal void Leave(int playerID)
         {
-            Player pl = gameObjects.players.Single(p => p.ID == playerID);
+            Player pl = gameObjects.Players.Single(p => p.ID == playerID);
             Leave(pl);
         }
 
         internal void Leave(Player pl)
         {
             GameConfig.ReturnColor(pl.Color);
-            gameObjects.players.RemoveAll(p => p.ID == pl.ID);
+            gameObjects.Entities.RemoveAll(j => j.Owner.ID == pl.ID);
+            gameObjects.Players.RemoveAll(p => p.ID == pl.ID);
             hubContext.Clients.All.UpdateLobby(gameObjects);
         }
 
@@ -161,12 +166,9 @@ namespace GameObjects
         public void Start()
         {
             gameObjects.InitFeudingParties();
-            thrdGameLoop = new Thread(GameLoop)
-            {
-                Name = "GameLoop"
-            };
+            gameObjects.StartTime = DateTime.Now;
             thrdGameLoop.Start();
-            Console.WriteLine("Fight!");
+            Logger.Log("Fight!", LogLevel.Info);
             gameObjects.GameOn = true;
             hubContext.Clients.All.Start();
         }
@@ -174,12 +176,11 @@ namespace GameObjects
         /// <summary>
         /// Define enemies for each player
         /// </summary>
-
         public void Stop(string message = "Game aborted")
         {
             // Signal the shutdown event
             _shutdownEvent.Set();
-            Console.WriteLine(message);
+            Logger.Log(message, LogLevel.Info);
 
             gameObjects.GameOn = false;
             //if (thrdGameLoop != null)
@@ -196,19 +197,23 @@ namespace GameObjects
         public void Pause()
         {
             _pauseEvent.Reset();
-            Console.WriteLine("Game paused");
+            Logger.Log("Game paused", LogLevel.Info);
         }
 
         public void Resume()
         {
             _pauseEvent.Set();
-            Console.WriteLine("Game resumed");
+            Logger.Log("Game resumed", LogLevel.Info);
         }
 
         private async void GameLoop()
         {
-        // TODO: implement quad-trees for spacial indexing :
-        // https://badecho.com/index.php/2023/01/14/fast-simple-quadtree/
+            // TODO: implement quad-trees for spacial indexing :
+            // https://badecho.com/index.php/2023/01/14/fast-simple-quadtree/
+
+            // TODO: tweak SignalR performance:
+            //https://learn.microsoft.com/en-us/aspnet/signalr/overview/performance/signalr-performance
+            //https://learn.microsoft.com/en-us/aspnet/signalr/overview/getting-started/tutorial-high-frequency-realtime-with-signalr
             try
             {
                 DateTime dt;// maybe replace this with stopwatch
@@ -223,7 +228,7 @@ namespace GameObjects
 
                     dt = DateTime.UtcNow;
 
-                    //reap dead losers, if any
+                    //reap dead losers, if any // TODO: move this part into gameObjects.Frame()
                     if ((loser = gameObjects.Reap()) != null)
                     {
                         Notify(loser, Notification.DeathNotice, "YOU DIED");
@@ -236,12 +241,12 @@ namespace GameObjects
 
                     tdiff = DateTime.UtcNow - dt;
                     Thread.Sleep((GameState.FrameInterval - tdiff).Duration()); //this is bad. There should be timer instead
-                    //Console.WriteLine("frameNum: " + gameObjects.frameNum);// + "| " + tdiff.ToString()
+                    //Logger.Log("frameNum: " + gameObjects.frameNum, LogLevel.Status);// + "| " + tdiff.ToString()
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Logger.Log(e, LogLevel.Debug);
             }
         }
 

@@ -1,41 +1,59 @@
 ﻿using Newtonsoft.Json;
 using PolygonCollision;
-using System.Linq;
 
 namespace GameObjects
 {
     [JsonObject(IsReference = true)]
     public class ViewPort
     {
-        public Polygon Body { get; set; }
+        public Rectangle Body { get; set; }
+
         [JsonIgnore]
-        public Vector Origin { get { return Body.Vertices[0]; } }
+        public Vector Origin { get { return Body.Origin; } }
         public Vector velocity { get; set; }
         [JsonIgnore]
         public Player P { get; set; }
 
-        private Vector size { get; set; }
       
         public Vector Size
         {
-            get { return size; }
+            get { return Body.Size; }
 
             internal set
-            {                
-                size = value;
+            {
                 if (Body != null) {
-                    Body  = new Polygon().FromRectangle(Body.Vertices.Min(v => v.X), Body.Vertices.Min(v => v.Y), value.X, value.Y);
+                    Body  = new Rectangle(Origin, value);
                 }
                 else
                 {
-                    Body = new Polygon().FromRectangle(0, 0, value.X, value.Y);
+                    Body = new Rectangle(0, 0, value.X, value.Y);
                 }
             }
+        }
+
+        public override string ToString()
+        {
+            return "Origin: " + Origin + "Size: " + Body.Size;
         }
 
         public ViewPort() 
         {
 
+        }
+
+        internal PolygonCollisionResult Collides(ICollideable entity)
+        {
+            return Body.Collides(entity.BoundingCirc);
+        }
+
+        internal PolygonCollisionResult Collides(Wall entity)
+        {
+            return Body.Collides(entity.BoundingCirc);
+        }
+
+        internal PolygonCollisionResult Collides(Star entity)
+        {
+            return Body.Collides(entity.BoundingCirc);
         }
 
         public ViewPort(Player player) 

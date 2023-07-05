@@ -21,11 +21,11 @@ namespace GameObjects
         {
             try
             {              
-                _gameServer.gameObjects.players.Single(p => p.ID == who).Act(command);
+                _gameServer.gameObjects.Players.Single(p => p.ID == who).Act(command);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Logger.Log(e, LogLevel.Debug);
             }            
         }
         
@@ -33,11 +33,11 @@ namespace GameObjects
         {
             try
             {                
-                _gameServer.gameObjects.players.Single(p => p.ID == who).Act(command);
+                _gameServer.gameObjects.Players.Single(p => p.ID == who).Act(command);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Logger.Log(e, LogLevel.Debug);
             }
         }
 
@@ -48,11 +48,9 @@ namespace GameObjects
 
         public void JoinLobby(PlayerInfo playerInfo)
         {
-
             int playerID = _gameServer.Join( Context.ConnectionId, playerInfo);
             Clients.Client(Context.ConnectionId).JoinedLobby(playerID);
             Clients.All.UpdateLobby(_gameServer.gameObjects);
-            //Clients.All.UpdateModel(_gameServer.gameObjects);
         }
 
 
@@ -73,7 +71,6 @@ namespace GameObjects
             //string name = Context.User.Identity.Name;
             //_connections.Add(name, Context.ConnectionId);
 
-            Clients.All.UpdateModel(_gameServer.gameObjects);
             return base.OnConnected();
 
         }
@@ -82,8 +79,7 @@ namespace GameObjects
         {
             //string name = Context.User.Identity.Name;
             //_connections.Remove(name, Context.ConnectionId);
-
-            Console.WriteLine("disconnected");
+            Logger.Log("disconnected", LogLevel.Info);            
             return Clients.All.disconnected("diconnected");
         }
 
