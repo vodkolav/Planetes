@@ -20,23 +20,23 @@ namespace PlanetesWPF
             B.Clear(Colors.Black);
         }
 
-        public void DrawRay(System.Drawing.Color c, Ray ray)
+        public void DrawRay(Color c, Ray ray)
         {
             ray = ray.Offseted(ViewPortOffset);
             Vector End = ray.Pos - ray.Tail*0.5;
-            B.DrawLineAa((int)ray.Pos.X, (int)ray.Pos.Y, (int)End.X, (int)End.Y, System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B),ray.Size);
+            B.DrawLineAa((int)ray.Pos.X, (int)ray.Pos.Y, (int)End.X, (int)End.Y, c,ray.Size);
         }
 
-        public void FillEllipse(System.Drawing.Color c, Circle circ)
+        public void FillEllipse(Color c, Circle circ)
         {
             circ = circ.Offseted(ViewPortOffset);
-            B.FillEllipseCentered((int)circ.Pos.X, (int)circ.Pos.Y, (int)circ.R / 2, (int)circ.R / 2, System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B));
+            B.FillEllipseCentered((int)circ.Pos.X, (int)circ.Pos.Y, (int)circ.R / 2, (int)circ.R / 2, c);
         }
 
-        public void FillPolygon(System.Drawing.Color c, Polygon poly)
+        public void FillPolygon(Color c, Polygon poly)
         {
-            B.FillPolygon(poly.Offseted(ViewPortOffset).ints, System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B));
-            B.DrawPolylineAa(poly.Offseted(ViewPortOffset).ints, System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B));
+            B.FillPolygon(poly.Offseted(ViewPortOffset).ints, c);
+            B.DrawPolylineAa(poly.Offseted(ViewPortOffset).ints, c);
         }
     }
 }

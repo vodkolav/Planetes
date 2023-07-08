@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using PolygonCollision;
 using System;
-using System.Drawing;
+using System.Windows.Media;
 
 namespace GameObjects
 {
@@ -45,11 +45,11 @@ namespace GameObjects
                 switch (Type)
                 {
                     case AstType.Ammo:
-                        return Color.Yellow;
+                        return Colors.Yellow;
                     case AstType.Health:
-                        return Color.Blue;
+                        return Colors.Blue;
                     default:
-                        return Color.SaddleBrown;
+                        return Colors.SaddleBrown;
                 }
             }
         }
@@ -64,6 +64,11 @@ namespace GameObjects
             Speed = mult * linearSpeed;
             TossType(random);
             HasHit = false;
+        }
+
+        public Astroid()
+        {
+            
         }
 
         public override void Draw()

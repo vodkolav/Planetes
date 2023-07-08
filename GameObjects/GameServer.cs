@@ -107,7 +107,7 @@ namespace GameObjects
             else
             {                              
                 Bot DMYSYS = new T();
-                DMYSYS.joinNetworkGame(URL, new PolygonCollision.Vector(500, 500));
+                DMYSYS.joinNetworkGame(URL, new PolygonCollision.Size(500, 500));
                 //DMYSYS.Me.Name = "Rei";
                 //DMYSYS.Me.Jet.Color = Color.White;
                 //DMYSYS.UpdateMe();

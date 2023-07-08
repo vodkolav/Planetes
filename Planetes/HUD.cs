@@ -22,7 +22,7 @@ namespace Planetes
             pbAmmo.Maximum = p.MaxAmmo;
             pbHlth.Maximum = p.MaxHealth;
             Visible = true;
-            BackColor = p.Jet.Color;
+            BackColor = WFGraphicsContainer.ConvertColor(p.Jet.Color);
         }
 
         public void Draw()

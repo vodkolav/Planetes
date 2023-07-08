@@ -72,7 +72,7 @@ namespace PlanetesWPF
         /// <summary>
         /// Convert from device-independent 1/60th inch WPF units to amount of pixels
         /// </summary>
-        public PolygonCollision.Vector VisorSize
+        public PolygonCollision.Size VisorSize
         {
             get
             {
@@ -80,7 +80,7 @@ namespace PlanetesWPF
                 Matrix transformToDevice = source.CompositionTarget.TransformToDevice;
                 Vector wpfSize = new Vector(Visor.Width, Visor.Height);
                 Size pixelSize = (Size)transformToDevice.Transform(wpfSize);
-                PolygonCollision.Vector v = new PolygonCollision.Vector((int)pixelSize.Width, (int)pixelSize.Height);
+                PolygonCollision.Size v = new PolygonCollision.Size((int)pixelSize.Width, (int)pixelSize.Height);
                 return v;
             }
         }

@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Windows.Forms;
+﻿using System.Windows.Media;
 
 namespace PolygonCollision
 {
@@ -12,6 +11,7 @@ namespace PolygonCollision
         void FillPolygon(Color c, Polygon poly);
 
         void DrawRay(Color c, Ray ray);
+
         void Clear();
     }
 }

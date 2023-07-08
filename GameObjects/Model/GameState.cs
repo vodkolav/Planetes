@@ -2,7 +2,6 @@
 using PolygonCollision;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 
 namespace GameObjects
@@ -46,7 +45,7 @@ namespace GameObjects
         {
         }
 
-            public GameState(Size worldSize)
+        public GameState(Size worldSize)
         {
             Entities = new List<ICollideable>();
             World = new Map(worldSize);

@@ -6,6 +6,10 @@ namespace GameObjects
     [JsonObject(IsReference = true)]
     public abstract class ICollideable //TODO: make this a gameObject : ICollidable class 
     {
+        public ICollideable()
+        {
+            
+        }
 
         public virtual Player Owner { get; set; }
 

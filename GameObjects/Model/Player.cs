@@ -2,7 +2,7 @@
 using PolygonCollision;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
+using System.Windows.Media;
 
 namespace GameObjects
 {
@@ -12,7 +12,7 @@ namespace GameObjects
     public struct PlayerInfo
     {
         public string PlayerName { get; set; } 
-        public Vector VisorSize { get; set; }
+        public Size VisorSize { get; set; }
     }
 
     [JsonObject(IsReference = true)]
@@ -100,7 +100,7 @@ namespace GameObjects
 
         internal void setViewPort(object argument)
         {
-            viewPort.Size = (Vector)argument;
+            viewPort.Size = (Size)argument;
         }
 
         public override string ToString()

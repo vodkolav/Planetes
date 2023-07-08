@@ -53,7 +53,7 @@ namespace Planetes
                     }
                 case "joinNetworkGame":
                     {
-                        C.joinNetworkGame($"http://127.0.0.1:2861/", new Vector(pbxWorld.Width, pbxWorld.Height));
+                        C.joinNetworkGame($"http://127.0.0.1:2861/", new PolygonCollision.Size(pbxWorld.Width, pbxWorld.Height));
                         break;
                     }
                 case "SinglePlayer":
@@ -187,7 +187,7 @@ namespace Planetes
         private void pbxWorld_MouseMove(object sender, MouseEventArgs e)
         {
             if (C.GameOn)
-                C.Yoke.Aim(Vector.FromPoint(e.Location));
+                C.Yoke.Aim( WFGraphicsContainer.Point2Vector(e.Location));
         }
 
         private void pbxWorld_MouseDown(object sender, MouseEventArgs e)
@@ -258,7 +258,7 @@ namespace Planetes
         public async Task joinNetworkGame(string URL)
         {
             Text += " (Client)";
-            C.joinNetworkGame(URL, new Vector(pbxWorld.Width, pbxWorld.Height));
+            C.joinNetworkGame(URL, new PolygonCollision.Size(pbxWorld.Width, pbxWorld.Height));
 
             bool GameStarted = L.OpenLobby_WaitForGuestsAndBegin();
 

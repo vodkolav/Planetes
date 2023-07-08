@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using PolygonCollision;
-using System.Drawing;
+using System.Windows.Media;
 using System.Linq;
 
 namespace GameObjects
@@ -22,31 +22,34 @@ namespace GameObjects
             }
         }
 
-        public Wall(Point from, Point to, Color color, int width = 20)
+        public Wall()
+        {
+            
+        }
+
+        public Wall(Vector from, Vector to, Color color, int width = 20)
         {
             Body = Construct(from, to, width);
 
             Color = color;
         }
 
-        private Polygon Construct(Point from, Point to, int w)
+        private Polygon Construct(Vector from, Vector to, int w)
         {
-            Vector F = new Vector(from);
-            Vector T = new Vector(to);
-
-            float alp = (T - F).Angle(new Vector(1, 0));
+ 
+            float alp = (to - from).Angle(new Vector(1, 0));
 
             Vector UP = new Vector(0, -w / 2).Rotated(-alp);
             Vector DN = new Vector(0, w / 2).Rotated(-alp);
 
             //Vector shift = width / 2 * new Vector((float)(Math.Cos(Math.PI / 2.0 - alp)), (float)(-Math.Sin(Math.PI / 2.0 - alp)));
-            Polygon p = new Polygon();
+            Polygon p = new Polygon(5);
 
-            p.AddVertex(F + UP);
-            p.AddVertex(T + UP);
-            p.AddVertex(T + DN);
-            p.AddVertex(F + DN);
-            p.AddVertex(F + UP);
+            p.AddVertex(from + UP);
+            p.AddVertex(to + UP);
+            p.AddVertex(to + DN);
+            p.AddVertex(from + DN);
+            p.AddVertex(from + UP);
             return p;
         }
 
@@ -54,6 +57,5 @@ namespace GameObjects
         {
             Body.Draw(Color);
         }
-
     }
 }

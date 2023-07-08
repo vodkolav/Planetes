@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using PolygonCollision;
 using Microsoft.AspNet.SignalR.Client.Transports;
+using System.IO;
 
 namespace GameObjects
 {
@@ -31,18 +32,24 @@ namespace GameObjects
 
         DateTime StartTime { get; set; }
 
-        // StreamWriter writer;
+        StreamWriter writer;
 
         public GameClient(IUI owner)
         {
             UI = owner;
         }
 
-        public async void joinNetworkGame(string URL, Vector windowSize)
+        public async void joinNetworkGame(string URL, Size windowSize)
         {
             try
             {
                 Conn = new HubConnection(URL);
+
+                // use this code to investigate problems when signalR ceases to receive model updates from server
+                Conn.TraceLevel = TraceLevels.All;
+                writer = new StreamWriter($"..\\..\\ClientLog_{PlayerName}.txt");
+                Conn.TraceWriter = writer;
+
                 Proxy = Conn.CreateHubProxy("GameHub");
                 Proxy.On<GameState>("UpdateModel", updateGameState);
                 Proxy.On<GameState>("UpdateLobby", UpdateLobby);
@@ -55,12 +62,8 @@ namespace GameObjects
                     VisorSize = windowSize
                 };
 
-                await Proxy.Invoke<GameState>("JoinLobby", new object[] { info });
+                await Proxy.Invoke("JoinLobby", new object[] { info });
 
-                 // use this code to investigate problems when signalR ceases to receive model updates from server
-/*               Conn.TraceLevel = TraceLevels.All;
-                 writer = new StreamWriter($"..\\..\\ClientLog_{Me.ID}.txt");                
-                 Conn.TraceWriter = writer;*/
             }
             catch (Exception e)
             {

@@ -10,9 +10,11 @@ namespace GameObjects
     {
 
         private static List<LogLevel> loglevels { get; set; } = new List<LogLevel>()
-        { LogLevel.Debug,
+        {
+            LogLevel.Debug,
             LogLevel.Info,
-        LogLevel.Status};
+            LogLevel.Status
+        };
 
         public static void Log(Exception exception, LogLevel ll)
         {
