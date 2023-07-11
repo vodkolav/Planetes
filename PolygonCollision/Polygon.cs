@@ -1,10 +1,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-//TODO: remove dependency on  System.Drawing namespace from this project
-// Replace it with System.Windows.Media https://stackoverflow.com/a/7739547
+using System.Windows.Media;
 
 namespace PolygonCollision
 {
@@ -28,8 +25,16 @@ namespace PolygonCollision
         };
     }
 
-    public class Polygon
+    public class Polygon :ICloneable
     {
+
+        public Polygon() { }
+
+        public Polygon(int vert_amt) 
+        {
+            Vertices = new List<Vector>(vert_amt);
+        }
+
         public List<Vector> BuildEdges()
         {
             Vector p1;
@@ -79,15 +84,7 @@ namespace PolygonCollision
             return p2 - p1;
         }
 
-
-        public List<Vector> Vertices { get; private set; } = new List<Vector>();
-
-        [JsonIgnore]
-        public PointF[] PointFs
-        {
-            get { return Vertices.ConvertAll(new Converter<Vector, PointF>(Vector.asPointF)).ToArray(); }
-            set { Vertices = new List<PointF>(value).ConvertAll(new Converter<PointF, Vector>(Vector.FromPointF)); }
-        }
+        public List<Vector> Vertices { get; set; }
 
         [JsonIgnore]
         public int[] ints
@@ -134,9 +131,6 @@ namespace PolygonCollision
             }
         }
 
-
-        public Vector MTV { get; set; }
-
         /// <summary>
         /// Offset (move) this polygon
         /// </summary>
@@ -163,7 +157,7 @@ namespace PolygonCollision
         /// <returns></returns>
         public Polygon Offseted(Vector offset)
         {
-            Polygon np = new Polygon();
+            Polygon np = new Polygon(Vertices.Count);
             foreach (Vector v in Vertices)
             {
                 np.AddVertex(v + offset);
@@ -171,25 +165,24 @@ namespace PolygonCollision
             return np;
         }
 
-        public void Rotate(float angle)
+        public object Clone()
         {
-            Matrix myMatrix = new Matrix();
-            myMatrix.RotateAt(angle, Center);
-            //PointF[] toRotate = PointFs;
-            PointF[] p = PointFs;
-            myMatrix.TransformPoints(p);
-            PointFs = p;
+            return Offseted(new Vector(0, 0));
         }
 
-
-        public void RotateAt(float angle, Vector at)
+        public void RotateAt(float angle, Vector pivot)
         {
-            Matrix myMatrix = new Matrix();
-            myMatrix.RotateAt(angle, at);
-            //PointF[] toRotate = PointFs;
-            PointF[] p = PointFs;
-            myMatrix.TransformPoints(p);
-            PointFs = p;
+            double theta = angle * (Math.PI / 180); // Convert to radians
+            double c = Math.Cos(theta);
+            double s = Math.Sin(theta);
+     
+            foreach (Vector v in Vertices)
+            {
+                Vector dif = v - pivot;
+
+                v.X = (float)(c * dif.X - s * dif.Y + pivot.X);
+                v.Y = (float)(s * dif.X + c * dif.Y + pivot.Y);
+            }
         }
 
 
@@ -370,8 +363,7 @@ namespace PolygonCollision
                     translationAxis = axis;
 
                     Vector d = Center - Other.Center;
-                    if (d.Dot(translationAxis) < 0) translationAxis = -translationAxis;
-                    MTV = translationAxis;
+                    if (d.Dot(translationAxis) < 0) translationAxis = -translationAxis; 
                     result.translationAxis = translationAxis;
                 }
             }

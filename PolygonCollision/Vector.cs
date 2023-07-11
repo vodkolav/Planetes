@@ -1,7 +1,5 @@
 using Newtonsoft.Json;
 using System;
-using System.Drawing;
-using System.Drawing.Drawing2D;
 
 namespace PolygonCollision
 {
@@ -23,44 +21,14 @@ namespace PolygonCollision
             Y = y;
         }
 
-        public Vector(Point p)
-        {
-            X = p.X;
-            Y = p.Y;
-        }
-
-        public Vector(PointF p)
-        {
-            X = p.X;
-            Y = p.Y;
-        }
-
         public Vector()
         {
-            X = 0;
-            Y = 0;
         }
 
         public Vector(Size size)
         {
             X = size.Width;
             Y = size.Height;
-        }
-
-        static public Vector FromPoint(Point p)
-        {
-            return new Vector(p.X, p.Y);
-        }
-
-        static public Vector FromPointF(PointF p)
-        {
-            return new Vector(p);
-        }
-
-        [JsonIgnore]
-        public Point AsPoint
-        {
-            get { return new Point((int)X, (int)Y); }
         }
 
         [JsonIgnore]
@@ -94,22 +62,25 @@ namespace PolygonCollision
         }
 
         /// <summary>
-        /// Rotates the vector inplace 
+        /// rotate  this Vector "angle" degrees around "@pivot" Vector 
         /// </summary>
         /// <param name="angle"></param>
-        /// <param name="at"></param>
-        public void RotateAt(float angle, Vector at)
-        {
-            Matrix myMatrix = new Matrix();
-            myMatrix.RotateAt(angle, at);
-            //This conversion is bad, but I don't know how to rotate vector
-            PointF[] p = new PointF[] { AsPoint };
-            myMatrix.TransformPoints(p);
-            FromPointF(p[0]);
+        /// <param name="pivot"></param>
+        public void RotateAt(float angle, Vector pivot)
+        {         
+            double theta = angle * (Math.PI / 180); // Convert to radians
+
+            double c = Math.Cos(theta);
+            double s = Math.Sin(theta);   
+            Vector dif = this - pivot;
+
+            X = (float)(c * dif.X - s * dif.Y + pivot.X);
+            Y = (float)(s * dif.X + c * dif.Y + pivot.Y);
+
         }
 
         /// <summary>
-        /// returns rotated version of angle 
+        /// returns copy of Vector, rotated around origin (0,0)  by angle
         /// </summary>		
         public Vector Rotated(float angle)
         {
@@ -159,17 +130,6 @@ namespace PolygonCollision
         public float Angle(Vector other)
         {
             return Angle(this, other);
-        }
-
-
-        public static implicit operator Point(Vector p)
-        {
-            return new Point((int)p.X, (int)p.Y);
-        }
-
-        public static implicit operator PointF(Vector p)
-        {
-            return new PointF(p.X, p.Y);
         }
 
         public static Vector operator +(Vector a, Vector b)
@@ -261,10 +221,6 @@ namespace PolygonCollision
             }
         }
 
-        public static PointF asPointF(Vector v)
-        {
-            return new PointF(v.X, v.Y);
-        }
 
 
         /// <summary>

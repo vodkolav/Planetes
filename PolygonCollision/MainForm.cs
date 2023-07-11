@@ -32,7 +32,6 @@ namespace PolygonCollision
             p.Vertices.Add(new Vector(100, 60));
             p.Vertices.Add(new Vector(80, 70));
             p.Vertices.Add(new Vector(50, 70));
-            p.Rotate(20);
             polygons.Add(p);
 
             p = new Polygon();

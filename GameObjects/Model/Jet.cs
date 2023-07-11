@@ -1,13 +1,20 @@
 ﻿using Newtonsoft.Json;
 using PolygonCollision;
-using System.Drawing;
+using System.Windows.Media;
 
 namespace GameObjects
 {
     [JsonObject(IsReference = true)]
     public class Jet : ICollideable
     {
-        public override Vector Pos { get => Hull.Center; }
+        [JsonIgnore]
+        public override Vector Pos
+        {
+            get
+            {
+                return Hull.Center;
+            }
+        }
 
         public Vector Speed { get; set; }
 
@@ -19,11 +26,38 @@ namespace GameObjects
 
         public Vector Aim { get; set; }
 
-        public Color Color { get; set; } 
+        public Color Color { get; set; }
 
-        public Polygon Hull { get; set; }
+        private Polygon _hull;
+        private Polygon _hull_cache;
 
-        public Polygon Cockpit { get; set; }
+
+        public Polygon Hull 
+        {
+            get
+            {
+                return _hull_cache;
+            }
+            set { _hull = value;
+                  _hull_cache = value;
+            }
+        }
+
+        private Polygon _cockpit;
+
+        private Polygon _cockpit_cache;
+
+        public Polygon Cockpit
+        {
+            get
+            {
+                return _cockpit_cache;
+            }
+            set { 
+                _cockpit = value;
+                _cockpit_cache = value;
+            }
+        }
 
         public Vector Gun { get { return Cockpit.Vertices[1]; } }
 
@@ -37,24 +71,29 @@ namespace GameObjects
         [JsonIgnore]
         public override bool HasHit { get => false; set { } }
 
+        public Jet()
+        {
+            
+        }
+
         public Jet(Player owner, Color color)
         {
             double l = 0.8; 
-            Hull = new Polygon();
+            Hull = new Polygon(5);
             Hull.AddVertex(new Vector(0, 0)*l);
             Hull.AddVertex(new Vector(50, 10) * l);//
             Hull.AddVertex(new Vector(50, 30) * l);//
             Hull.AddVertex(new Vector(0, 40) * l);
             Hull.AddVertex(new Vector(0, 0) * l);
 
-            Cockpit = new Polygon();
+            Cockpit = new Polygon(5);
             Cockpit.AddVertex(new Vector(50, 10) * l);//
             Cockpit.AddVertex(new Vector(80, 20) * l);
             Cockpit.AddVertex(new Vector(50, 30) * l);//
             Cockpit.AddVertex(new Vector(50, 10) * l);
 
             Owner = owner;
-            Offset(new Vector(GameConfig.TossPoint));
+            Offset(GameConfig.TossPoint);
             Speed = new Vector(0, 0);
             Acceleration = new Vector(0, 0);
             Aim = new Vector(1, 0);
@@ -65,17 +104,22 @@ namespace GameObjects
 
         public void Offset(Vector by)
         {
-            Hull.Offset(by);
-            Cockpit.Offset(by);
+            _hull.Offset(by);
+            _cockpit.Offset(by);
         }
 
         private void Rotate(Vector dir)
         {
             dir.Normalize();
-            float diff = Bearing.Angle(dir);
             Bearing = dir;
-            Hull.RotateAt(diff, Hull.Center);
-            Cockpit.RotateAt(diff, Hull.Center);
+            float angl = -Bearing.Angle(new Vector(1,0));
+
+            _cockpit_cache = (Polygon)_cockpit.Clone();
+            _cockpit_cache.RotateAt(angl, _hull.Center);
+
+            _hull_cache = (Polygon)_hull.Clone();
+            _hull_cache.RotateAt(angl, _hull.Center);          
+
         }
 
         public override PolygonCollisionResult Collides(Jet j)
@@ -101,7 +145,7 @@ namespace GameObjects
         {
             if (KeyBrake)
             {
-                Acceleration = -Speed * 0.5;
+                Acceleration = -Speed * 0.8;
             }
 
             Vector newSpeed = Speed + Acceleration * Thrust ;
@@ -117,10 +161,10 @@ namespace GameObjects
             }
 
             Offset(Speed);
-           
+
             Rotate(Aim);
 
-            Owner.viewPort.Update();            
+            Owner.viewPort.Update();
         }
 
         public void Bounce(Vector normal)
@@ -132,7 +176,7 @@ namespace GameObjects
         public override void Draw()
         {
             Hull.Draw(Color);
-            Cockpit.Draw(Color.Gray);
+            Cockpit.Draw(Colors.Gray);
         }
 
         public override string ToString()
