@@ -309,7 +309,7 @@ namespace PlanetesWPF
                 {
                     RC.Start();
                 }
-                C.Yoke.Press(KeyInterop.VirtualKeyFromKey(e.Key));
+                C.Yoke.Press(e.Key);
             }
         }
 
@@ -322,7 +322,7 @@ namespace PlanetesWPF
                 {     
                     RC.End();
                 }               
-                C.Yoke.Release(KeyInterop.VirtualKeyFromKey(e.Key));
+                C.Yoke.Release(e.Key);
             }
         }
 
@@ -337,7 +337,7 @@ namespace PlanetesWPF
         {
             if (C.GameOn)
             {
-                C.Yoke.Press(fromMouseButton(e.ChangedButton));
+                C.Yoke.Press(e.ChangedButton);
             }
         }
 
@@ -345,7 +345,7 @@ namespace PlanetesWPF
         {
             if (C.GameOn)
             {
-                C.Yoke.Release(fromMouseButton(e.ChangedButton));
+                C.Yoke.Release(e.ChangedButton);
             }             
         }
 

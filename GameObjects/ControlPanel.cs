@@ -3,16 +3,16 @@ using PolygonCollision;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
+using System.Windows.Input;
 
 namespace GameObjects
 {
     public enum HOTAS { Up, Down, Left, Right, Shoot, Aim, Brake, Nothing };
     public class ControlPanel
     {
-        private Dictionary<Keys, HOTAS> KeyBindings;
+        private Dictionary<Key, HOTAS> KeyBindings;
 
-        private Dictionary<MouseButtons, HOTAS> MouseBindings;
+        private Dictionary<MouseButton, HOTAS> MouseBindings;
 
         private HOTAS LastPress { get; set; } = HOTAS.Nothing;
 
@@ -26,38 +26,38 @@ namespace GameObjects
         {
             PlayerID = playerid;
             this.Proxy = Proxy;
-            KeyBindings = new Dictionary<Keys, HOTAS>();
-            MouseBindings = new Dictionary<MouseButtons, HOTAS>();
+            KeyBindings = new Dictionary<Key, HOTAS>();
+            MouseBindings = new Dictionary<MouseButton, HOTAS>();
             isWorking = true;
         }
 
-        public void bindKey(Keys key, HOTAS action)
+        public void bindKey(Key key, HOTAS action)
         {
             KeyBindings.Add(key, action);
         }
 
         public void bindMouse()
         {            
-            MouseBindings.Add(MouseButtons.Left, HOTAS.Shoot);
-            MouseBindings.Add(MouseButtons.None, HOTAS.Aim);
+            MouseBindings.Add(MouseButton.Left, HOTAS.Shoot);
+            //MouseBindings.Add(MouseButton.None, HOTAS.Aim);
         }
 
         public void bindWASD()
         {
-            bindKey(Keys.W, HOTAS.Up);
-            bindKey(Keys.S, HOTAS.Down);
-            bindKey(Keys.A, HOTAS.Left);
-            bindKey(Keys.D, HOTAS.Right);
-            bindKey(Keys.Space, HOTAS.Brake);
+            bindKey(Key.W, HOTAS.Up);
+            bindKey(Key.S, HOTAS.Down);
+            bindKey(Key.A, HOTAS.Left);
+            bindKey(Key.D, HOTAS.Right);
+            bindKey(Key.Space, HOTAS.Brake);
         }
 
         public void bindARROWSto()
         {
-            bindKey(Keys.Up, HOTAS.Up);
-            bindKey(Keys.Down, HOTAS.Down);
-            bindKey(Keys.Left, HOTAS.Left);
-            bindKey(Keys.Right, HOTAS.Right);
-            bindKey(Keys.Enter, HOTAS.Shoot);
+            bindKey(Key.Up, HOTAS.Up);
+            bindKey(Key.Down, HOTAS.Down);
+            bindKey(Key.Left, HOTAS.Left);
+            bindKey(Key.Right, HOTAS.Right);
+            bindKey(Key.Enter, HOTAS.Shoot);
         }
 
         public void unbind()
@@ -101,10 +101,10 @@ namespace GameObjects
 
         public void Press(int key)
         {
-            Press((Keys)key);
+            Press((Key)key);
         }
 
-        public void Press(Keys key)
+        public void Press(Key key)
         {
             if (KeyBindings.Keys.Contains(key))
             {
@@ -115,10 +115,10 @@ namespace GameObjects
 
         public void Release(int key)
         {
-            Release((Keys)key);
+            Release((Key)key);
         }
         
-        public void Release(Keys key)
+        public void Release(Key key)
         {
             if (KeyBindings.Keys.Contains(key))
             {
@@ -127,7 +127,7 @@ namespace GameObjects
             }
         }  
 
-        public void Press(MouseButtons button)
+        public void Press(MouseButton button)
         {
             if (MouseBindings.Keys.Contains(button))
             {
@@ -136,7 +136,7 @@ namespace GameObjects
             }
         }
           
-        public void Release(MouseButtons button)
+        public void Release(MouseButton button)
         {
             if (MouseBindings.Keys.Contains(button))
             {

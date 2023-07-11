@@ -171,21 +171,33 @@ namespace Planetes
         }
 
         #region Piloting
-        private void Game_KeyDown(object sender, KeyEventArgs e)
+
+        private System.Windows.Input.MouseButton toWPF(MouseButtons btn)
         {
+            System.Windows.Input.MouseButton btns;
+            Enum.TryParse(btn.ToString(), out btns);
+            return btns;
+        }
+
+        private System.Windows.Input.Key toWPF(Keys key)
+        {
+            return System.Windows.Input.KeyInterop.KeyFromVirtualKey((int)key);
+        }        
+
+        private void Game_KeyDown(object sender, KeyEventArgs e)
+        {            
             if (C.GameOn)
-                C.Yoke.Press(e.KeyData);
+                C.Yoke.Press(toWPF(e.KeyData));
         }
 
         private void Game_KeyUp(object sender, KeyEventArgs e)
         {
             if (C.GameOn)
-                C.Yoke.Release(e.KeyData);
+                C.Yoke.Release(toWPF(e.KeyData));
         }
 
-
         private void pbxWorld_MouseMove(object sender, MouseEventArgs e)
-        {
+        {            
             if (C.GameOn)
                 C.Yoke.Aim( WFGraphicsContainer.Point2Vector(e.Location));
         }
@@ -194,14 +206,14 @@ namespace Planetes
         {
             if (C.GameOn)
             {
-                C.Yoke.Press(e.Button);
+                C.Yoke.Press(toWPF(e.Button));
             }
         }
 
         private void pbxWorld_MouseUp(object sender, MouseEventArgs e)
         {
             if (C.GameOn)
-                C.Yoke.Release(e.Button);
+                C.Yoke.Release(toWPF(e.Button));
         }
 
         private void Game_FormClosing(object sender, FormClosingEventArgs e)
