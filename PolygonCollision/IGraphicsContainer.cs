@@ -10,6 +10,8 @@ namespace PolygonCollision
 
         void FillPolygon(Color c, Polygon poly);
 
+        void FillRectangle(Color c, Rectangle rect);
+
         void DrawRay(Color c, Ray ray);
 
         void Clear();

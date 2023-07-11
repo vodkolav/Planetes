@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Windows.Media ;
 using System.IO;
 using System.Linq;
-using DrawingContext = PolygonCollision.DrawingContext;
 
 namespace GameObjects
 {
@@ -29,7 +28,7 @@ namespace GameObjects
 
         public Map(Size size)
         {
-            Space = new PolygonCollision.Rectangle(0,0, size.Width, size.Height);
+            Space = new Rectangle(0,0, size.Width, size.Height);
             Walls = new List<Wall>();
             Stars = new List<Star>();
             LoadDefault2();
@@ -47,7 +46,7 @@ namespace GameObjects
 
         public void Draw()
         {
-            DrawingContext.GraphicsContainer.Clear();            
+            Space.Clear();
         }
 
         public void MakeStars(int amount)

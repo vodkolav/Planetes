@@ -1,5 +1,6 @@
 ﻿
 using Newtonsoft.Json;
+using System.Windows.Media;
 
 namespace PolygonCollision
 {
@@ -42,6 +43,16 @@ namespace PolygonCollision
                 && Top < bcirc.Pos.Y + bcirc.R && bcirc.Pos.Y - bcirc.R < Bottom)
                 return PolygonCollisionResult.yesCollision;
             else return PolygonCollisionResult.noCollision;
+        }
+
+        public void Clear()
+        {
+            DrawingContext.GraphicsContainer.Clear();
+        }
+
+        public void Draw(Color color)
+        {
+            DrawingContext.GraphicsContainer.FillRectangle(color, this);
         }
 
         public void Offset(Vector ofst)

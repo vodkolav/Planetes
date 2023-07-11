@@ -37,6 +37,11 @@ namespace Planetes
             G.FillPolygon(new SolidBrush(ConvertColor(c)), PointFs);
         }
 
+        public void FillRectangle(System.Windows.Media.Color c, PolygonCollision.Rectangle rect)
+        {
+            G.FillRectangle(new SolidBrush(ConvertColor(c)), rect.Left, rect.Top, rect.Right, rect.Bottom);
+        }
+
         public static Color ConvertColor(System.Windows.Media.Color c)
         {
             return Color.FromArgb(c.A, c.R, c.G, c.B);

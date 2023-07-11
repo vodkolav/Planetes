@@ -36,7 +36,12 @@ namespace PlanetesWPF
         public void FillPolygon(Color c, Polygon poly)
         {
             B.FillPolygon(poly.Offseted(ViewPortOffset).ints, c);
-            B.DrawPolylineAa(poly.Offseted(ViewPortOffset).ints, c);
+            B.DrawPolylineAa(poly.Offseted(ViewPortOffset).ints, c);            
+        }
+
+        public void FillRectangle(Color c, Rectangle rect)
+        {
+            B.FillRectangle((int)rect.Left, (int)rect.Top, (int)rect.Right, (int)rect.Bottom, c);
         }
     }
 }
