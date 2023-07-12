@@ -20,6 +20,8 @@ namespace GameObjects
 
         public static int StartingAmmo { get { return 1000; } }
 
+        public static int bulletSpeed { get { return 30; } }
+
         public static float  Thrust { get { return 0.1f; } }
 
         public static ConcurrentBag<Color> _colors = new ConcurrentBag<Color>()
