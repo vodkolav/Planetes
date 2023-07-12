@@ -4,6 +4,8 @@ using PolygonCollision;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using GameObjects.Model;
+using Action = GameObjects.Model.Action;
 
 namespace GameObjects
 {

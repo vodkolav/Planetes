@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json;
-using PolygonCollision;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
+using PolygonCollision;
 
-namespace GameObjects
+namespace GameObjects.Model
 {
     public class GameState
     {
@@ -79,7 +79,7 @@ namespace GameObjects
 
                 //check for collision of Bullets Astroids and Jets with Walls
                 foreach (Wall w in World.Walls)
-                {           
+                {
                     foreach (ICollideable e in Entities)
                     {
                         r = e.Collides(w);
@@ -92,7 +92,7 @@ namespace GameObjects
                 }
 
                 //check for collision of Bullets and Astroids with Jets
-                List<Type> types = new List<Type>() { typeof(Astroid), typeof(Bullet) }; 
+                List<Type> types = new List<Type>() { typeof(Astroid), typeof(Bullet) };
 
                 foreach (Jet j in Entities.OfType<Jet>())
                 {
@@ -115,7 +115,7 @@ namespace GameObjects
                         r = e.Collides(a);
                         if (r.Intersect)
                         {
-                            e.HandleCollision(a,r);
+                            e.HandleCollision(a, r);
                             break;
                         }
                     }
@@ -129,20 +129,6 @@ namespace GameObjects
                     Entities.Add(new Astroid(World.Size));
                 }
             }
-        }        
-
-        public Player Reap()
-        {
-            Player loser;
-            if ((loser = Players.FirstOrDefault(p => !p.isAlive)) != null)
-            {
-                Players.Remove(loser);
-                //Must remove a dead player from all other players enemies lists,
-                //otherwise from the point of view of the bullets the dead one still exists 
-                Players.ForEach(p => p.Enemies.Remove(loser));               
-                return loser;
-            }
-            return null;
         }
 
         public void InitFeudingParties()

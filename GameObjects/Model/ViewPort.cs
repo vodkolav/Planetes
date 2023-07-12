@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using PolygonCollision;
 
-namespace GameObjects
+namespace GameObjects.Model
 {
     [JsonObject(IsReference = true)]
     public class ViewPort

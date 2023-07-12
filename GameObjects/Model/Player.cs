@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json;
-using PolygonCollision;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Windows.Media;
+using Newtonsoft.Json;
+using PolygonCollision;
 
-namespace GameObjects
+namespace GameObjects.Model
 {
     public enum Action { Press, Release, Aim, setViewPort }
     public enum Notification { DeathNotice, Kicked, Message }

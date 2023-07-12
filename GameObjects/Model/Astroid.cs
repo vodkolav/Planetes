@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json;
-using PolygonCollision;
-using System;
+﻿using System;
 using System.Windows.Media;
+using Newtonsoft.Json;
+using PolygonCollision;
 
-namespace GameObjects
+namespace GameObjects.Model
 {
     public enum AstType { Rubble, Ammo, Health };
 

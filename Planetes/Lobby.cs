@@ -2,6 +2,7 @@
 using System;
 using System.ComponentModel;
 using System.Windows.Forms;
+using GameObjects.Model;
 
 namespace Planetes
 {

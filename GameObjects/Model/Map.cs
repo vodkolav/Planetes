@@ -1,12 +1,12 @@
-﻿using Newtonsoft.Json;
-using PolygonCollision;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Windows.Media ;
 using System.IO;
 using System.Linq;
+using System.Windows.Media;
+using Newtonsoft.Json;
+using PolygonCollision;
 
-namespace GameObjects
+namespace GameObjects.Model
 {
     [JsonObject(IsReference = true)]
     public class Map

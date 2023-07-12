@@ -1,8 +1,9 @@
-﻿using PolygonCollision;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using GameObjects.Model;
+using PolygonCollision;
 
 namespace GameObjects
 {

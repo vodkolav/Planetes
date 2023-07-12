@@ -8,6 +8,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using GameObjects.Model;
 using Newtonsoft.Json;
 
 namespace GameObjects
@@ -218,7 +219,7 @@ namespace GameObjects
             {
                 DateTime dt;// maybe replace this with stopwatch
                 TimeSpan tdiff;
-                Player loser;
+
                 while (gameObjects.GameOn)
                 {
                     _pauseEvent.WaitOne(Timeout.Infinite);
@@ -228,16 +229,13 @@ namespace GameObjects
 
                     dt = DateTime.UtcNow;
 
-                    //reap dead losers, if any // TODO: move this part into gameObjects.Frame()
-                    if ((loser = gameObjects.Reap()) != null)
-                    {
-                        Notify(loser, Notification.DeathNotice, "YOU DIED");
-                    }
+
                     gameObjects.Frame();
 
                     //string gobj = JsonConvert.SerializeObject(gameObjects); // only for debugging - to check what got serialized
                     await hubContext.Clients.All.UpdateModel(gameObjects);
                     _ = Task.Run(DispatchMessages);
+
 
                     tdiff = DateTime.UtcNow - dt;
                     Thread.Sleep((GameState.FrameInterval - tdiff).Duration()); //this is bad. There should be timer instead

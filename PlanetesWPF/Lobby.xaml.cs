@@ -2,6 +2,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Windows;
+using GameObjects.Model;
 
 namespace PlanetesWPF
 {

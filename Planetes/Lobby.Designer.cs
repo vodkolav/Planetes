@@ -1,4 +1,6 @@
-﻿namespace Planetes
+﻿using GameObjects.Model;
+
+namespace Planetes
 {
     partial class Lobby
     {
@@ -106,7 +108,7 @@
             // 
             // playerBindingSource
             // 
-            this.playerBindingSource.DataSource = typeof(GameObjects.Player);
+            this.playerBindingSource.DataSource = typeof(Player);
             this.playerBindingSource.DataSourceChanged += new System.EventHandler(this.playerBindingSource_DataSourceChanged);
             this.playerBindingSource.ListChanged += new System.ComponentModel.ListChangedEventHandler(this.playerBindingSource_ListChanged);
             // 

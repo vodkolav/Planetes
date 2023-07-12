@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using System.Windows.Media;
+using Newtonsoft.Json;
 using PolygonCollision;
-using System.Windows.Media;
 
-namespace GameObjects
+namespace GameObjects.Model
 {
     [JsonObject(IsReference = true)]
     public class Jet : ICollideable
