@@ -1,5 +1,6 @@
 ﻿
 using Newtonsoft.Json;
+using System.Windows.Media;
 
 namespace PolygonCollision
 {
@@ -11,7 +12,7 @@ namespace PolygonCollision
 
         }
 
-        public Rectangle(Vector origin, Vector size)
+        public Rectangle(Vector origin, Size size)
         {
             Origin = origin;
             Size = size;
@@ -20,11 +21,11 @@ namespace PolygonCollision
         public Rectangle(float ox, float oy, float sx, float sy)
         {
             Origin = new Vector(ox, oy);
-            Size = new Vector(sx, sy);
+            Size = new Size(sx, sy);
         }
 
         public  Vector Origin { get; set; }
-        public  Vector Size { get; set; }
+        public  Size Size { get; set; }
         [JsonIgnore]
         public float Left {  get { return Origin.X; }  }
         [JsonIgnore]
@@ -42,6 +43,16 @@ namespace PolygonCollision
                 && Top < bcirc.Pos.Y + bcirc.R && bcirc.Pos.Y - bcirc.R < Bottom)
                 return PolygonCollisionResult.yesCollision;
             else return PolygonCollisionResult.noCollision;
+        }
+
+        public void Clear()
+        {
+            DrawingContext.GraphicsContainer.Clear();
+        }
+
+        public void Draw(Color color)
+        {
+            DrawingContext.GraphicsContainer.FillRectangle(color, this);
         }
 
         public void Offset(Vector ofst)

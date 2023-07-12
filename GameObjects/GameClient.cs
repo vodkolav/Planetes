@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using PolygonCollision;
 using Microsoft.AspNet.SignalR.Client.Transports;
+using System.IO;
 
 namespace GameObjects
 {
@@ -31,18 +32,24 @@ namespace GameObjects
 
         DateTime StartTime { get; set; }
 
-        // StreamWriter writer;
+        StreamWriter writer;
 
         public GameClient(IUI owner)
         {
             UI = owner;
         }
 
-        public async void joinNetworkGame(string URL, Vector windowSize)
+        public async void joinNetworkGame(string URL, Size windowSize)
         {
             try
             {
                 Conn = new HubConnection(URL);
+
+                // use this code to investigate problems when signalR ceases to receive model updates from server
+                Conn.TraceLevel = TraceLevels.All;
+                writer = new StreamWriter($"..\\..\\ClientLog_{PlayerName}.txt");
+                Conn.TraceWriter = writer;
+
                 Proxy = Conn.CreateHubProxy("GameHub");
                 Proxy.On<GameState>("UpdateModel", updateGameState);
                 Proxy.On<GameState>("UpdateLobby", UpdateLobby);
@@ -55,12 +62,8 @@ namespace GameObjects
                     VisorSize = windowSize
                 };
 
-                await Proxy.Invoke<GameState>("JoinLobby", new object[] { info });
+                await Proxy.Invoke("JoinLobby", new object[] { info });
 
-                 // use this code to investigate problems when signalR ceases to receive model updates from server
-/*               Conn.TraceLevel = TraceLevels.All;
-                 writer = new StreamWriter($"..\\..\\ClientLog_{Me.ID}.txt");                
-                 Conn.TraceWriter = writer;*/
             }
             catch (Exception e)
             {
@@ -135,11 +138,6 @@ namespace GameObjects
 
         public void Draw()
         {
-            //TODO: draw only the objects that are in the ViewPort.
-            // for this i need to replace Collides function with Rectangle.intersect - as it's supposed to be computationally cheaper.
-            /*  Walls = gameState.World.Walls.Where(w => w.Body.Collides(Body, velocity).Intersect).ToList();
-            Players = gameState.players.Where(p => p.Jet.Collides(Body) || p.Bullets.Any(b => Body.Collides(b.Pos))).ToList();
-            Astroids = gameState.Astroids.Where(a => !Body.Collides(a.Body)).ToList(); // TODO: understand why Collides here is supposed to be negated? */
             //Logger.Log("Draw FPS: " + gameObjects.frameNum / (DateTime.Now - StartTime).TotalSeconds, LogLevel.Status);
             //Logger.Log("Me.Pos " + Me.Jet.Pos + " |VP: " + Me.viewPort, LogLevel.Status);
             //Logger.Log("drawing frame " + gameObjects.frameNum, LogLevel.Status);

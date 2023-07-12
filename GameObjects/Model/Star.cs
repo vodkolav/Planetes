@@ -1,6 +1,6 @@
 ﻿using PolygonCollision;
-using System.Drawing;
-using Newtonsoft.Json; //TODO: need this?
+using System.Windows.Media;
+using Newtonsoft.Json;
 
 namespace GameObjects
 {

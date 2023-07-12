@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
@@ -31,7 +32,6 @@ namespace PolygonCollision
             p.Vertices.Add(new Vector(100, 60));
             p.Vertices.Add(new Vector(80, 70));
             p.Vertices.Add(new Vector(50, 70));
-            p.Rotate(20);
             polygons.Add(p);
 
             p = new Polygon();
@@ -56,6 +56,10 @@ namespace PolygonCollision
 
             player = polygons[0];
         }
+    public static PointF asPointF(Vector v)
+                    {
+                        return new PointF(v.X, v.Y);
+                    }
 
         void Form1_Paint(object sender, PaintEventArgs e)
         {
@@ -75,14 +79,15 @@ namespace PolygonCollision
                         p2 = polygon.Vertices[i + 1];
                     }
                     e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                    e.Graphics.DrawLine(new Pen(Color.Black), p1, p2);
-                    e.Graphics.FillPolygon(Brushes.Blue, polygon.PointFs);
+                    e.Graphics.DrawLine(new Pen(Color.Black), asPointF(p1), asPointF(p2));
+                    PointF[] PointFs = polygon.Vertices.ConvertAll(new Converter<Vector, PointF>(asPointF)).ToArray();
+                    e.Graphics.FillPolygon(Brushes.Blue, PointFs);
                 }
             }
 
             int r = 5;
             e.Graphics.DrawEllipse(new Pen(Color.Red), player.Center.X - r, player.Center.Y - r, 2 * r, 2 * r);
-            e.Graphics.DrawLine(new Pen(Color.Black), player.Center, player.Center + player.MTV * 100);
+            e.Graphics.DrawLine(new Pen(Color.Black), asPointF(player.Center), asPointF(player.Center* 100));
             Invalidate();
         }
 

@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using PolygonCollision;
-using System.Drawing;
+using System.Windows.Media;
 
 namespace GameObjects
 {
@@ -9,10 +9,10 @@ namespace GameObjects
     {
         public override Vector Pos { get => Body.Pos; set => Body.Pos = value; }     
         
-        public static int linearSpeed = 20;
+        public static int linearSpeed = GameConfig.bulletSpeed;
 
         public Vector Speed { get => Body.Tail; }
-
+        
         public int Size { get => Body.Size; }       
         
         Ray Body { get; set; }
@@ -24,7 +24,7 @@ namespace GameObjects
         public Bullet(Player owner, Vector pos, Vector speed, int size, Color color)
         {
             Owner = owner;            
-            Body = new Ray(pos, speed, size);
+            Body = new Ray(pos, speed*0.5, size);
             Color = color;
             HasHit = false;
         }   

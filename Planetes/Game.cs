@@ -53,7 +53,7 @@ namespace Planetes
                     }
                 case "joinNetworkGame":
                     {
-                        C.joinNetworkGame($"http://127.0.0.1:2861/", new Vector(pbxWorld.Width, pbxWorld.Height));
+                        C.joinNetworkGame($"http://127.0.0.1:2861/", new PolygonCollision.Size(pbxWorld.Width, pbxWorld.Height));
                         break;
                     }
                 case "SinglePlayer":
@@ -171,37 +171,49 @@ namespace Planetes
         }
 
         #region Piloting
-        private void Game_KeyDown(object sender, KeyEventArgs e)
+
+        private System.Windows.Input.MouseButton toWPF(MouseButtons btn)
         {
+            System.Windows.Input.MouseButton btns;
+            Enum.TryParse(btn.ToString(), out btns);
+            return btns;
+        }
+
+        private System.Windows.Input.Key toWPF(Keys key)
+        {
+            return System.Windows.Input.KeyInterop.KeyFromVirtualKey((int)key);
+        }        
+
+        private void Game_KeyDown(object sender, KeyEventArgs e)
+        {            
             if (C.GameOn)
-                C.Yoke.Press(e.KeyData);
+                C.Yoke.Press(toWPF(e.KeyData));
         }
 
         private void Game_KeyUp(object sender, KeyEventArgs e)
         {
             if (C.GameOn)
-                C.Yoke.Release(e.KeyData);
+                C.Yoke.Release(toWPF(e.KeyData));
         }
 
-
         private void pbxWorld_MouseMove(object sender, MouseEventArgs e)
-        {
+        {            
             if (C.GameOn)
-                C.Yoke.Aim(Vector.FromPoint(e.Location));
+                C.Yoke.Aim( WFGraphicsContainer.Point2Vector(e.Location));
         }
 
         private void pbxWorld_MouseDown(object sender, MouseEventArgs e)
         {
             if (C.GameOn)
             {
-                C.Yoke.Press(e.Button);
+                C.Yoke.Press(toWPF(e.Button));
             }
         }
 
         private void pbxWorld_MouseUp(object sender, MouseEventArgs e)
         {
             if (C.GameOn)
-                C.Yoke.Release(e.Button);
+                C.Yoke.Release(toWPF(e.Button));
         }
 
         private void Game_FormClosing(object sender, FormClosingEventArgs e)
@@ -258,7 +270,7 @@ namespace Planetes
         public async Task joinNetworkGame(string URL)
         {
             Text += " (Client)";
-            C.joinNetworkGame(URL, new Vector(pbxWorld.Width, pbxWorld.Height));
+            C.joinNetworkGame(URL, new PolygonCollision.Size(pbxWorld.Width, pbxWorld.Height));
 
             bool GameStarted = L.OpenLobby_WaitForGuestsAndBegin();
 

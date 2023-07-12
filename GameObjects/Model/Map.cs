@@ -2,7 +2,7 @@
 using PolygonCollision;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
+using System.Windows.Media ;
 using System.IO;
 using System.Linq;
 
@@ -13,14 +13,14 @@ namespace GameObjects
     {
         // TODO: implement spawning region for asteroids and players
 
-        public PolygonCollision.Rectangle Space { get; set; }
+        public Rectangle Space { get; set; }
 
         public List<Wall> Walls { get; set; }
 
         public List<Star> Stars { get; set; }
 
         [JsonIgnore]
-        public Size Size { get { return new Size((int)Space.Size.X,(int)Space.Size.Y); } }
+        public Size Size { get { return Space.Size; } }
 
         public Map()
         {  
@@ -28,7 +28,7 @@ namespace GameObjects
 
         public Map(Size size)
         {
-            Space = new PolygonCollision.Rectangle(0,0, size.Width, size.Height);
+            Space = new Rectangle(0,0, size.Width, size.Height);
             Walls = new List<Wall>();
             Stars = new List<Star>();
             LoadDefault2();
@@ -46,7 +46,7 @@ namespace GameObjects
 
         public void Draw()
         {
-            DrawingContext.GraphicsContainer.Clear();            
+            Space.Clear();
         }
 
         public void MakeStars(int amount)
@@ -55,7 +55,7 @@ namespace GameObjects
 
             Random rand = new Random();
             Stars = Enumerable.Range(0, amount)
-                                         .Select(i => new Tuple<int, Star>(rand.Next(amount), new Star(new Vector(rand.Next(Size.Width), rand.Next(Size.Height)), 2, Color.Aquamarine)))
+                                         .Select(i => new Tuple<int, Star>(rand.Next(amount), new Star(new Vector(rand.Next(Size.Width), rand.Next(Size.Height)), 2, Colors.Aquamarine)))
                                          .OrderBy(i => i.Item1)
                                          .Select(i => i.Item2)
                                          .ToList();
@@ -64,7 +64,7 @@ namespace GameObjects
         public void LoadDefault2()
         {
             Logger.Log("loading map", LogLevel.Info);
-            Color wallBrush = Color.Magenta;
+            Color wallBrush = Colors.Magenta;
 
             int b = 0; //border width
 

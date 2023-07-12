@@ -15,7 +15,7 @@ namespace GameObjects
         public Player P { get; set; }
 
       
-        public Vector Size
+        public Size Size
         {
             get { return Body.Size; }
 
@@ -60,7 +60,7 @@ namespace GameObjects
         {
             velocity = new Vector(0,0);
             P = player;
-            Size = new Vector(800, 600);
+            Size = new Size(800, 600);
         }
 
         internal void Update()
