@@ -1,4 +1,6 @@
-﻿using System.Windows.Media;
+﻿using System;
+using System.Windows.Controls;
+using System.Windows.Media;
 using Newtonsoft.Json;
 using PolygonCollision;
 
@@ -19,14 +21,22 @@ namespace GameObjects.Model
         public Vector Speed { get; set; }
 
         public Vector Acceleration { get; set; }
-
+        
         public float Thrust { get; set; }
 
         public Vector Bearing { get; set; } = new Vector(1, 0);
 
         public Vector Aim { get; set; }
 
-        public Color Color { get; set; }
+        public int Health { get; set; }
+        public int MaxHealth { get; set; }
+        public int Ammo { get; set; }
+        public int MaxAmmo { get; set; }
+
+        public Color Color
+        {
+            get => Owner.Color;
+        }
 
         private Polygon _hull;
         private Polygon _hull_cache;
@@ -63,7 +73,10 @@ namespace GameObjects.Model
 
         public int LastFired { get; set; }
 
+        public bool KeyShoot { get; set; }
+
         public bool KeyBrake { get; set; }
+
         public int Cooldown { get; set; }
 
         public override Circle BoundingCirc { get { return new Circle(Pos, (Gun - Pos).Magnitude); } }
@@ -71,12 +84,16 @@ namespace GameObjects.Model
         [JsonIgnore]
         public override bool HasHit { get => false; set { } }
 
+        public bool isAlive { get; private set; } = true;
+
+        public event MatchEventHandler OnMatchEvent;
+
         public Jet()
         {
             
         }
 
-        public Jet(Player owner, Color color)
+        public Jet(Player owner, int health, int ammo)
         {
             double l = 0.8; 
             Hull = new Polygon(5);
@@ -97,9 +114,13 @@ namespace GameObjects.Model
             Speed = new Vector(0, 0);
             Acceleration = new Vector(0, 0);
             Aim = new Vector(1, 0);
-            Color = color;
             Thrust = GameConfig.Thrust;
             Cooldown = 2;
+
+            Health = health;
+            MaxHealth = health;
+            Ammo = ammo;
+            MaxAmmo = ammo;
         }
 
         public void Offset(Vector by)
@@ -172,7 +193,7 @@ namespace GameObjects.Model
             //TODO: rename speed to velocity
             Speed -= 2 * Speed.Dot(normal) * normal;
         }
-
+        
         public override void Draw()
         {
             Hull.Draw(Color);
@@ -193,6 +214,123 @@ namespace GameObjects.Model
         public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)
         {
             Bounce(-Speed);
+        }
+
+        public void Recharge(int amount)
+        {
+            Ammo = Math.Min(Ammo + (int)amount, MaxAmmo);
+        }
+
+        public void Heal(int amount)
+        {
+            Health = Math.Min(Health + amount, MaxHealth);
+        }
+
+        internal void Hit(ICollideable hitter)
+        {
+            if (Health > hitter.Power)
+                Health -= hitter.Power;
+            else
+                Die(hitter);
+        }
+
+        private void Die(ICollideable hitter)
+        {
+            
+            isAlive = false;
+
+            if (OnMatchEvent != null)
+            {
+                OnMatchEvent(this, new MatchEventArgs(hitter.Owner, Owner,"Killed "));
+            }
+        }
+
+        public virtual void Shoot(GameState gameObjects)
+        {
+            if (KeyShoot)
+            {
+                if (Ammo != 0 && gameObjects.frameNum > LastFired + Cooldown)
+                {
+                    LastFired = gameObjects.frameNum;
+                    Bullet bullet = new Bullet(Owner, Gun, speed: Bearing.GetNormalized() * Bullet.linearSpeed /*+ Speed*/, size: 3, color: Color);
+                    gameObjects.Entities.Add(bullet);
+                    Ammo--;
+                }
+            }
+        }
+
+        public virtual void Press(HOTAS argument)
+        {
+            switch (argument)
+            {
+                case (HOTAS.Up):
+                {
+                    Acceleration.Y = -1;
+                    break;
+                }
+                case (HOTAS.Down):
+                {
+                    Acceleration.Y = 1;
+                    break;
+                }
+                case (HOTAS.Left):
+                {
+                    Acceleration.X = -1;
+                    break;
+                }
+                case (HOTAS.Right):
+                {
+                    Acceleration.X = 1;
+                    break;
+                }
+                case (HOTAS.Shoot):
+                {
+                    KeyShoot = true;
+                    break;
+                }
+                case HOTAS.Brake:
+                {
+                    KeyBrake = true;
+                    break;
+                }
+            }
+        }
+
+        public virtual void Release(HOTAS argument)
+        {
+            switch (argument)
+            {
+                case (HOTAS.Up):
+                {
+                    Acceleration.Y = 0;
+                    break;
+                }
+                case (HOTAS.Down):
+                {
+                    Acceleration.Y = 0;
+                    break;
+                }
+                case (HOTAS.Left):
+                {
+                    Acceleration.X = 0;
+                    break;
+                }
+                case (HOTAS.Right):
+                {
+                    Acceleration.X = 0;
+                    break;
+                }
+                case (HOTAS.Shoot):
+                {
+                    KeyShoot = false;
+                    break;
+                }
+                case HOTAS.Brake:
+                {
+                    KeyBrake = false;
+                    break;
+                }
+            }
         }
     }
 }

@@ -19,7 +19,7 @@ namespace GameObjects.Model
 
         public Color Color { get; set; }
 
-        public int Power { get; set; } = 1;
+        public override int Power { get; internal set; } = 1;
 
         public Bullet(Player owner, Vector pos, Vector speed, int size, Color color)
         {
@@ -50,7 +50,7 @@ namespace GameObjects.Model
         public override void HandleCollision(Jet j, PolygonCollisionResult r)
         {
             HasHit = true;
-            j.Owner.Hit(Power);
+            j.Hit(this);
         }
 
         public override void Draw()

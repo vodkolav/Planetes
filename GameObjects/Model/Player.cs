@@ -7,7 +7,7 @@ using PolygonCollision;
 namespace GameObjects.Model
 {
     public enum Action { Press, Release, Aim, setViewPort }
-    public enum Notification { DeathNotice, Kicked, Message }
+    public enum Notification { DeathNotice, Won, Lost, Respawned, Joined, Kicked, Message }
 
     public struct PlayerInfo
     {
@@ -21,18 +21,12 @@ namespace GameObjects.Model
         public int ID { get; set; }        
         public string ConnectionID { get; set; }
         public string Name { get; set; }
-        public Color Color { get { return Jet.Color; } }
-        public int Health { get; set; }
-        public int MaxHealth { get; set; }
-        public int Ammo { get; set; }
-        public int MaxAmmo { get; set; }        
-
+        public Color Color { get; set; }
+        
         public List<Player> Enemies { get; set; }
         public Jet Jet { get; set; }
 
-        public Vector Acceleration;
-        public bool KeyShoot { get; set; }
-
+        
         [JsonIgnore]
         public GameState gameState { get; set; }
         [JsonIgnore]
@@ -40,8 +34,7 @@ namespace GameObjects.Model
 
         public ViewPort viewPort { get; set; }
 
-        public bool isAlive { get; private set; } = true;
-
+        
         public void Act(Tuple<Action, HOTAS> instruction)
         {
             if (Name == "WPFplayer")
@@ -78,15 +71,12 @@ namespace GameObjects.Model
             ID = id;
             ConnectionID = connectionid;
             Name = Info.PlayerName;
-            Health = health;
-            MaxHealth = health;
-            Ammo = ammo;
-            MaxAmmo = ammo;
-            Jet = new Jet(this, color);
+            Color = color;
+            Jet = new Jet(this, health, ammo);
             Enemies = new List<Player>();
             gameState = game;
-            Acceleration = new Vector();
             viewPort = new ViewPort(this);
+            Jet.OnMatchEvent += gameState.Match.MatchEvent;
             setViewPort(Info.VisorSize);
             MapActions();
         }
@@ -124,90 +114,14 @@ namespace GameObjects.Model
             }
         }
 
-        public void Recharge(int amount)
-        {
-            Ammo = Math.Min(Ammo + (int)amount, MaxAmmo);
-        }
-
-        public void Heal(int amount)
-        {
-            Health = Math.Min(Health + amount, MaxHealth);
-        }
-
         public virtual void Steer(object argument)
         {
-            switch ((HOTAS)argument)
-            {
-                case (HOTAS.Up):
-                    {
-                        Acceleration.Y = -1;
-                        break;
-                    }
-                case (HOTAS.Down):
-                    {
-                        Acceleration.Y = 1;
-                        break;
-                    }
-                case (HOTAS.Left):
-                    {
-                        Acceleration.X = -1;
-                        break;
-                    }
-                case (HOTAS.Right):
-                    {
-                        Acceleration.X = 1;
-                        break;
-                    }
-                case (HOTAS.Shoot):
-                    {
-                        KeyShoot = true;
-                        break;
-                    }
-                case HOTAS.Brake:
-                    {
-                        Jet.KeyBrake = true;
-                        break;
-                    }
-            }
-            Jet.Acceleration = Acceleration;
+            Jet.Press((HOTAS)argument);
         }
 
         public virtual void Release(object argument)
         {
-            switch ((HOTAS)argument)
-            {
-                case (HOTAS.Up):
-                    {
-                        Acceleration.Y = 0;
-                        break;
-                    }
-                case (HOTAS.Down):
-                    {
-                        Acceleration.Y = 0;
-                        break;
-                    }
-                case (HOTAS.Left):
-                    {
-                        Acceleration.X = 0;
-                        break;
-                    }
-                case (HOTAS.Right):
-                    {
-                        Acceleration.X = 0;
-                        break;
-                    }
-                case (HOTAS.Shoot):
-                    {
-                        KeyShoot = false;
-                        break;
-                    }
-                case HOTAS.Brake:
-                    {
-                        Jet.KeyBrake = false;
-                        break;
-                    }
-            }
-            Jet.Acceleration = Acceleration;
+            Jet.Release((HOTAS)argument);
         }
 
         public virtual void Aim(object argument)
@@ -217,25 +131,7 @@ namespace GameObjects.Model
 
         public virtual void Shoot(GameState gameObjects)
         {
-            if (KeyShoot)
-            {
-                if (Ammo != 0 && gameObjects.frameNum > Jet.LastFired + Jet.Cooldown)
-                {
-                    Jet.LastFired = gameObjects.frameNum;
-                    Bullet bullet = new Bullet(this, Jet.Gun, speed: Jet.Bearing.GetNormalized() * Bullet.linearSpeed /*+ Speed*/, size: 3, color: Color);
-                    gameObjects.Entities.Add(bullet);
-                    Ammo--;
-                }
-            }
-        }
-
-        internal void Hit(int points)
-        {
-            if (Health > points)
-                Health -= points;
-            else
-                isAlive = false;
-
+            Jet.Shoot(gameObjects);
         }
     }
 }

@@ -19,6 +19,8 @@ namespace GameObjects.Model
 
         public virtual Circle BoundingCirc { get { return new Circle(Pos, 10); }}
 
+        public virtual int Power { get; internal set; } = 0;
+
         public virtual PolygonCollisionResult Collides(Wall w)
         {
             return w.Body.Collides(Pos);

@@ -10,19 +10,34 @@ namespace GameObjects.Model
     public class Astroid : ICollideable
     {
         [JsonIgnore]
-        public float Size { get { return Body.R * 2; } }
+        public float Size
+        {
+            get { return Body.R * 2; }
+        }
+
         public Circle Body { get; set; }
         public Vector Speed { get; set; }
 
         [JsonIgnore]
-        public override Circle BoundingCirc { get { return Body; } }
+        public override Circle BoundingCirc
+        {
+            get { return Body; }
+        }
 
         [JsonIgnore]
-        public override Vector Pos { get { return Body.Pos; } set { Body.Pos = value; } }
+        public override Vector Pos
+        {
+            get { return Body.Pos; }
+            set { Body.Pos = value; }
+        }
+
         public AstType Type { get; set; }
         public override Player Owner { get; set; }
 
-        public void TossType(Random random)
+        public override int Power {  get {return (int)Size; }
+    }
+
+    public void TossType(Random random)
         {
             switch (random.Next(10))
             {
@@ -109,14 +124,14 @@ namespace GameObjects.Model
             HasHit = true;
             if (Type == AstType.Ammo)
             {
-                j.Owner.Recharge((int)Size);
+                j.Recharge((int)Size);
             }
             else if (Type == AstType.Health)
             {
-                j.Owner.Heal(1);
+                j.Heal(1);
             }
             else
-                j.Owner.Hit((int)Size);
+                j.Hit(this);
         }
 
         public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)

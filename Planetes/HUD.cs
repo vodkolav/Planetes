@@ -20,8 +20,8 @@ namespace Planetes
             C = game;
             playerID = p.ID;
             lblName.Text = p.Name;
-            pbAmmo.Maximum = p.MaxAmmo;
-            pbHlth.Maximum = p.MaxHealth;
+            pbAmmo.Maximum = p.Jet.MaxAmmo;
+            pbHlth.Maximum = p.Jet.MaxHealth;
             Visible = true;
             BackColor = WFGraphicsContainer.ConvertColor(p.Jet.Color);
         }
@@ -40,10 +40,10 @@ namespace Planetes
                         lblAccX.Text = playerstate.Jet.Acceleration.X.ToString("N2");
                         lblAccY.Text = playerstate.Jet.Acceleration.Y.ToString("N2");
 
-                        pbHlth.Value = playerstate.Health;
-                        lblHealth.Text = "Health: " + playerstate.Health;
-                        pbAmmo.Value = playerstate.Ammo;
-                        lblAmmo.Text = "Ammo: " + playerstate.Ammo;
+                        pbHlth.Value = playerstate.Jet.Health;
+                        lblHealth.Text = "Health: " + playerstate.Jet.Health;
+                        pbAmmo.Value = playerstate.Jet.Ammo;
+                        lblAmmo.Text = "Ammo: " + playerstate.Jet.Ammo;
                     }
             }
             catch (Exception e)
