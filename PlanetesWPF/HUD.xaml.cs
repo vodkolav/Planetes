@@ -40,9 +40,9 @@ namespace PlanetesWPF
                 if (playerstate != null)
                     lock (C.gameObjects)
                     {
-                        lblSpeed.Content = playerstate.Jet.Speed.ToString();
+                        lblSpeed.Content = "Speed: " + playerstate.Jet.Speed.ToString();
 
-                        lblAcc.Content = playerstate.Jet.Acceleration.X.ToString();
+                        lblAcc.Content = "Acc:" + playerstate.Jet.Acceleration.X.ToString();
 
                         pbHealth.Value = playerstate.Jet.Health;
                         lblHealth.Content = "Health: " + playerstate.Jet.Health;

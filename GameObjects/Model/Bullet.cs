@@ -26,7 +26,7 @@ namespace GameObjects.Model
             Owner = owner;            
             Body = new Ray(pos, speed*0.5, size);
             Color = color;
-            HasHit = false;
+            isAlive = true;
         }   
 
         public override PolygonCollisionResult Collides(Astroid a)
@@ -49,13 +49,13 @@ namespace GameObjects.Model
 
         public override void HandleCollision(Jet j, PolygonCollisionResult r)
         {
-            HasHit = true;
+            isAlive = false;
             j.Hit(this);
         }
 
         public override void Draw()
         {
-            if (!HasHit)
+            if (isAlive)
             {
                 Body.Draw(Color);
             }
@@ -73,7 +73,7 @@ namespace GameObjects.Model
 
         public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)
         {
-            HasHit = true;
+            isAlive = false;
         }
     }
 }

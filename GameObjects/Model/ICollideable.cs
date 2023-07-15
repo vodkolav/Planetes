@@ -15,7 +15,7 @@ namespace GameObjects.Model
 
         public virtual Vector Pos { get; set; }
 
-        public virtual bool HasHit { get; set; }
+        public virtual bool isAlive { get; set; }
 
         public virtual Circle BoundingCirc { get { return new Circle(Pos, 10); }}
 
@@ -40,7 +40,7 @@ namespace GameObjects.Model
 
         public virtual void HandleCollision(Wall w, PolygonCollisionResult r)
         {
-            HasHit = true;
+            isAlive = false;
         }
 
         public virtual PolygonCollisionResult Collides(Jet j)
@@ -50,7 +50,7 @@ namespace GameObjects.Model
 
         public virtual void HandleCollision(Jet j, PolygonCollisionResult r)
         {
-            HasHit = true;
+            isAlive = false;
         }
 
         public virtual PolygonCollisionResult Collides(Astroid a)
@@ -62,8 +62,8 @@ namespace GameObjects.Model
 
         public virtual void HandleCollision(Astroid a, PolygonCollisionResult r)
         {
-            HasHit = true;
-            a.HasHit = true;
+            isAlive = false;
+            a.isAlive = false;
         }
 
         public float Dist(ICollideable a)

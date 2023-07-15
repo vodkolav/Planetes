@@ -78,7 +78,7 @@ namespace GameObjects.Model
             Vector mult = new Vector((float)Math.Cos(Angle), (float)Math.Sin(Angle));
             Speed = mult * linearSpeed;
             TossType(random);
-            HasHit = false;
+            isAlive = true;
         }
 
         public Astroid()
@@ -88,7 +88,7 @@ namespace GameObjects.Model
 
         public override void Draw()
         {
-            if (!HasHit)
+            if (isAlive)
             {
                 Body.Draw(Color);
             }
@@ -121,7 +121,7 @@ namespace GameObjects.Model
 
         public override void HandleCollision(Jet j, PolygonCollisionResult r)
         {
-            HasHit = true;
+            isAlive = false;
             if (Type == AstType.Ammo)
             {
                 j.Recharge((int)Size);
@@ -136,7 +136,7 @@ namespace GameObjects.Model
 
         public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)
         {
-                HasHit = true;
+                isAlive = false;
         }
     }
 }

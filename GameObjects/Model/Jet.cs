@@ -82,11 +82,12 @@ namespace GameObjects.Model
         public override Circle BoundingCirc { get { return new Circle(Pos, (Gun - Pos).Magnitude); } }
 
         [JsonIgnore]
-        public override bool HasHit { get => false; set { } }
+        public override bool isAlive
+        {
+            get => Owner.isAlive;
+        }
 
-        public bool isAlive { get; private set; } = true;
 
-        public event MatchEventHandler OnMatchEvent;
 
         public Jet()
         {
@@ -236,13 +237,7 @@ namespace GameObjects.Model
 
         private void Die(ICollideable hitter)
         {
-            
-            isAlive = false;
-
-            if (OnMatchEvent != null)
-            {
-                OnMatchEvent(this, new MatchEventArgs(hitter.Owner, Owner,"Killed "));
-            }
+            Owner.MatchEvent(hitter);
         }
 
         public virtual void Shoot(GameState gameObjects)
@@ -328,6 +323,8 @@ namespace GameObjects.Model
                 case HOTAS.Brake:
                 {
                     KeyBrake = false;
+                    Acceleration.X = 0;
+                    Acceleration.Y = 0;
                     break;
                 }
             }
