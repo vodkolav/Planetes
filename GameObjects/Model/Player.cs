@@ -26,7 +26,12 @@ namespace GameObjects.Model
         public List<Player> Enemies { get; set; }
         public Jet Jet { get; set; }
 
-        
+        public event MatchEventHandler OnMatchEvent;
+
+        public int DeathTime { get; set; } = 0;
+
+        public bool isAlive { get; set; } = true;
+
         [JsonIgnore]
         public GameState gameState { get; set; }
         [JsonIgnore]
@@ -34,7 +39,14 @@ namespace GameObjects.Model
 
         public ViewPort viewPort { get; set; }
 
-        
+        public void MatchEvent(ICollideable killer)
+        {
+            if (OnMatchEvent != null)
+            {
+                OnMatchEvent(this, new MatchEventArgs(killer.Owner, this, " Killed "));
+            }
+        }
+
         public void Act(Tuple<Action, HOTAS> instruction)
         {
             if (Name == "WPFplayer")
@@ -76,7 +88,6 @@ namespace GameObjects.Model
             Enemies = new List<Player>();
             gameState = game;
             viewPort = new ViewPort(this);
-            Jet.OnMatchEvent += gameState.Match.MatchEvent;
             setViewPort(Info.VisorSize);
             MapActions();
         }
@@ -116,22 +127,26 @@ namespace GameObjects.Model
 
         public virtual void Steer(object argument)
         {
-            Jet.Press((HOTAS)argument);
+            if (isAlive)
+                Jet.Press((HOTAS)argument);
         }
 
         public virtual void Release(object argument)
         {
-            Jet.Release((HOTAS)argument);
+            if (isAlive)
+                Jet.Release((HOTAS)argument);
         }
 
         public virtual void Aim(object argument)
         {
-            Jet.Aim = (Vector)argument - (viewPort.Size * .5);
+            if (isAlive)
+                Jet.Aim = (Vector)argument - (viewPort.Size * .5);
         }
 
         public virtual void Shoot(GameState gameObjects)
         {
-            Jet.Shoot(gameObjects);
+            if (isAlive)
+                Jet.Shoot(gameObjects);
         }
     }
 }

@@ -30,7 +30,7 @@ namespace GameObjects.Model
 
         [JsonProperty(ItemTypeNameHandling = TypeNameHandling.Auto)]
         public List<ICollideable> Entities { get; set; }
-
+        
         public Map World { get; set; }
 
         public bool ShouldSerializeWorld()
@@ -51,6 +51,12 @@ namespace GameObjects.Model
             World = new Map(worldSize);
             Players = new List<Player>();
             frameNum = 0;
+        }
+        
+        public void Start()
+        {
+            GameOn = true;
+            StartTime = DateTime.Now;
         }
 
         public void Frame()
@@ -121,24 +127,12 @@ namespace GameObjects.Model
                     }
                 }
 
-                Entities.RemoveAll(b => b.HasHit);
+                Entities.RemoveAll(b => !b.isAlive);
 
                 //Spawn asteroid after timeout
                 if (frameNum % GameConfig.AsteroidTimeout == 0)
                 {
                     Entities.Add(new Astroid(World.Size));
-                }
-            }
-        }
-
-        public void InitFeudingParties()
-        {
-            //simplest case: Free-For-All (All-Against-All)
-            foreach (Player p1 in Players)
-            {
-                foreach (Player p2 in Players)
-                {
-                    p1.FeudWith(p2);
                 }
             }
         }

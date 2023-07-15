@@ -20,8 +20,8 @@
         <Label x:Name="lblName" Content="Name: " HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" FontSize="9" Height="21" Background="#FFF0AD37"/>
         <Label x:Name="lblAmmo" Content="Ammo: 1000" HorizontalAlignment="Left" Margin="10,57,0,0" VerticalAlignment="Top" FontSize="9" Height="21" Background="#FFF0AD37"/>
         <ProgressBar x:Name="pbAmmo" HorizontalAlignment="Left" Height="21" Margin="75,57,0,0" VerticalAlignment="Top" Width="115"/>
-        <Label x:Name="lblSpeed" Content="Speed" HorizontalAlignment="Left" Margin="10,83,0,0" VerticalAlignment="Top" FontSize="9" Height="21" Width="42" Background="#FFF0AD37"/>
-        <Label x:Name="lblAcc" Content="Acc" HorizontalAlignment="Left" Margin="98,83,0,0" VerticalAlignment="Top" FontSize="9" Height="21" Width="42" Background="#FFF0AD37"/>
+        <Label x:Name="lblSpeed" Content="Speed" HorizontalAlignment="Left" Margin="10,83,0,0" VerticalAlignment="Top" FontSize="9" Height="21" Width="84" Background="#FFF0AD37"/>
+        <Label x:Name="lblAcc" Content="Acc" HorizontalAlignment="Left" Margin="99,84,0,0" VerticalAlignment="Top" FontSize="9" Height="21" Width="91" Background="#FFF0AD37"/>
 
     </Grid>
 </UserControl>

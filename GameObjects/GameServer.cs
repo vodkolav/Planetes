@@ -32,6 +32,8 @@ namespace GameObjects
 
         public GameState gameObjects { get; set; }
 
+        public Match Match { get; set; }
+
         public List<Bot> Bots { get; set; }
 
         //the Tuple holds: int ids of player to send message to, enum Notification type, and string the message
@@ -166,11 +168,11 @@ namespace GameObjects
 
         public void Start()
         {
-            gameObjects.InitFeudingParties();
-            gameObjects.StartTime = DateTime.Now;
+            gameObjects.Start();
             thrdGameLoop.Start();
+            Match = new Match(gameObjects);
+            Match.InitFeudingParties();
             Logger.Log("Fight!", LogLevel.Info);
-            gameObjects.GameOn = true;
             hubContext.Clients.All.Start();
         }
 
@@ -231,6 +233,7 @@ namespace GameObjects
 
 
                     gameObjects.Frame();
+                    Match.CheckGame(this);
 
                     //string gobj = JsonConvert.SerializeObject(gameObjects); // only for debugging - to check what got serialized
                     await hubContext.Clients.All.UpdateModel(gameObjects);

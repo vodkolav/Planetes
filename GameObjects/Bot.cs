@@ -56,7 +56,10 @@ namespace GameObjects
         {
             get
             {
-                return gameObjects.Astroids.Aggregate((curMin, x) => curMin == null ||Jet.Dist(x) < Jet.Dist(curMin) ? x : curMin);
+                if (gameObjects.Astroids.Any())
+                    return gameObjects.Astroids.Aggregate((curMin, x) =>
+                        curMin == null || Jet.Dist(x) < Jet.Dist(curMin) ? x : curMin);
+                else return null;
             }
         }
 
@@ -191,18 +194,22 @@ namespace GameObjects
             {
                 //asteroid evasion tactic
                 Astroid astClosest = ClosestAsteroid;
-
-                if (astClosest.Pos.X - astClosest.Size * 10 < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X && astClosest.Type == AstType.Rubble)
+                if (astClosest != null)
                 {
-                    Press(HOTAS.Left);
-                }
-                else if (astClosest.Pos.X < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X + astClosest.Size * 10 && astClosest.Type == AstType.Rubble)
-                {
-                    Press(HOTAS.Right);
-                }
-                else
-                {
-                    Release(HOTAS.Right);
+                    if (astClosest.Pos.X - astClosest.Size * 10 < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X &&
+                        astClosest.Type == AstType.Rubble)
+                    {
+                        Press(HOTAS.Left);
+                    }
+                    else if (astClosest.Pos.X < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X + astClosest.Size * 10 &&
+                             astClosest.Type == AstType.Rubble)
+                    {
+                        Press(HOTAS.Right);
+                    }
+                    else
+                    {
+                        Release(HOTAS.Right);
+                    }
                 }
             }
             catch (Exception e)
@@ -285,23 +292,29 @@ namespace GameObjects
             try
             {
                 //asteroid evasion tactic
-
-                if (ClosestAsteroid.Pos.X - ClosestAsteroid.Size * 10 < Jet.Pos.X && Jet.Pos.X < ClosestAsteroid.Pos.X && ClosestAsteroid.Type == AstType.Rubble)
+                Astroid astClosest = ClosestAsteroid;
+                if (astClosest != null)
                 {
-                    Press(HOTAS.Left);
-                }
-                else if (ClosestAsteroid.Pos.X < Jet.Pos.X && Jet.Pos.X < ClosestAsteroid.Pos.X + ClosestAsteroid.Size * 10 && ClosestAsteroid.Type == AstType.Rubble)
-                {
-                    Press(HOTAS.Right);
-                }
-                else
-                {
-                    Release(HOTAS.Right);
+                    if (astClosest.Pos.X - astClosest.Size * 10 < Jet.Pos.X &&
+                        Jet.Pos.X < astClosest.Pos.X && astClosest.Type == AstType.Rubble)
+                    {
+                        Press(HOTAS.Left);
+                    }
+                    else if (astClosest.Pos.X < Jet.Pos.X &&
+                             Jet.Pos.X < astClosest.Pos.X + astClosest.Size * 10 &&
+                             astClosest.Type == AstType.Rubble)
+                    {
+                        Press(HOTAS.Right);
+                    }
+                    else
+                    {
+                        Release(HOTAS.Right);
+                    }
                 }
             }
             catch (Exception e)
             {
-                Logger.Log(e, LogLevel.Debug);
+                Logger.Log(e, LogLevel.Warning);
             }
 
             try

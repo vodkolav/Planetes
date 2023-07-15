@@ -95,7 +95,7 @@ namespace GameObjects
 
         public void Notify(Notification type, string message)
         {
-
+            Logger.Log(message, LogLevel.Info);
             switch (type)
             {
                 case Notification.DeathNotice:
@@ -119,7 +119,6 @@ namespace GameObjects
 
         protected virtual void Die(string message)
         {
-            Yoke.unbind();
             UI.AnnounceDeath(message);
         }
 
