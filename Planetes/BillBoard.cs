@@ -1,23 +1,22 @@
-﻿using System;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
+using System.Drawing;
 
 namespace Planetes
 {
     public partial class BillBoard : Form
     {  
-        public BillBoard(Form owner): this()
-        {
-            Owner = owner;            
-        }
-        public BillBoard()
+        public BillBoard(Form owner)
         {
             InitializeComponent();
+            StartPosition = FormStartPosition.CenterParent;
+            Owner = owner;            
         }
 
         internal void Show(IWin32Window game, string message)
         {
-            Show(game);
             Text = message;
+            Location = Owner.Location + new Size(50, 50);
+            Show(game);
         }
     }
 }

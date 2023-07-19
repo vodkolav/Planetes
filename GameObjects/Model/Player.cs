@@ -7,8 +7,8 @@ using PolygonCollision;
 namespace GameObjects.Model
 {
     public enum Action { Press, Release, Aim, setViewPort }
-    public enum Notification { DeathNotice, Won, Lost, Respawned, Joined, Kicked, Message }
-
+    public enum Notification { Joined, Kicked, Death, Respawn, Won, Lost, Message }
+     
     public struct PlayerInfo
     {
         public string PlayerName { get; set; } 
@@ -22,7 +22,7 @@ namespace GameObjects.Model
         public string ConnectionID { get; set; }
         public string Name { get; set; }
         public Color Color { get; set; }
-        
+      
         public List<Player> Enemies { get; set; }
         public Jet Jet { get; set; }
 
@@ -82,7 +82,7 @@ namespace GameObjects.Model
         {
             ID = id;
             ConnectionID = connectionid;
-            Name = Info.PlayerName;
+            Name = GameConfig.GetColorName(color) + "_" + Info.PlayerName;
             Color = color;
             Jet = new Jet(this, health, ammo);
             Enemies = new List<Player>();

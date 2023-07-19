@@ -332,6 +332,19 @@ namespace Planetes
             }           
         }
 
+
+        public void AnnounceRespawn(string message)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action<string>(AnnounceRespawn), message);
+            }
+            else
+            {
+                Billboard.Hide();
+            }
+        }
+
         public void CloseLobby()
         {
             L.Close();

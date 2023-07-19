@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Linq;
+using System.Reflection;
 using System.Windows.Media;
 using PolygonCollision;
 
@@ -52,6 +54,15 @@ namespace GameObjects
                 }
             }
         }
+
+        public static string GetColorName(Color col)
+        {
+            PropertyInfo colorProperty = typeof(Colors).GetProperties()
+                .FirstOrDefault(p => Color.AreClose((Color)p.GetValue(null), col));
+            return colorProperty != null ? colorProperty.Name : "unnamed color";
+
+        }
+
         internal static void ReturnColor(Color color)
         {
             _colors.Add(color);

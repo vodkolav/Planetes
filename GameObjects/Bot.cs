@@ -45,10 +45,10 @@ namespace GameObjects
             {
                 if (Me != null)
                 {
-                    return Me.Enemies.Aggregate((curMin, x) => curMin == null || (Jet.Dist(x.Jet)) < Jet.Dist(curMin.Jet) ? x : curMin);
+                    return Me.Enemies.Aggregate((curMin, x) =>
+                        curMin == null || (Jet.Dist(x.Jet)) < Jet.Dist(curMin.Jet) ? x : curMin);
                 }
-                else
-                { return null; }
+                return null;
             }
         }
 
@@ -59,7 +59,7 @@ namespace GameObjects
                 if (gameObjects.Astroids.Any())
                     return gameObjects.Astroids.Aggregate((curMin, x) =>
                         curMin == null || Jet.Dist(x) < Jet.Dist(curMin) ? x : curMin);
-                else return null;
+                return null;
             }
         }
 
@@ -120,7 +120,14 @@ namespace GameObjects
                     dt = DateTime.UtcNow;
                     //TODO: cancel the call of this function if it takes longer than ReactionInterval 
                     //https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/cancel-async-tasks-after-a-period-of-time
-                    FrameReact();
+                    lock (gameObjects)
+                    {
+                        if (Me.isAlive)
+                        {
+                            Logger.Log(Me.Name + " reacting to frame " + gameObjects.frameNum, LogLevel.Info);
+                            FrameReact();
+                        }
+                    }
                     tdiff = DateTime.UtcNow - dt;
                     Thread.Sleep(ReactionInterval - tdiff);//this is bad. There should be timer instead
 
@@ -135,7 +142,7 @@ namespace GameObjects
 
         protected sealed override void Die(string message)
         {
-            computer.Join();
+            //computer.Join();
             base.Die(message);
         }
 
@@ -244,30 +251,32 @@ namespace GameObjects
             //aiming at opponent tactic
 
             Player EnemyClosest = ClosestEnemy;
+            if (EnemyClosest != null)
+            {
+                Aim(EnemyClosest.Jet.Pos);
+                if (Jet.Pos.Y < EnemyClosest.Jet.Pos.Y - 50)
+                {
 
-            Aim(EnemyClosest.Jet.Pos);
-            if (Jet.Pos.Y < EnemyClosest.Jet.Pos.Y - 50)
-            {
+                    Press(HOTAS.Down);
+                }
+                else if (Jet.Pos.Y > EnemyClosest.Jet.Pos.Y + 50)
+                {
+                    Press(HOTAS.Up);
+                }
+                else
+                {
+                    Release(HOTAS.Up);
+                }
 
-                Press(HOTAS.Down);
-            }
-            else if (Jet.Pos.Y > EnemyClosest.Jet.Pos.Y + 50)
-            {
-                Press(HOTAS.Up);
-            }
-            else
-            {
-                Release(HOTAS.Up);
-            }
-
-            //shoot at opponent tactic
-            if ((Jet.Pos - EnemyClosest.Jet.Pos).Magnitude < 300)
-            {
-                Press(HOTAS.Shoot);
-            }
-            else
-            {
-                Release(HOTAS.Shoot);
+                //shoot at opponent tactic
+                if ((Jet.Pos - EnemyClosest.Jet.Pos).Magnitude < 300)
+                {
+                    Press(HOTAS.Shoot);
+                }
+                else
+                {
+                    Release(HOTAS.Shoot);
+                }
             }
         }
     }
@@ -321,18 +330,20 @@ namespace GameObjects
             {
                 //bullet evasion tactic (not good yet)
                 Bullet bulClosest = ClosestBullet;
-
-                if (bulClosest.Pos.Y > Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
+                if (bulClosest != null)
                 {
-                    Press(HOTAS.Up);
-                }
-                else if (bulClosest.Pos.Y < Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
-                {
-                    Press(HOTAS.Down);
-                }
-                else
-                {
-                    Release(HOTAS.Up);
+                    if (bulClosest.Pos.Y > Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
+                    {
+                        Press(HOTAS.Up);
+                    }
+                    else if (bulClosest.Pos.Y < Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
+                    {
+                        Press(HOTAS.Down);
+                    }
+                    else
+                    {
+                        Release(HOTAS.Up);
+                    }
                 }
             }
             catch (Exception e)
@@ -414,20 +425,24 @@ namespace GameObjects
 
 
             Press(HOTAS.Left);
-            Aim(ClosestEnemy.Jet.Pos);
-
-            if (Me.Jet.Pos.Dist(ClosestEnemy.Jet.Pos) < 200)
+            Player enemyClosest = ClosestEnemy;
+            if (enemyClosest != null)
             {
-                Press(HOTAS.Shoot);
-            }
-            else
-            {
-                Release(HOTAS.Shoot);
-            }
+                Aim(enemyClosest.Jet.Pos);
 
-            memory["count"] = count;
-            memory["direction"] = direction;
-            memory["amShooting"] = amShooting;
+                if (Me.Jet.Pos.Dist(ClosestEnemy.Jet.Pos) < 200)
+                {
+                    Press(HOTAS.Shoot);
+                }
+                else
+                {
+                    Release(HOTAS.Shoot);
+                }
+
+                memory["count"] = count;
+                memory["direction"] = direction;
+                memory["amShooting"] = amShooting;
+            }
         }
     }
 }

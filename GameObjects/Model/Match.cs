@@ -36,7 +36,7 @@ namespace GameObjects.Model
     {
         private int KillsGoal { get; set; } = 500;
 
-        public int RespawnTime { get; set; } = 400;
+        public int RespawnTime { get; set; } = 200;
 
         private Dictionary<int,Stat> stats { get; set; }// int is Player.ID 
         
@@ -59,7 +59,6 @@ namespace GameObjects.Model
 
         internal void Respawn(Player player)
         {
-            Logger.Log($"respawning player {player.Name}", LogLevel.Info);
             player.Jet = new Jet(player, GameConfig.StartingHP, GameConfig.StartingAmmo);
             player.isAlive = true;
             gameObjects.Entities.Add(player.Jet);
@@ -81,6 +80,7 @@ namespace GameObjects.Model
                 stats.Add(player.ID,new Stat());
                 player.OnMatchEvent += MatchEvent;
             }
+            Logger.Log("creating match",LogLevel.Nothing);
         }
 
         public void InitFeudingParties()
@@ -105,15 +105,16 @@ namespace GameObjects.Model
                     int tillRespawn = player.DeathTime + RespawnTime - gameObjects.frameNum;
                     if (tillRespawn > 0)
                     {
-                        if (tillRespawn % 100 == 0)
+                        if (tillRespawn % 10 == 0)
                         {
-                            s.Notify(player, Notification.DeathNotice,
+                            s.Notify(player, Notification.Death,
                                 $" {player.Name} is DEAD. He will respawn in {tillRespawn} frames");
                         }
                     }
                     else
                     {
                         Respawn(player);
+                        s.Notify(player, Notification.Respawn, $"respawning player {player.Name}");
                     }
                 }
             }

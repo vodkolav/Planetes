@@ -27,6 +27,8 @@ namespace PlanetesWPF
 
         public WriteableBitmap B { get; set; }
 
+        public Billboard BB { get; set; }
+
         public RecorderController RC { get; set; }
 
         public string PlayerName = "WPFplayer";
@@ -36,7 +38,8 @@ namespace PlanetesWPF
             InitializeComponent();
             C = new GameClient(this);
             C.PlayerName = PlayerName;
-            L = new Lobby(this);           
+            L = new Lobby(this);
+            BB = new Billboard();
         }
 
         /// <summary>
@@ -88,9 +91,18 @@ namespace PlanetesWPF
 
         public void AnnounceDeath(string message)
         {
-            Billboard B = new Billboard();
-            B.Show();
-            Logger.Log(message,LogLevel.Info);
+            Dispatcher.Invoke(() =>
+            {
+                BB.Show(this,message);
+            });
+        }
+
+        public void AnnounceRespawn(string message)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                BB.Hide();
+            });
         }
 
         public void bindHUDS()

@@ -18,6 +18,8 @@ namespace GameObjects
 
         void AnnounceDeath(string message);
 
+        void AnnounceRespawn(string message);
+
         Task LeaveLobby();
 
         void CloseLobby();

@@ -31,15 +31,13 @@ namespace GameObjects
 
         public bool GameOn { get { return gameObjects != null && gameObjects.GameOn; } }
 
-        DateTime StartTime { get; set; }
-
         StreamWriter writer;
 
         public GameClient(IUI owner)
         {
             UI = owner;
         }
-
+        
         public async void joinNetworkGame(string URL, Size windowSize)
         {
             try
@@ -47,9 +45,9 @@ namespace GameObjects
                 Conn = new HubConnection(URL);
 
                 // use this code to investigate problems when signalR ceases to receive model updates from server
-                Conn.TraceLevel = TraceLevels.All;
+                /*Conn.TraceLevel = TraceLevels.All;
                 writer = new StreamWriter($"..\\..\\ClientLog_{PlayerName}.txt");
-                Conn.TraceWriter = writer;
+                Conn.TraceWriter = writer;*/
 
                 Proxy = Conn.CreateHubProxy("GameHub");
                 Proxy.On<GameState>("UpdateModel", updateGameState);
@@ -98,23 +96,33 @@ namespace GameObjects
             Logger.Log(message, LogLevel.Info);
             switch (type)
             {
-                case Notification.DeathNotice:
-                    {
-                        Die(message);
-                        break;
-                    }
+                case Notification.Death:
+                {
+                    Die(message);
+                    break;
+                }
+                case Notification.Respawn:
+                {
+                    Respawn(message);
+                    break;
+                }
                 case Notification.Message:
-                    {
-                        UI.Notify(message);
-                        break;
-                    }
+                {
+                    UI.Notify(message);
+                    break;
+                }
                 case Notification.Kicked:
-                    {
-                        UI.Notify(message);
-                        UI.CloseLobby();
-                        break;
-                    }
+                {
+                    UI.Notify(message);
+                    UI.CloseLobby();
+                    break;
+                }
             }
+        }
+
+        private void Respawn(string message)
+        {
+            UI.AnnounceRespawn(message);
         }
 
         protected virtual void Die(string message)
@@ -133,7 +141,6 @@ namespace GameObjects
             Yoke.bindWASD();
             Yoke.bindMouse();
             UI.Start();
-            StartTime = DateTime.Now;
         }
 
         public void Draw()

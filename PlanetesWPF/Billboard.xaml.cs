@@ -10,18 +10,15 @@ namespace PlanetesWPF
         public Billboard() //TODO: repair
         {
             InitializeComponent();
+            WindowStartupLocation = WindowStartupLocation.Manual;
         }
 
-        public Billboard(Window owner) : this()
+        public void Show(Window owner, string message)
         {
-            Owner = owner;
-        }      
-
-        public static void Show(string message)
-        {
-            Billboard b = new Billboard();
-            b.Title = message;
-            b.Show();            
+            Title = message;
+            Left = owner.Left + 50;
+            Top = owner.Top + 50;
+            Show();            
         }
     }
 }

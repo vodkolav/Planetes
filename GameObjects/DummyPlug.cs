@@ -48,6 +48,11 @@ namespace GameObjects
         {
         }
 
+        public void AnnounceRespawn(string message)
+        {
+            
+        }
+
         //public void StartGraphics()
         //{
         //}
