@@ -15,5 +15,7 @@ namespace PolygonCollision
         void DrawRay(Color c, Ray ray);
 
         void Clear();
+
+        void UpdateBitmap(int width, int height);
     }
 }

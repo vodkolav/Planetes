@@ -2,10 +2,9 @@
 using System;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Threading;
 using GameObjects.Model;
 
 namespace PlanetesWPF
@@ -25,7 +24,6 @@ namespace PlanetesWPF
 
         public GameServer S { get; private set; }
 
-        public WriteableBitmap B { get; set; }
 
         public Billboard BB { get; set; }
 
@@ -40,6 +38,9 @@ namespace PlanetesWPF
             C.PlayerName = PlayerName;
             L = new Lobby(this);
             BB = new Billboard();
+
+            PolygonCollision.DrawingContext.GraphicsContainer = new WPFGraphicsContainer();
+            DataContext = (WPFGraphicsContainer)PolygonCollision.DrawingContext.GraphicsContainer;
         }
 
         /// <summary>
@@ -80,9 +81,12 @@ namespace PlanetesWPF
         {
             get
             {
+                var cell = (Grid)VisualTreeHelper.GetParent(Visor);
+                double w = cell.ColumnDefinitions[Grid.GetColumn(Visor)].ActualWidth;
+                double h = cell.RowDefinitions[Grid.GetRow(Visor)].ActualHeight;
                 var source = PresentationSource.FromVisual(this);
                 Matrix transformToDevice = source.CompositionTarget.TransformToDevice;
-                Vector wpfSize = new Vector(Visor.Width, Visor.Height);
+                Vector wpfSize = new Vector(w, h);
                 Size pixelSize = (Size)transformToDevice.Transform(wpfSize);
                 PolygonCollision.Size v = new PolygonCollision.Size((int)pixelSize.Width, (int)pixelSize.Height);
                 return v;
@@ -131,7 +135,6 @@ namespace PlanetesWPF
             ));
         }
 
-
         internal void AddBot()
         {
             if (isServer)
@@ -166,16 +169,9 @@ namespace PlanetesWPF
 
             // or SFML: 
             // https://www.sfml-dev.org/download/bindings.php
-
-            if (B != null)
-            {
-                // Wrap updates in a GetContext call, to prevent invalidation and nested locking/unlocking during this block
-                using (B.GetBitmapContext())
-                {
-                    C.Draw();
-
-                }
-            }
+            
+            ((WPFGraphicsContainer) PolygonCollision.DrawingContext.GraphicsContainer).Draw(C);
+            
             foreach (var hud in wpHUDs.Children)
             {
                 ((HUD)hud).Draw();
@@ -204,15 +200,13 @@ namespace PlanetesWPF
         }
 
         public void StartGraphics()
-        {                                    
-            B = BitmapFactory.New((int)Visor.Width, (int)Visor.Height);
-            Visor.Source = B;
-            Visor.Cursor = Cursors.Cross;
-            PolygonCollision.DrawingContext.GraphicsContainer = new WPFGraphicsContainer(B);
-            RC = new RecorderController(B);
+        {
+            ((WPFGraphicsContainer) PolygonCollision.DrawingContext.GraphicsContainer).UpdateBitmap(VisorSize.Width, VisorSize.Height);
+            
+            RC = new RecorderController((WPFGraphicsContainer)PolygonCollision.DrawingContext.GraphicsContainer);
             bindHUDS();
             CompositionTarget.Rendering += (s, e) => DrawGraphics();            
-            CompositionTarget.Rendering += (s, e) => RC.AddFrame(B,C.gameObjects.frameNum);
+            CompositionTarget.Rendering += (s, e) => RC.AddFrame(C.gameObjects.frameNum); //TODO: Add this only when recording
             Closing += (s, e) => RC.End();    
         }
         
@@ -268,8 +262,8 @@ namespace PlanetesWPF
         {
             var URL = hostNetworkGame();
             
-           S.AddBot();
-           S.AddBot<Bot3>();
+            S.AddBot(); 
+            S.AddBot<Bot3>();
             await joinNetworkGame(URL);
             //await C.StartServer();
         }
@@ -290,11 +284,6 @@ namespace PlanetesWPF
 
 
             //await joinNetworkGame(url);
-        }
-
-        private Task joinNetworkGame(object uRL)
-        {
-            throw new NotImplementedException();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -375,5 +364,16 @@ namespace PlanetesWPF
             }
         }
         #endregion
+        
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (C.GameOn)
+            {
+                PolygonCollision.Size s = new PolygonCollision.Size((float)e.NewSize.Width, (float)e.NewSize.Height);
+                C.Yoke.Do(GameObjects.Model.Action.SetViewPort, s);
+                PolygonCollision.DrawingContext.GraphicsContainer.UpdateBitmap(s.Width, s.Height);
+                Logger.Log(s.ToString(), LogLevel.Debug);
+            }
+        }
     }
 }

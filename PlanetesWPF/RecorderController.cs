@@ -12,9 +12,11 @@ namespace PlanetesWPF
         List<GameRecorder> cassetes = new List<GameRecorder>(10);
         GameRecorder current;
         WriteableBitmap imageSample;
-
-        public RecorderController(WriteableBitmap imageSample)
+        WPFGraphicsContainer graphicsContainer;
+        public RecorderController(WPFGraphicsContainer gc )
         {
+            graphicsContainer = gc;
+            WriteableBitmap imageSample = gc.CurrentView;
             aPixels = new byte[imageSample.PixelHeight * imageSample.BackBufferStride];
             this.imageSample = imageSample;
             current = new GameRecorder(imageSample);
@@ -27,8 +29,9 @@ namespace PlanetesWPF
             current.Start();
         }
 
-        public void AddFrame(WriteableBitmap Source, int frameNum)
+        public void AddFrame( int frameNum)
         {
+            WriteableBitmap Source = graphicsContainer.CurrentView;
             if (current.IsRecording)
                 if (Source != null)
                 {
