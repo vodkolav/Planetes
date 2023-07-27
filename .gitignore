@@ -351,3 +351,4 @@ MigrationBackup/
 
 #Profiling files
 *.diagsession
+/Diagnostics

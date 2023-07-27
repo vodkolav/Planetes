@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using GameObjects.Model;
+using PolygonCollision;
 
 namespace GameObjects
 {
@@ -12,8 +13,10 @@ namespace GameObjects
 
         public string Text { get ; set ; }
 
+        public Size VisorSize { get; } = new Size(500, 500);
+
         //public bool InvokeRequired{get => false;}
-          
+
         public void AnnounceDeath(string message)
         {
         }

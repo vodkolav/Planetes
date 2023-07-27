@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Windows.Controls;
 using System.Windows.Media;
 using Newtonsoft.Json;
 using PolygonCollision;
@@ -14,7 +13,7 @@ namespace GameObjects.Model
         {
             get
             {
-                return Hull.Center;
+                return Center;
             }
         }
 
@@ -130,6 +129,11 @@ namespace GameObjects.Model
             _cockpit.Offset(by);
         }
 
+        public Vector Center
+        {
+            get { return (_cockpit.Center + _hull.Center) / 2; }
+        }
+
         private void Rotate(Vector dir)
         {
             dir.Normalize();
@@ -137,10 +141,10 @@ namespace GameObjects.Model
             float angl = -Bearing.Angle(new Vector(1,0));
 
             _cockpit_cache = (Polygon)_cockpit.Clone();
-            _cockpit_cache.RotateAt(angl, _hull.Center);
+            _cockpit_cache.RotateAt(angl, Center);
 
             _hull_cache = (Polygon)_hull.Clone();
-            _hull_cache.RotateAt(angl, _hull.Center);          
+            _hull_cache.RotateAt(angl, Center);          
 
         }
 

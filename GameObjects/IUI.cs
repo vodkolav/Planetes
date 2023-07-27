@@ -1,6 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using GameObjects.Model;
+using PolygonCollision;
 
 namespace GameObjects
 {
@@ -9,6 +9,8 @@ namespace GameObjects
         string Text { get; set; }
 
         GameClient C { get; set; }
+
+        Size VisorSize { get;  }
 
         void DrawGraphics();
 

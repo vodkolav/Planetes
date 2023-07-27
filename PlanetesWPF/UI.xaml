@@ -5,16 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PlanetesWPF"
         mc:Ignorable="d"
-        Title="Planetes WPF" Height="1008" Width="1600" Closing="Window_Closing" Loaded="Window_Loaded" KeyDown="Window_KeyDown" KeyUp="Window_KeyUp">
+        Title="Planetes WPF" Height="800" Width="1400" Closing="Window_Closing" Loaded="Window_Loaded" KeyDown="Window_KeyDown" KeyUp="Window_KeyUp" SizeChanged="Window_SizeChanged">
     <Grid Margin="0,0,10,0">
         <Grid.RowDefinitions>
-            <RowDefinition Height="40" />
-            <RowDefinition/>
-            <RowDefinition Height="115">
-
-            </RowDefinition>
+            <RowDefinition Height="40px" />
+            <RowDefinition Height="30*" />
         </Grid.RowDefinitions>
-        <ToolBarTray Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,2" >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="24" />
+            <ColumnDefinition Width="146"/>
+            <ColumnDefinition Width="6*"/>
+        </Grid.ColumnDefinitions>
+
+        <ToolBarTray Grid.ColumnSpan="3" Grid.Row="0" Grid.Column="0" Margin="0,2,0,2" >
             <ToolBar RenderTransformOrigin="0.5,0.5"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                 <Menu Background="#00000000">
                     <MenuItem >
@@ -26,7 +29,7 @@
                           Fill="Black" Data="M 0 0 L 3 3 L 6 0 Z"/>
                             </StackPanel>
                         </MenuItem.Header>
-                        <MenuItem Header="Host Game" >
+                        <MenuItem Header="Host Game" Click="MenuItem_Click_1" >
 
                         </MenuItem>
                         <MenuItem Header="Join Game" Click="MenuItem_Click"/>
@@ -47,9 +50,9 @@
                 </Menu>
             </ToolBar>
         </ToolBarTray>
-        <Image x:Name="Visor" Grid.Row="1" Margin="10,0,0,30" Stretch="None" RenderTransformOrigin="0.5,0.5" MouseDown="World_MouseDown" MouseUp="World_MouseUp" MouseMove="World_MouseMove" Height="779" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="1578"/>
-        <WrapPanel  x:Name="wpHUDs" Grid.Row="2" Margin="0,8,0,0">
-            <local:HUD x:Name="hudLeft" HorizontalAlignment="Left" Height="100" Margin="10,0,0,0" VerticalAlignment="Top" Width="199" Visibility="Hidden"/>
+        <Image x:Name="Visor" Grid.Column="2" Margin="0,0,10,10" Stretch="None" MouseDown="World_MouseDown" MouseUp="World_MouseUp" MouseMove="World_MouseMove" Grid.Row="1" SizeChanged="Visor_SizeChanged"  />
+        <WrapPanel  x:Name="wpHUDs" Grid.Column="0" Grid.Row="1" Margin="0,8,10,0" Grid.ColumnSpan="2">
+            <local:HUD x:Name="hudLeft" HorizontalAlignment="Left" Height="100" Margin="0,0,0,0" VerticalAlignment="Top" Width="199" Visibility="Hidden"/>
 
         </WrapPanel>
 

@@ -6,7 +6,7 @@ using PolygonCollision;
 
 namespace GameObjects.Model
 {
-    public enum Action { Press, Release, Aim, setViewPort }
+    public enum Action { Press, Release, Aim, SetViewPort }
     public enum Notification { Joined, Kicked, Death, Respawn, Won, Lost, Message }
      
     public struct PlayerInfo
@@ -69,7 +69,7 @@ namespace GameObjects.Model
                 { Action.Press, Steer },
                 { Action.Release, Release },
                 { Action.Aim, Aim },
-                { Action.setViewPort,setViewPort } // This Action is not used for now, but will be useful when you want tot change window size in-game
+                { Action.SetViewPort,setViewPort } // This Action is not used for now, but will be useful when you want tot change window size in-game
             };
         }
 

@@ -29,7 +29,6 @@ namespace PlanetesWPF
         {
             Owner = uI;
             var res = ShowDialog();
-            Owner = uI;
             return res.HasValue && res.Value;
         }
 

@@ -4,10 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PlanetesWPF"
-             mc:Ignorable="d" d:DesignWidth="800" Width="200" Height="115">
+             mc:Ignorable="d" Width="160
+             " Height="115">
     <Grid>
         <Label x:Name="lblHealth" Content="Health: 1000" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" FontSize="9" Height="21" Background="#FFF0AD37"/>
-        <ProgressBar x:Name="pbHealth" Height="21" Margin="75,31,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" Width="114">
+        <ProgressBar x:Name="pbHealth" Height="21" Margin="75,31,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" Width="78">
             <ProgressBar.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -19,9 +20,9 @@
         </ProgressBar>
         <Label x:Name="lblName" Content="Name: " HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" FontSize="9" Height="21" Background="#FFF0AD37"/>
         <Label x:Name="lblAmmo" Content="Ammo: 1000" HorizontalAlignment="Left" Margin="10,57,0,0" VerticalAlignment="Top" FontSize="9" Height="21" Background="#FFF0AD37"/>
-        <ProgressBar x:Name="pbAmmo" HorizontalAlignment="Left" Height="21" Margin="75,57,0,0" VerticalAlignment="Top" Width="115"/>
+        <ProgressBar x:Name="pbAmmo" HorizontalAlignment="Left" Height="21" Margin="75,57,0,0" VerticalAlignment="Top" Width="78"/>
         <Label x:Name="lblSpeed" Content="Speed" HorizontalAlignment="Left" Margin="10,83,0,0" VerticalAlignment="Top" FontSize="9" Height="21" Width="84" Background="#FFF0AD37"/>
-        <Label x:Name="lblAcc" Content="Acc" HorizontalAlignment="Left" Margin="99,84,0,0" VerticalAlignment="Top" FontSize="9" Height="21" Width="91" Background="#FFF0AD37"/>
+        <Label x:Name="lblAcc" Content="Acc" HorizontalAlignment="Left" Margin="99,84,0,0" VerticalAlignment="Top" FontSize="9" Height="21" Width="54" Background="#FFF0AD37"/>
 
     </Grid>
 </UserControl>

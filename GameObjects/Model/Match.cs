@@ -1,36 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GameObjects.Model
 {
     public delegate void MatchEventHandler(object source, MatchEventArgs e);
 
-        public class MatchEventArgs : EventArgs
+    public class MatchEventArgs : EventArgs
+    {
+        public Player Obj { get; set; }
+        public Player Subj { get; set; }
+
+        public string EventInfo { get; set; }
+
+        public MatchEventArgs(Player obj, Player subj, string info)
         {
-            public Player Obj { get; set; }
-            public Player Subj { get; set; }
-
-            public string EventInfo { get; set; }
-
-            public MatchEventArgs(Player obj, Player subj, string info)
-            {
-                Obj = obj;
-                Subj = subj;
-                EventInfo = info;
-            }
-
-            public string GetInfo()
-            {
-                return EventInfo;
-            }
+            Obj = obj;
+            Subj = subj;
+            EventInfo = info;
         }
 
-        public class Stat
+        public string GetInfo()
         {
-            public int Kills { get; set; } = 0;
-            public int Deaths { get; set; } = 0;
-            public int Assists { get; set; } // that will be harder to implement. will do it later
+            return EventInfo;
         }
+    }
+
+    public class Stat
+    {
+        public int Kills { get; set; } = 0;
+        public int Deaths { get; set; } = 0;
+        public int Assists { get; set; } // that will be harder to implement. will do it later
+    }
 
     public class Match
     {
@@ -38,13 +39,13 @@ namespace GameObjects.Model
 
         public int RespawnTime { get; set; } = 200;
 
-        private Dictionary<int,Stat> stats { get; set; }// int is Player.ID 
-        
+        private Dictionary<int, Stat> stats { get; set; } // int is Player.ID 
+
         private GameState gameObjects { get; set; }
-        
+
         public void MatchEvent(object source, MatchEventArgs e)
         {
-            Reap(e.Obj,e.Subj);
+            Reap(e.Obj, e.Subj);
             Logger.Log(e.Obj + e.EventInfo + e.Subj, LogLevel.Info);
         }
 
@@ -55,6 +56,7 @@ namespace GameObjects.Model
             stats[victim.ID].Deaths += 1;
             victim.DeathTime = gameObjects.frameNum;
             victim.isAlive = false;
+            Logger.Log(ShowStats(), LogLevel.Info);
         }
 
         internal void Respawn(Player player)
@@ -69,18 +71,19 @@ namespace GameObjects.Model
         {
         }
 
-        public Match(GameState gameObjects )
+        public Match(GameState gameObjects)
         {
             this.gameObjects = gameObjects;
             InitFeudingParties();
-            stats = new Dictionary<int,Stat>();
+            stats = new Dictionary<int, Stat>();
 
             foreach (var player in gameObjects.Players)
             {
-                stats.Add(player.ID,new Stat());
+                stats.Add(player.ID, new Stat());
                 player.OnMatchEvent += MatchEvent;
             }
-            Logger.Log("creating match",LogLevel.Nothing);
+
+            Logger.Log("creating match", LogLevel.Nothing);
         }
 
         public void InitFeudingParties()
@@ -95,7 +98,7 @@ namespace GameObjects.Model
             }
         }
 
-        public void  CheckGame(GameServer s)
+        public void CheckGame(GameServer s)
         {
             //TODO: remove, wait and respawn a player's jet
             foreach (var player in gameObjects.Players)
@@ -141,6 +144,18 @@ namespace GameObjects.Model
             // close clients on UIs 
             // end game 
             // reset server
+        }
+
+        public string ShowStats()
+        {
+            string res = "| Player | Kills | Deaths |\n";
+            
+            foreach (var stat in stats)
+            {
+                var player = gameObjects.Players.Single(p => p.ID == stat.Key);
+                res += $"| {player.Name} | {stat.Value.Kills} | {stat.Value.Deaths} |\n";
+            }
+            return res;
         }
     }
 }

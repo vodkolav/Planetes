@@ -5,7 +5,7 @@ namespace PolygonCollision
     {
 
         public Size() { }
-        public Size(float x, float y) : base(x, y)
+        public Size(float w, float h) : base(w, h)
         {
         }
 

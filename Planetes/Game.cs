@@ -23,6 +23,11 @@ namespace Planetes
 
         public BillBoard Billboard { get; set; }
 
+        public PolygonCollision.Size VisorSize
+        {
+            get => new PolygonCollision.Size(pbxWorld.Width, pbxWorld.Height);
+        }
+
         public string PlayerName = "FormsPlayer";
 
         public Game()
@@ -54,7 +59,7 @@ namespace Planetes
                     }
                 case "joinNetworkGame":
                     {
-                        C.joinNetworkGame($"http://127.0.0.1:2861/", new PolygonCollision.Size(pbxWorld.Width, pbxWorld.Height));
+                        C.joinNetworkGame($"http://127.0.0.1:2861/");
                         break;
                     }
                 case "SinglePlayer":
@@ -271,7 +276,7 @@ namespace Planetes
         public async Task joinNetworkGame(string URL)
         {
             Text += " (Client)";
-            C.joinNetworkGame(URL, new PolygonCollision.Size(pbxWorld.Width, pbxWorld.Height));
+            C.joinNetworkGame(URL);
 
             bool GameStarted = L.OpenLobby_WaitForGuestsAndBegin();
 

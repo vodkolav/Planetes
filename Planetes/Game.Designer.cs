@@ -187,7 +187,7 @@
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.flpOtherPlayers);
-            this.splitContainer2.Size = new System.Drawing.Size(1734, 112);
+            this.splitContainer2.Size = new System.Drawing.Size(1734, 40);
             this.splitContainer2.SplitterDistance = 221;
             this.splitContainer2.TabIndex = 8;
             // 
@@ -196,7 +196,7 @@
             this.flpOtherPlayers.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flpOtherPlayers.Location = new System.Drawing.Point(0, 0);
             this.flpOtherPlayers.Name = "flpOtherPlayers";
-            this.flpOtherPlayers.Size = new System.Drawing.Size(1509, 112);
+            this.flpOtherPlayers.Size = new System.Drawing.Size(1509, 40);
             this.flpOtherPlayers.TabIndex = 0;
             // 
             // hudLeft
@@ -204,7 +204,7 @@
             this.hudLeft.Dock = System.Windows.Forms.DockStyle.Fill;
             this.hudLeft.Location = new System.Drawing.Point(0, 0);
             this.hudLeft.Name = "hudLeft";
-            this.hudLeft.Size = new System.Drawing.Size(221, 112);
+            this.hudLeft.Size = new System.Drawing.Size(221, 40);
             this.hudLeft.TabIndex = 6;
             this.hudLeft.Visible = false;
             // 

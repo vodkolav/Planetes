@@ -16,8 +16,8 @@ namespace PlanetesWPF
         public void Show(Window owner, string message)
         {
             Title = message;
-            Left = owner.Left + 50;
-            Top = owner.Top + 50;
+            Left = owner.Left + 0.25 * owner.Width;
+            Top = owner.Top + 0.25 * owner.Height;
             Show();            
         }
     }

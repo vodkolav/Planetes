@@ -61,7 +61,7 @@ namespace PlanetesWPF
                     }
                 case "joinNetworkGame":
                     {
-                        C.joinNetworkGame($"http://192.168.1.11:2861/", VisorSize);
+                        C.joinNetworkGame($"http://192.168.1.11:2861/");
                         break;
                     }
                 case "SinglePlayer":
@@ -238,7 +238,7 @@ namespace PlanetesWPF
         public async Task joinNetworkGame(string URL)
         {
             Text += " (Client)";
-            C.joinNetworkGame(URL,VisorSize);
+            C.joinNetworkGame(URL);
             
             bool GameStarted = L.OpenLobby_WaitForGuestsAndBegin(this);
 

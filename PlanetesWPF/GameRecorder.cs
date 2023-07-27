@@ -179,7 +179,7 @@ namespace PlanetesWPF
                             if (Data[x + 3] == 4)
                             {
                                 // word, little endian, the hundredths of second to show this frame
-                                byte[] Bte = BitConverter.GetBytes(FrameRate / 10);
+                                byte[] Bte = BitConverter.GetBytes(FrameRate);
                                 Data[x + 5] = Bte[0];
                                 Data[x + 6] = Bte[1];
                             }
@@ -215,7 +215,7 @@ namespace PlanetesWPF
         /// <summary>
         ///     '''  Get or set the amount of time each frame will be shown (in milliseconds). The default value is 200ms
         ///     ''' </summary>
-        public int FrameRate { get; set; } = (int)GameConfig.FrameInterval.TotalMilliseconds;
+        public int FrameRate { get; set; } = (int)GameConfig.FrameInterval.TotalMilliseconds/10;
     }
 }
 

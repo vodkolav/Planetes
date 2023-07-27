@@ -38,7 +38,7 @@ namespace GameObjects
             UI = owner;
         }
         
-        public async void joinNetworkGame(string URL, Size windowSize)
+        public async void joinNetworkGame(string URL)
         {
             try
             {
@@ -58,7 +58,7 @@ namespace GameObjects
                 await Conn.Start(new WebSocketTransport());               
                 PlayerInfo info = new PlayerInfo() {
                     PlayerName = PlayerName,
-                    VisorSize = windowSize
+                    VisorSize = UI.VisorSize 
                 };
 
                 await Proxy.Invoke("JoinLobby", new object[] { info });
