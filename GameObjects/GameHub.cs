@@ -30,11 +30,12 @@ namespace GameObjects
                 Logger.Log(e, LogLevel.Debug);
             }            
         }
-        
+
+        //TODO: get rid of those tuples. just use regular params
         public void Aim(int who, Tuple<Action, Vector> command)
         {
             try
-            {                
+            {
                 _gameServer.gameObjects.Players.Single(p => p.ID == who).Act(command);
             }
             catch (Exception e)

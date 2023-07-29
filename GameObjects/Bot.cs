@@ -415,7 +415,7 @@ namespace GameObjects
         { }
 
         /// <summary>
-        /// Constantly accelerates left. every frame aims at closest enemy(if in range) and shoots
+        /// Bot1 is basic bot. Just does nothing.
         /// </summary>
         protected override void FrameReact()
         {
@@ -423,26 +423,9 @@ namespace GameObjects
             HOTAS direction = (HOTAS)memory["direction"];
             bool amShooting = (bool)memory["amShooting"];
 
-
-            Press(HOTAS.Left);
-            Player enemyClosest = ClosestEnemy;
-            if (enemyClosest != null)
-            {
-                Aim(enemyClosest.Jet.Pos);
-
-                if (Me.Jet.Pos.Dist(ClosestEnemy.Jet.Pos) < 200)
-                {
-                    Press(HOTAS.Shoot);
-                }
-                else
-                {
-                    Release(HOTAS.Shoot);
-                }
-
-                memory["count"] = count;
-                memory["direction"] = direction;
-                memory["amShooting"] = amShooting;
-            }
+            memory["count"] = count;
+            memory["direction"] = direction;
+            memory["amShooting"] = amShooting;
         }
     }
 }

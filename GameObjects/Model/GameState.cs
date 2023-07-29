@@ -130,7 +130,7 @@ namespace GameObjects.Model
                 Entities.RemoveAll(b => !b.isAlive);
 
                 //Spawn asteroid after timeout
-                if (frameNum % GameConfig.AsteroidTimeout == 0)
+                if (GameConfig.EnableAstroids && frameNum % GameConfig.AsteroidTimeout == 0)
                 {
                     Entities.Add(new Astroid(World.Size));
                 }

@@ -36,7 +36,9 @@ namespace GameObjects
             Colors.Cyan, 
             Colors.White, 
             Colors.Orange, 
-            Colors.Purple
+            Colors.Purple,
+            Colors.Chartreuse,
+            Colors.OliveDrab,
         };
 
         public static Color TossColor
@@ -78,6 +80,8 @@ namespace GameObjects
         }
 
         public static float Lightspeed { get { return 8; } }
+
+        public static bool EnableAstroids { get { return false; } }
 
         public static int AsteroidTimeout { get { return 30; } }
     }

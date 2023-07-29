@@ -145,7 +145,7 @@ namespace GameObjects
 
         public void Draw()
         {
-            //Logger.Log("Draw FPS: " + gameObjects.frameNum / (DateTime.Now - StartTime).TotalSeconds, LogLevel.Status);
+            //Logger.Log("Draw FPS: " + gameObjects.frameNum / (DateTime.Now - gameObjects.StartTime).TotalSeconds, LogLevel.Status);
             //Logger.Log("Me.Pos " + Me.Jet.Pos + " |VP: " + Me.viewPort, LogLevel.Status);
             //Logger.Log("drawing frame " + gameObjects.frameNum, LogLevel.Status);
 
@@ -172,6 +172,13 @@ namespace GameObjects
                     j.Draw(); 
                 }
             }
+        }
+
+        public void SetViewPort(Vector s)
+        {
+            Yoke.Do(Model.Action.SetViewPort, s);
+            DrawingContext.GraphicsContainer.UpdateBitmap((int)s.X, (int)s.Y);
+            //Logger.Log(s.ToString(), LogLevel.Debug);
         }
     }
 }

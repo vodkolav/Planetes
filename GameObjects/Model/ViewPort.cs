@@ -22,7 +22,8 @@ namespace GameObjects.Model
             internal set
             {
                 if (Body != null) {
-                    Body  = new Rectangle(Origin, value);
+                    Vector newOrigin = Body.Center - value/2;
+                    Body  = new Rectangle(newOrigin, value);
                 }
                 else
                 {

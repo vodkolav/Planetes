@@ -369,10 +369,7 @@ namespace PlanetesWPF
         {
             if (C.GameOn)
             {
-                PolygonCollision.Size s = new PolygonCollision.Size((float)e.NewSize.Width, (float)e.NewSize.Height);
-                C.Yoke.Do(GameObjects.Model.Action.SetViewPort, s);
-                PolygonCollision.DrawingContext.GraphicsContainer.UpdateBitmap(s.Width, s.Height);
-                Logger.Log(s.ToString(), LogLevel.Debug);
+                C.SetViewPort(VisorSize);
             }
         }
     }

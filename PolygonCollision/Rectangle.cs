@@ -18,11 +18,8 @@ namespace PolygonCollision
             Size = size;
         }
 
-        public Rectangle(float ox, float oy, float sx, float sy)
-        {
-            Origin = new Vector(ox, oy);
-            Size = new Size(sx, sy);
-        }
+        public Rectangle(float ox, float oy, float sx, float sy) : this(new Vector(ox, oy), new Size(sx, sy))
+        { }
 
         public  Vector Origin { get; set; }
         public  Size Size { get; set; }

@@ -85,11 +85,16 @@ namespace GameObjects
             }
         }
             
-        public void Do(Action instruction, object argument)
+        public void Do(Action instruction, Vector argument)
         {
             //instructions will probably be required later, for example to apply abilities at something/someone
+            if (instruction == Action.SetViewPort)
+            {
+                Logger.Log("bp!", LogLevel.Debug);
+            }
+
             if (isWorking)
-                Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, object>(instruction, argument) });
+                Proxy.Invoke("Aim", new object[] { PlayerID, new Tuple<Action, Vector>(instruction, argument) });
         }
 
         public void Aim(Vector argument)

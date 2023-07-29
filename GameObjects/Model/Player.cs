@@ -34,8 +34,6 @@ namespace GameObjects.Model
 
         [JsonIgnore]
         public GameState gameState { get; set; }
-        [JsonIgnore]
-        public Dictionary<Action, Action<object>> actionMapping { get; set; }
 
         public ViewPort viewPort { get; set; }
 
@@ -47,30 +45,39 @@ namespace GameObjects.Model
             }
         }
 
-        public void Act(Tuple<Action, HOTAS> instruction)
+        public void Act<T>(Tuple<Action, T> instruction)
         {
             if (Name == "WPFplayer")
             {
                 Logger.Log("sent command: " + instruction.ToString(), LogLevel.Info);
                 //Logger.Log("Acceleration: " + Acceleration.ToString(), LogLevel.Info);
             }
-            actionMapping[instruction.Item1](instruction.Item2);
-        }
 
-        public void Act(Tuple<Action, Vector> instruction)
-        {
-            actionMapping[instruction.Item1](instruction.Item2);
-        }
-
-        private void MapActions()
-        {
-            actionMapping = new Dictionary<Action, System.Action<object>>
+            switch (instruction.Item1)
             {
-                { Action.Press, Steer },
-                { Action.Release, Release },
-                { Action.Aim, Aim },
-                { Action.SetViewPort,setViewPort } // This Action is not used for now, but will be useful when you want tot change window size in-game
-            };
+
+                case Action.Press:
+                {
+                    Steer(instruction.Item2);
+                    break;
+                }
+
+                case Action.Release:
+                {
+                    Release(instruction.Item2);
+                    break;
+                }
+                case Action.Aim:
+                {
+                    Aim(instruction.Item2);
+                    break;
+                }
+                case Action.SetViewPort:
+                {
+                    setViewPort(instruction.Item2);
+                    break;
+                }
+            }
         }
 
         public Player()
@@ -89,7 +96,6 @@ namespace GameObjects.Model
             gameState = game;
             viewPort = new ViewPort(this);
             setViewPort(Info.VisorSize);
-            MapActions();
         }
 
         public Player(int id, string connectionid, PlayerInfo Info, GameState game) :
@@ -97,11 +103,6 @@ namespace GameObjects.Model
                  GameConfig.StartingAmmo, GameConfig.TossColor, game)
         {
 
-        }
-
-        internal void setViewPort(object argument)
-        {
-            viewPort.Size = (Size)argument;
         }
 
         public override string ToString()
@@ -143,7 +144,12 @@ namespace GameObjects.Model
                 Jet.Aim = (Vector)argument - (viewPort.Size * .5);
         }
 
-        public virtual void Shoot(GameState gameObjects)
+        internal void setViewPort(object argument)
+        {
+            viewPort.Size = new Size((Vector)argument);
+        }
+
+        public virtual void Shoot(GameState gameObjects) // maybe move this to Jet
         {
             if (isAlive)
                 Jet.Shoot(gameObjects);
