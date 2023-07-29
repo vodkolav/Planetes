@@ -1,15 +1,22 @@
 ﻿using PolygonCollision;
 using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Windows.Forms;
 
 namespace Planetes
 {
     class WFGraphicsContainer : IGraphicsContainer
     {
-        readonly Graphics G;
-        public WFGraphicsContainer(Graphics G)
+        private Graphics G;
+
+        public Bitmap B { get; set; }
+
+        public WFGraphicsContainer(PictureBox pbxWorld)
         {
-            this.G = G;
+            UpdateBitmap(800,600);
+            pbxWorld.Image = B;
+            //Logger.Log(s.ToString(), LogLevel.Debug);
         }
 
         public Vector ViewPortOffset { get ; set; } = new Vector(0, 0);
@@ -65,6 +72,13 @@ namespace Planetes
         public static Vector PointF2Vector(PointF p)
         {
             return new Vector(p.X, p.Y);
+        }
+
+        public void UpdateBitmap(int width, int height)
+        {
+            B = new Bitmap(width, height);
+            G = Graphics.FromImage(B);
+            G.SmoothingMode = SmoothingMode.AntiAlias;
         }
     }
 }

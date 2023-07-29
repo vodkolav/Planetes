@@ -1,8 +1,6 @@
 ﻿using GameObjects;
 using PolygonCollision;
 using System;
-using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using GameObjects.Model;
@@ -16,8 +14,6 @@ namespace Planetes
         private GameServer S { get; set; }
 
         public GameClient C { get; set; }
-
-        public Bitmap B { get; set; }
 
         public Lobby L { get; set; }
 
@@ -42,6 +38,7 @@ namespace Planetes
             C.PlayerName = PlayerName;
             L = new Lobby(this);
             Billboard = new BillBoard(this);
+            DrawingContext.GraphicsContainer = new WFGraphicsContainer(pbxWorld);
         }
 
         public Game(string AutoStartgametype) : this()
@@ -95,14 +92,7 @@ namespace Planetes
 
         public void StartGraphics()
         {
-            B = new Bitmap(pbxWorld.Width, pbxWorld.Height);
-
-            Graphics G = Graphics.FromImage(B);
-            G.SmoothingMode = SmoothingMode.AntiAlias;
-            DrawingContext.GraphicsContainer = new WFGraphicsContainer(G);
-
-            pbxWorld.Image = B;
-
+            DrawingContext.GraphicsContainer.UpdateBitmap(pbxWorld.Width, pbxWorld.Height);
             bindHUDS();
             timerDraw.Interval = (int)GameState.FrameInterval.TotalMilliseconds;// * 0.25);
             timerDraw.Start();
@@ -141,7 +131,7 @@ namespace Planetes
         public void DrawGraphics()
         {
             C.Draw();
-            pbxWorld.Image = B;
+            pbxWorld.Image = ((WFGraphicsContainer)DrawingContext.GraphicsContainer).B;
             if (pbxWorld != null)
                 pbxWorld.Invoke(new System.Action(pbxWorld.Refresh));
             hudLeft.Draw();
@@ -390,6 +380,13 @@ namespace Planetes
 
         }
 
+        private void Game_SizeChanged(object sender, EventArgs e)
+        {
+            if (C.GameOn)
+            {
+                C.SetViewPort(VisorSize);
+            }
+        }
         #endregion
     }
 }

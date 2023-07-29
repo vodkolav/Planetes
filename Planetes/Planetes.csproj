@@ -176,6 +176,7 @@
     <None Include="packages.config" />
     <None Include="Properties\DataSources\GameObjects.GameServer.datasource" />
     <None Include="Properties\DataSources\GameObjects.Player.datasource" />
+    <None Include="Properties\DataSources\WFGraphicsContainer.datasource" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
