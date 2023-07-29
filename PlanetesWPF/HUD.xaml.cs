@@ -32,6 +32,7 @@ namespace PlanetesWPF
             Background = new SolidColorBrush(c);
         }
 
+        //TODO: remake this with data binding
         public void Draw()
         {
             try

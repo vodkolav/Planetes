@@ -35,9 +35,6 @@ namespace GameObjects.Model
             MakeStars(500);
         }
 
-
-
-
         public static Map Load(string MapFile)
         {
             //todo: implement save and load map

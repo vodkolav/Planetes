@@ -86,8 +86,6 @@ namespace GameObjects.Model
             get => Owner.isAlive;
         }
 
-
-
         public Jet()
         {
             
@@ -167,6 +165,17 @@ namespace GameObjects.Model
             }
         }
 
+        public override void HandleCollision(Wall w, PolygonCollisionResult r)
+        {
+            Offset(r.MinimumTranslationVector);
+            Bounce(r.translationAxis);
+        }
+
+        public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)
+        {
+            Bounce(-Speed);
+        }
+
         public override  void Move(GameState gO)
         {
             if (KeyBrake)
@@ -208,17 +217,6 @@ namespace GameObjects.Model
         public override string ToString()
         {
             return "Speed: " + Speed.ToString() + " |Acc:" + Acceleration.ToString();
-        }
-
-        public override void HandleCollision(Wall w , PolygonCollisionResult r)
-        {
-            Offset(r.MinimumTranslationVector);
-            Bounce(r.translationAxis);
-        }
-
-        public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)
-        {
-            Bounce(-Speed);
         }
 
         public void Recharge(int amount)

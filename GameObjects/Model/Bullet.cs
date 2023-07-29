@@ -52,6 +52,10 @@ namespace GameObjects.Model
             isAlive = false;
             j.Hit(this);
         }
+        public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)
+        {
+            isAlive = false;
+        }
 
         public override void Draw()
         {
@@ -71,9 +75,5 @@ namespace GameObjects.Model
            Body.Offset(by);
         }
 
-        public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)
-        {
-            isAlive = false;
-        }
     }
 }

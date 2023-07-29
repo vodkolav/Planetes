@@ -21,11 +21,6 @@ namespace GameObjects.Model
 
         public virtual int Power { get; internal set; } = 0;
 
-        public virtual PolygonCollisionResult Collides(Wall w)
-        {
-            return w.Body.Collides(Pos);
-        }
-
         public PolygonCollisionResult Collides(Map WorldEdge)
         {
             //Object is out of world bounds
@@ -36,23 +31,16 @@ namespace GameObjects.Model
             return PolygonCollisionResult.noCollision;
         }
 
-        public abstract void HandleCollision(Map WorldEdge, PolygonCollisionResult r);
-
-        public virtual void HandleCollision(Wall w, PolygonCollisionResult r)
+        public virtual PolygonCollisionResult Collides(Wall w)
         {
-            isAlive = false;
+            return w.Body.Collides(Pos);
         }
 
         public virtual PolygonCollisionResult Collides(Jet j)
         {
             return PolygonCollisionResult.noCollision;
-        }
-
-        public virtual void HandleCollision(Jet j, PolygonCollisionResult r)
-        {
-            isAlive = false;
-        }
-
+        }       
+         
         public virtual PolygonCollisionResult Collides(Astroid a)
         {
             // collisions of Jets with Astroids are handled in astroid class
@@ -60,18 +48,31 @@ namespace GameObjects.Model
             return PolygonCollisionResult.noCollision;
         }
 
+        public abstract void HandleCollision(Map WorldEdge, PolygonCollisionResult r);
+
+        public virtual void HandleCollision(Wall w, PolygonCollisionResult r)
+        {
+            isAlive = false;
+        }
+        
+        public virtual void HandleCollision(Jet j, PolygonCollisionResult r)
+        {
+            isAlive = false;
+        }
+        
         public virtual void HandleCollision(Astroid a, PolygonCollisionResult r)
         {
             isAlive = false;
             a.isAlive = false;
         }
 
-        public float Dist(ICollideable a)
+        public float Dist(ICollideable other)
         {
-            return Pos.Dist(a.Pos);
+            return Pos.Dist(other.Pos);
         }
 
         public abstract void Move(GameState gameObjects);
+
         public abstract void Draw();
     }
 }

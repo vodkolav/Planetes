@@ -32,12 +32,12 @@ namespace GameObjects.Model
         }
 
         public AstType Type { get; set; }
+
         public override Player Owner { get; set; }
 
-        public override int Power {  get {return (int)Size; }
-    }
-
-    public void TossType(Random random)
+        public override int Power {  get {return (int)Size; } }
+        
+        public void TossType(Random random)
         {
             switch (random.Next(10))
             {
@@ -52,6 +52,7 @@ namespace GameObjects.Model
                     break;
             }
         }
+        
         [JsonIgnore]
         public Color Color
         {
@@ -73,7 +74,7 @@ namespace GameObjects.Model
         {
             Random random = new Random();
             Body = new Circle(new Vector(random.Next(worldSize.Width), random.Next(worldSize.Height)), random.Next(20) + 5);
-            int linearSpeed = random.Next(1, (int)GameConfig.Lightspeed);
+            int linearSpeed = random.Next(1, (int)GameConfig.Lightspeed/2);
             double Angle = Math.PI / 180 * random.Next(360);
             Vector mult = new Vector((float)Math.Cos(Angle), (float)Math.Sin(Angle));
             Speed = mult * linearSpeed;
@@ -107,18 +108,6 @@ namespace GameObjects.Model
             }
         }
 
-
-
-        public override void Move(GameState gameObjects)
-        {
-            Offset(Speed);
-        }
-
-        private void Offset(Vector by)
-        {
-            Body.Offset(by);
-        }
-
         public override void HandleCollision(Jet j, PolygonCollisionResult r)
         {
             isAlive = false;
@@ -137,6 +126,16 @@ namespace GameObjects.Model
         public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)
         {
                 isAlive = false;
+        }
+
+        public override void Move(GameState gameObjects)
+        {
+            Offset(Speed);
+        }
+
+        private void Offset(Vector by)
+        {
+            Body.Offset(by);
         }
     }
 }

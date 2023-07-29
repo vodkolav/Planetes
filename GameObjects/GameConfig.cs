@@ -12,19 +12,23 @@ namespace GameObjects
 
         static readonly Random r = new Random();
 
-        public static Size WorldSize { get { return new Size(2500, 1200); } }
+        public static Size WorldSize { get { return new Size(1200, 600); } }
 
         public static TimeSpan FrameInterval { get { return new TimeSpan(0, 0, 0, 0, 20); } } 
-
-        public static int WallWidth { get { return 30; } }
-
-        public static int StartingHP { get { return 1000; } }
-
-        public static int StartingAmmo { get { return 1000; } }
+        
+        public static float Lightspeed { get { return 8; } }
 
         public static int bulletSpeed { get { return 30; } }
 
         public static float  Thrust { get { return 0.1f; } }
+
+        public static int WallWidth { get { return 30; } }
+
+        public static int StartingHP { get { return 50; } }
+
+        public static int StartingAmmo { get { return 1000; } }
+
+
 
         public static ConcurrentBag<Color> _colors = new ConcurrentBag<Color>()
         {
@@ -78,8 +82,6 @@ namespace GameObjects
                 return new Vector(x, y);
             }
         }
-
-        public static float Lightspeed { get { return 8; } }
 
         public static bool EnableAstroids { get { return false; } }
 
