@@ -17,7 +17,6 @@ namespace GameObjects.Model
             }
         }
 
-        public Vector Speed { get; set; }
 
         public Vector Acceleration { get; set; }
         

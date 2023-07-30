@@ -15,6 +15,8 @@ namespace GameObjects.Model
 
         public virtual Vector Pos { get; set; }
 
+        public virtual Vector Speed { get; set; }
+
         public virtual bool isAlive { get; set; }
 
         public virtual Circle BoundingCirc { get { return new Circle(Pos, 10); }}

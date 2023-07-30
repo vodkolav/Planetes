@@ -7,7 +7,7 @@ namespace PlanetesWPF
     /// </summary>
     public partial class Billboard : Window
     {
-        public Billboard() //TODO: repair
+        public Billboard() 
         {
             InitializeComponent();
             WindowStartupLocation = WindowStartupLocation.Manual;

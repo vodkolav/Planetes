@@ -9,8 +9,7 @@ namespace Planetes
     public partial class HUD : UserControl
     {
         GameClient C;
-        int playerID;
-
+        
         public HUD()
         {
             InitializeComponent();
@@ -18,7 +17,6 @@ namespace Planetes
         public void bind(GameClient game, Player p)
         {
             C = game;
-            playerID = p.ID;
             lblName.Text = p.Name;
             pbAmmo.Maximum = p.Jet.MaxAmmo;
             pbHlth.Maximum = p.Jet.MaxHealth;
@@ -30,7 +28,7 @@ namespace Planetes
         {
             try
             {
-                Player playerstate = C.gameObjects.Players.SingleOrDefault(p => p.ID == playerID);
+                Player playerstate = C.Me;
                 if (playerstate != null)
                     lock (C.gameObjects)
                     {

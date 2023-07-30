@@ -8,7 +8,7 @@ using Action = GameObjects.Model.Action;
 
 namespace GameObjects
 {
-    public enum HOTAS { Up, Down, Left, Right, Shoot, Aim, Brake, Nothing };
+    public enum HOTAS { Up, Down, Left, Right, Shoot, Brake, Nothing };
     public class ControlPanel
     {
         private Dictionary<Key, HOTAS> KeyBindings;
@@ -94,13 +94,13 @@ namespace GameObjects
             }
 
             if (isWorking)
-                Proxy.Invoke("Aim", new object[] { PlayerID, new Tuple<Action, Vector>(instruction, argument) });
+                Proxy.Invoke("Do", new object[] { PlayerID, new Tuple<Action, Vector>(instruction, argument) });
         }
 
         public void Aim(Vector argument)
         {
             if (isWorking)
-                Proxy.Invoke("Aim", new object[] { PlayerID, new Tuple<Action, Vector>(Action.Aim, argument) });
+                Proxy.Invoke("Do", new object[] { PlayerID, new Tuple<Action, Vector>(Action.Aim, argument) });
             // these exceptions appear after waiting too long on a breakpoint. how to fix : https://stackoverflow.com/a/38161578
 
         }

@@ -11,7 +11,7 @@ namespace GameObjects.Model
         
         public static int linearSpeed = GameConfig.bulletSpeed;
 
-        public Vector Speed { get => Body.Tail; }
+        public override Vector Speed { get => Body.Tail; }
         
         public int Size { get => Body.Size; }       
         

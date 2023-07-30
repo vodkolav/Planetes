@@ -32,7 +32,7 @@ namespace GameObjects
         }
 
         //TODO: get rid of those tuples. just use regular params
-        public void Aim(int who, Tuple<Action, Vector> command)
+        public void Do(int who, Tuple<Action, Vector> command)
         {
             try
             {

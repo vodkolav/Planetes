@@ -16,7 +16,6 @@ namespace GameObjects.Model
         }
 
         public Circle Body { get; set; }
-        public Vector Speed { get; set; }
 
         [JsonIgnore]
         public override Circle BoundingCirc

@@ -100,7 +100,7 @@ namespace GameObjects.Model
 
         public void CheckGame(GameServer s)
         {
-            //TODO: remove, wait and respawn a player's jet
+            // remove, wait and respawn a player's jet
             foreach (var player in gameObjects.Players)
             {
                 if (!player.isAlive)
