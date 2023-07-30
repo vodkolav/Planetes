@@ -8,31 +8,49 @@ namespace PlanetesWPF
 {
     public class RecorderController
     {
-        byte[] aPixels;
         List<GameRecorder> cassetes = new List<GameRecorder>(10);
         GameRecorder current;
-        WriteableBitmap imageSample;
         WPFGraphicsContainer graphicsContainer;
         public RecorderController(WPFGraphicsContainer gc )
         {
             graphicsContainer = gc;
-            WriteableBitmap imageSample = gc.CurrentView;
-            aPixels = new byte[imageSample.PixelHeight * imageSample.BackBufferStride];
-            this.imageSample = imageSample;
-            current = new GameRecorder(imageSample);
-            cassetes.Add(current);
+            ManageCassette(graphicsContainer.CurrentView);
+        }
+
+        public void ManageCassette(WriteableBitmap imageSample)
+        {
+            if (current != null && current.State == RecordingState.Recording)
+                return;
+            try
+            {
+                current = cassetes.First(c => c.State == RecordingState.Ready && c.Fits(imageSample));
+            }
+            catch
+            {
+                current = new GameRecorder(imageSample);
+                current.OnSaveComplete +=  ClearCassetes;
+                cassetes.Add(current);
+            }
+        }
+
+        public void ClearCassetes(GameRecorder cur)
+        {
+            cur.OnSaveComplete -= ClearCassetes;
+            cassetes.RemoveAll(c => c.State == RecordingState.Complete);
+        
         }
 
         internal void Start()
         {
-            Logger.Log("Cassettes: "+ cassetes.Count(),LogLevel.Info);
+            Logger.Log("Cassettes: "+ cassetes.Count,LogLevel.Status);
+            ManageCassette(graphicsContainer.CurrentView);
             current.Start();
         }
 
         public void AddFrame( int frameNum)
         {
             WriteableBitmap Source = graphicsContainer.CurrentView;
-            if (current.IsRecording)
+            if (current.State == RecordingState.Recording)
                 if (Source != null)
                 {
                     //Im gonna need this here : 
@@ -42,8 +60,7 @@ namespace PlanetesWPF
                     //https://stackoverflow.com/questions/9868929/how-to-edit-a-writablebitmap-backbuffer-in-non-ui-thread
                     if (!(Source.Width == 0) && !(Source.Height == 0))
                     {
-                        Source.CopyPixels(aPixels, Source.BackBufferStride, 0);
-                        current.AddFrame(aPixels);
+                        current.AddFrame(Source);
                         //encoder.Frames.Add(BitmapFrame.Create(Source.CloneCurrentValue()));                       
                     }
                     else
@@ -53,20 +70,9 @@ namespace PlanetesWPF
                     throw new ArgumentException("Argument Frame cannot be nothing");
         }
 
-
         internal void End()
         {
             current.End();
-
-            try
-            {
-                current = cassetes.First(c => !c.IsRecording);
-            }
-            catch
-            {
-                current = new GameRecorder(imageSample);
-                cassetes.Add(current);
-            }
         }
     }
 }

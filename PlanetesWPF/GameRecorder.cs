@@ -10,12 +10,19 @@ using GameObjects;
 
 namespace PlanetesWPF
 {
-    public class GameRecorder
+    public enum RecordingState {Ready, Recording, Saving, Complete}
+
+    public class GameRecorder : IDisposable
     {
-        public bool IsRecording { get; set; } = false;
+
+        public event  Action<GameRecorder> OnSaveComplete;
+
+        public RecordingState State { get; set; } =  RecordingState.Ready;
+        
         BlockingCollection<byte[]> frames;
         GifBitmapEncoder encoder;
 
+        byte[] aPixels;
         int PixelWidth;
         int PixelHeight;
         double DpiX;
@@ -23,10 +30,12 @@ namespace PlanetesWPF
         PixelFormat Format;
         BitmapPalette Palette;       
         int Stride;
+        public double ScaleFactor { get; set; } = 0.5; 
 
         public GameRecorder(WriteableBitmap imageSample)
         {
             frames = new BlockingCollection<byte[]>();
+            aPixels = new byte[imageSample.PixelHeight * imageSample.BackBufferStride];
             PixelWidth = imageSample.PixelWidth;
             PixelHeight = imageSample.PixelHeight;
             DpiX = imageSample.DpiX;
@@ -36,38 +45,45 @@ namespace PlanetesWPF
             Stride = imageSample.BackBufferStride;
         }
 
-        public void AddFrame(byte[] aPixels)
-        {           
-            frames.Add(aPixels);
+        public void AddFrame(WriteableBitmap imageSource)
+        {
+            if (State == RecordingState.Recording)
+            {
+                imageSource.CopyPixels(aPixels, imageSource.BackBufferStride, 0);
+                frames.Add(aPixels);
+            }
         }
+
         public void Feed(object Image)
         {
             encoder = new GifBitmapEncoder();
-            foreach (var aPixels in frames.GetConsumingEnumerable())
+            foreach (var pixels in frames.GetConsumingEnumerable())
             {
                 BitmapSource BF = BitmapSource.Create(PixelWidth, PixelHeight,
-                DpiX, DpiY, Format, Palette, aPixels, Stride);
-                var targetBitmap = new TransformedBitmap(BF, new ScaleTransform(0.5, 0.5));
-                encoder.Frames.Add(BitmapFrame.Create(targetBitmap));
+                DpiX, DpiY, Format, Palette, pixels, Stride);
+                if (ScaleFactor != 1.0f)
+                {
+                    BF = new TransformedBitmap(BF, new ScaleTransform(ScaleFactor, ScaleFactor));
+                }
+                encoder.Frames.Add(BitmapFrame.Create(BF));
                
             }
             Save();
-            frames = new BlockingCollection<byte[]>();
-            IsRecording = false;
         }       
 
         public void Start()
         {            
-            if (!IsRecording)
+            if (State is RecordingState.Ready )
             {
-                Logger.Log("Recording game to gif...", LogLevel.Info);
-                IsRecording = true;
+                Logger.Log($"Recording game to gif ({PixelWidth}x{PixelHeight} )...", LogLevel.Status);
+                State = RecordingState.Recording;
                 ThreadPool.QueueUserWorkItem(new WaitCallback(Feed));
             }
         }
 
         public void End()
         {
+            State = RecordingState.Saving;
             frames.CompleteAdding();
         }
 
@@ -78,7 +94,7 @@ namespace PlanetesWPF
             {
                 try
                 {
-                    Logger.Log("Saving Gif...", LogLevel.Info);
+                    Logger.Log("Saving Gif...", LogLevel.Status);
                     Save(stream);
                 }
                 catch (Exception e)
@@ -86,7 +102,24 @@ namespace PlanetesWPF
                     Logger.Log(e, LogLevel.Debug);
                 }
             }
-            Logger.Log("done saving", LogLevel.Debug); 
+
+            State = RecordingState.Complete; //  IsComplete = true;
+            OnSaveComplete(this);
+            Logger.Log("done saving", LogLevel.Status);
+            Dispose();
+        }
+
+        internal bool Fits(WriteableBitmap imageSample)
+        {
+            return aPixels.Length == imageSample.PixelHeight * imageSample.BackBufferStride;
+        }
+        
+        public void Dispose()
+        {
+            OnSaveComplete = null;
+            frames.Dispose();
+            encoder = null;
+            aPixels = null;
         }
 
         /// <summary>
