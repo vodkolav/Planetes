@@ -22,8 +22,7 @@ namespace PlanetesWPF
 
         public GameClient C { get; set; }
 
-        public GameServer S { get; private set; }
-
+        public GameServer S { get; set; }
 
         public Billboard BB { get; set; }
 
@@ -34,11 +33,13 @@ namespace PlanetesWPF
         public UI()
         {
             InitializeComponent();
-            C = new GameClient(this);
-            C.PlayerName = PlayerName;
+            C = new GameClient(this)
+            {
+                PlayerName = PlayerName
+            };
             L = new Lobby(this);
             BB = new Billboard();
-
+            Logger.Instance.Init($"..\\..\\..\\Logs\\{C}_Log_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv");
             PolygonCollision.DrawingContext.GraphicsContainer = new WPFGraphicsContainer();
             DataContext = (WPFGraphicsContainer)PolygonCollision.DrawingContext.GraphicsContainer;
         }
@@ -207,7 +208,8 @@ namespace PlanetesWPF
             bindHUDS();
             CompositionTarget.Rendering += (s, e) => DrawGraphics();            
             CompositionTarget.Rendering += (s, e) => RC.AddFrame(C.gameObjects.frameNum); //TODO: Add this only when recording
-            Closing += (s, e) => RC.End();    
+            Closing += (s, e) => RC.End();
+            Closing += (s, e) => Logger.Instance.Dispose();
         }
         
         public void UpdateLobby(GameState go)

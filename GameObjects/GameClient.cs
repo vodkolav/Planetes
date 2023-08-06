@@ -9,9 +9,37 @@ using GameObjects.Model;
 
 namespace GameObjects
 {
+    public class LocalClient : GameClient
+    {
+        
+        public LocalClient(IUI owner) : base(owner)
+        {
+
+        }
+
+        public override GameState gameObjects
+        {
+            get { return GameServer.Instance.gameObjects; }
+        }
+
+        public override void updateGameState(GameState go)
+        {
+           
+        }
+
+        public override void UpdateLobby(GameState go)
+        {
+            //gameObjects = go;
+            World = go.World;
+            UI.UpdateLobby(go);
+        }
+
+    }
+
+
     public class GameClient
     {
-        private IUI UI { get; set; }
+        protected IUI UI { get; set; }
 
         private IHubProxy Proxy { get; set; }
 
@@ -23,13 +51,15 @@ namespace GameObjects
 
         public ControlPanel Yoke { get; set; }
 
-        public GameState gameObjects { get; set; }
+        public virtual GameState gameObjects { get; set; }
 
         public Map World { get; set; }
 
         public Player Me { get { return gameObjects.Players.SingleOrDefault(p => p.ID == PlayerId); } }
 
         public bool GameOn { get { return gameObjects != null && gameObjects.GameOn; } }
+
+        private int LastDrawnFrame { get; set; } = 1;
 
         StreamWriter writer;
 
@@ -75,7 +105,7 @@ namespace GameObjects
             await Proxy.Invoke<GameState>("LeaveLobby", new object[] { PlayerId });
         }
 
-        public void updateGameState(GameState go)
+        public virtual void updateGameState(GameState go)
         {
             //Logger.Log("received model for frame " + go.frameNum, LogLevel.Status);
             lock (gameObjects)
@@ -84,7 +114,7 @@ namespace GameObjects
             }            
         }
 
-        public void UpdateLobby(GameState go)
+        public virtual void UpdateLobby(GameState go)
         {
             gameObjects = go;
             World = gameObjects.World;
@@ -149,8 +179,22 @@ namespace GameObjects
             //Logger.Log("Me.Pos " + Me.Jet.Pos + " |VP: " + Me.viewPort, LogLevel.Status);
             //Logger.Log("drawing frame " + gameObjects.frameNum, LogLevel.Status);
 
+
+            if (LastDrawnFrame >= gameObjects.frameNum)
+            {
+                return;
+            }
+
             lock (gameObjects)
             {
+                LastDrawnFrame = gameObjects.frameNum;
+                Jet debugged = gameObjects.Jets.Single(j => j.Owner.Name.Contains("Bot1")); // WPFplayer
+                float dt = (float)(DateTime.UtcNow - gameObjects.StartTime).TotalSeconds;
+                Logger.Log($"{gameObjects.frameNum},{GameTime.DeltaTime:F4}, " +
+                           $"{dt:F4}, {debugged.LastOffset.Magnitude:F4}, {debugged.Pos.Magnitude}, " +
+                           $"{debugged.Pos.X}, {debugged.Pos.Y}, Draw", LogLevel.CSV);
+
+
                 DrawingContext.GraphicsContainer.ViewPortOffset = -Me.viewPort.Origin;
 
                 World.Draw();

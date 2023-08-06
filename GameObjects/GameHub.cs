@@ -21,26 +21,32 @@ namespace GameObjects
 
         public void Command(int who, Tuple<Action, HOTAS> command)
         {
-            try
-            {              
-                _gameServer.gameObjects.Players.Single(p => p.ID == who).Act(command);
-            }
-            catch (Exception e)
+            lock (_gameServer.gameObjects)
             {
-                Logger.Log(e, LogLevel.Debug);
-            }            
+                try
+                {
+                    _gameServer.gameObjects.Players.Single(p => p.ID == who).Act(command);
+                }
+                catch (Exception e)
+                {
+                    Logger.Log(e, LogLevel.Debug);
+                }
+            }
         }
 
         //TODO: get rid of those tuples. just use regular params
         public void Do(int who, Tuple<Action, Vector> command)
         {
-            try
+            lock (_gameServer.gameObjects)
             {
-                _gameServer.gameObjects.Players.Single(p => p.ID == who).Act(command);
-            }
-            catch (Exception e)
-            {
-                Logger.Log(e, LogLevel.Debug);
+                try
+                {
+                    _gameServer.gameObjects.Players.Single(p => p.ID == who).Act(command);
+                }
+                catch (Exception e)
+                {
+                    Logger.Log(e, LogLevel.Debug);
+                }
             }
         }
 

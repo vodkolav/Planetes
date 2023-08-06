@@ -169,10 +169,10 @@ namespace GameObjects
         public void Start()
         {
             gameObjects.Start();
-            thrdGameLoop.Start();
             Match = new Match(gameObjects);
             Match.InitFeudingParties();
             Logger.Log("Fight!", LogLevel.Info);
+            thrdGameLoop.Start();
             hubContext.Clients.All.Start();
         }
 
@@ -219,8 +219,10 @@ namespace GameObjects
             //https://learn.microsoft.com/en-us/aspnet/signalr/overview/getting-started/tutorial-high-frequency-realtime-with-signalr
             try
             {
-                DateTime dt;// maybe replace this with stopwatch
-                TimeSpan tdiff;
+                GameTime.TotalElapsedSeconds = (float)(DateTime.UtcNow - gameObjects.StartTime).TotalSeconds;
+                
+                string CSVheader = "frame, DeltaTime, UtcNow, JetSpeed, JetPosMag, JetPosX, JetPosY , Source";
+                Logger.Log(CSVheader, LogLevel.CSV);
 
                 while (gameObjects.GameOn)
                 {
@@ -229,19 +231,36 @@ namespace GameObjects
                     if (_shutdownEvent.WaitOne(0))
                         break;
 
-                    dt = DateTime.UtcNow;
+                    float dt = (float)(DateTime.UtcNow - gameObjects.StartTime).TotalSeconds;
 
+                    if (dt == GameTime.TotalElapsedSeconds)
+                    {
+                        int a = 0;
+                    }
 
-                    gameObjects.Frame();
+                    GameTime.DeltaTime = (dt - GameTime.TotalElapsedSeconds);
+                    GameTime.TotalElapsedSeconds = dt;
+
+                    Jet debugged = gameObjects.Jets.Single(j => j.Owner.Name.Contains("Bot1"));  //"WPFplayer"
+                    string csvLine = $"{gameObjects.frameNum},{GameTime.DeltaTime:F4}, " +
+                                     $"{dt:F4}, {debugged.LastOffset.Magnitude:F4}, " +
+                                     $"{debugged.Pos.Magnitude}, {debugged.Pos.X}, {debugged.Pos.Y}, GameLoop";
+                    Logger.Log(csvLine, LogLevel.CSV);
+                    
+                    lock (gameObjects) 
+                    {
+                        gameObjects.Frame();
+                    }
+
                     Match.CheckGame(this);
 
                     //string gobj = JsonConvert.SerializeObject(gameObjects); // only for debugging - to check what got serialized
-                    await hubContext.Clients.All.UpdateModel(gameObjects);
-                    _ = Task.Run(DispatchMessages);
+                    if (gameObjects.frameNum % 4 == 0) //for performance - send only every 4th frame to the clients
+                    {
+                        await hubContext.Clients.All.UpdateModel(gameObjects);
+                    }
 
-
-                    tdiff = DateTime.UtcNow - dt;
-                    Thread.Sleep((GameState.FrameInterval - tdiff).Duration()); //this is bad. There should be timer instead
+                    await Task.Run(DispatchMessages);
                     //Logger.Log("frameNum: " + gameObjects.frameNum, LogLevel.Status);// + "| " + tdiff.ToString()
                 }
             }

@@ -14,13 +14,25 @@ namespace GameObjects
 
         public static Size WorldSize { get { return new Size(1200, 600); } }
 
-        public static TimeSpan FrameInterval { get { return new TimeSpan(0, 0, 0, 0, 20); } } 
+        public static float GameSpeed => 7.0f;
+
+        public static TimeSpan FrameInterval { get { return new TimeSpan(0, 0, 0, 0, 8); } } //TODO: drop this
         
-        public static float Lightspeed { get { return 8; } }
+        public static double JetScale => 0.6;
 
-        public static int bulletSpeed { get { return 30; } }
+        public static float Lightspeed { get { return 40 ; } }
 
-        public static float  Thrust { get { return 0.1f; } }
+        public static int bulletSpeed { get { return 200; } }
+
+        public static float Cooldown { get { return 0.1f; } }
+
+        public static bool EnableAstroids { get { return false; } }
+
+        public static float AsteroidTimeout { get { return 5; } }
+
+        public static float  Thrust { get { return 4f; } } 
+
+
 
         public static int WallWidth { get { return 30; } }
 
@@ -73,6 +85,7 @@ namespace GameObjects
         {
             _colors.Add(color);
         }
+
         public static Vector TossPoint
         {
             get
@@ -82,10 +95,5 @@ namespace GameObjects
                 return new Vector(x, y);
             }
         }
-
-        public static bool EnableAstroids { get { return false; } }
-
-        public static int AsteroidTimeout { get { return 30; } }
     }
-
 }
