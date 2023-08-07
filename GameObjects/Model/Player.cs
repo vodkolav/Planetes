@@ -28,7 +28,7 @@ namespace GameObjects.Model
 
         public event MatchEventHandler OnMatchEvent;
 
-        public int DeathTime { get; set; } = 0;
+        public float DeathTime { get; set; }
 
         public bool isAlive { get; set; } = true;
 

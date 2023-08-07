@@ -276,7 +276,10 @@ namespace GameObjects
                         gameObjects.Frame();
                     }
 
-                    Match.CheckGame(this);
+                    lock (gameObjects)
+                    {
+                        Match.CheckGame(this);
+                    }
 
                     //string gobj = JsonConvert.SerializeObject(gameObjects); // only for debugging - to check what got serialized
                     if (gameObjects.frameNum % 4 == 0) //for performance - send only every 4th frame to the clients

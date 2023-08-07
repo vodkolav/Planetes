@@ -17,6 +17,7 @@ namespace GameObjects.Model
             }
         }
 
+        public Vector LastOffset { get; set; }
 
         public Vector Acceleration { get; set; }
         
@@ -69,13 +70,15 @@ namespace GameObjects.Model
 
         public Vector Gun { get { return Cockpit.Vertices[1]; } }
 
-        public int LastFired { get; set; }
+        public float LastFired { get; set; }
 
         public bool KeyShoot { get; set; }
 
         public bool KeyBrake { get; set; }
 
-        public int Cooldown { get; set; }
+        public Vector BounceNormal { get; set; }
+
+        public float Cooldown { get; set; }
 
         public override Circle BoundingCirc { get { return new Circle(Pos, (Gun - Pos).Magnitude); } }
 
@@ -92,7 +95,7 @@ namespace GameObjects.Model
 
         public Jet(Player owner, int health, int ammo)
         {
-            double l = 0.8; 
+            double l = GameConfig.JetScale; 
             Hull = new Polygon(5);
             Hull.AddVertex(new Vector(0, 0)*l);
             Hull.AddVertex(new Vector(50, 10) * l);//
@@ -112,7 +115,7 @@ namespace GameObjects.Model
             Acceleration = new Vector(0, 0);
             Aim = new Vector(1, 0);
             Thrust = GameConfig.Thrust;
-            Cooldown = 2;
+            Cooldown = GameConfig.Cooldown;
 
             Health = health;
             MaxHealth = health;
@@ -122,6 +125,7 @@ namespace GameObjects.Model
 
         public void Offset(Vector by)
         {
+            LastOffset = by;
             _hull.Offset(by);
             _cockpit.Offset(by);
         }
@@ -172,17 +176,30 @@ namespace GameObjects.Model
 
         public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)
         {
-            Bounce(-Speed);
+            Offset(-Pos);
+            Offset(GameConfig.TossPoint);
+            //when I debug, the time continues, so when run continues, objects have 
+            //flied far beyond world edge. return them to random place on map
         }
 
-        public override  void Move(GameState gO)
+        public override void Move(GameState gO)
         {
             if (KeyBrake)
             {
-                Acceleration = -Speed * 0.8;
+                Acceleration = -Speed.GetNormalized() * 0.8;
             }
 
-            Vector newSpeed = Speed + Acceleration * Thrust ;
+            if (Speed.X == Single.NaN)
+            {
+                Logger.Log("speed nan", LogLevel.Debug);
+            }
+
+            Vector deltaV = Acceleration * GameConfig.GameSpeed * Thrust * GameTime.DeltaTime; 
+     
+            Vector newSpeed = Speed + deltaV * 0.5;
+
+            Vector offset = (Speed + deltaV * 0.5) * GameConfig.GameSpeed  * GameTime.DeltaTime ;
+            
             //Physics Police            
 
             if (newSpeed.Magnitude <= GameConfig.Lightspeed)
@@ -194,17 +211,37 @@ namespace GameObjects.Model
                 Speed = newSpeed.GetNormalized() * GameConfig.Lightspeed;
             }
 
-            Offset(Speed);
 
-            Rotate(Aim);
+            if (!(BounceNormal is null)) 
+            {
+                // TODO find out why it bounces strangely (too far)
+                // Probably need to do "* GameConfig.GameSpeed * GameTime.DeltaTime"
+                Vector oldspeed = Speed;
 
+                Speed -= 2 * Speed.Dot(BounceNormal) * BounceNormal ;
+
+                if (Speed.Magnitude != oldspeed.Magnitude)
+                {
+                    Logger.Log("hmmm", LogLevel.Info);
+                }
+                BounceNormal = null;
+            }
+
+            /*if (GameTime.DeltaTime == 0.000000f) // TODO: find WTF this happens
+            {
+                Logger.Log("DeltaTime zero", LogLevel.Debug);
+            }*/
+
+            Offset(offset);
+
+            Rotate(Aim );///  GameTime.DeltaTime/ GameTime.DeltaTime 
+            
             Owner.viewPort.Update();
         }
 
         public void Bounce(Vector normal)
         {
-            //TODO: rename speed to velocity
-            Speed -= 2 * Speed.Dot(normal) * normal;
+            BounceNormal = normal;
         }
         
         public override void Draw()
@@ -245,10 +282,10 @@ namespace GameObjects.Model
         {
             if (KeyShoot)
             {
-                if (Ammo != 0 && gameObjects.frameNum > LastFired + Cooldown)
+                if (Ammo != 0 && GameTime.TotalElapsedSeconds > LastFired + Cooldown)
                 {
-                    LastFired = gameObjects.frameNum;
-                    Bullet bullet = new Bullet(Owner, Gun, speed: Bearing.GetNormalized() * Bullet.linearSpeed /*+ Speed*/, size: 3, color: Color);
+                    LastFired = GameTime.TotalElapsedSeconds;
+                    Bullet bullet = new Bullet(Owner, Gun, speed: Bearing.GetNormalized() * GameConfig.bulletSpeed /*+ Speed*/, size: 3, color: Color);
                     gameObjects.Entities.Add(bullet);
                     Ammo--;
                 }

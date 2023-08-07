@@ -13,7 +13,7 @@ namespace GameObjects.Model
         public bool GameOn { get; set; } = false;
 
         public bool Paused { get; set; } // TODO: allow players to pause game 
-        [JsonIgnore]
+
         public DateTime StartTime { get; set; }
         public int frameNum { get; set; }
 
@@ -30,7 +30,7 @@ namespace GameObjects.Model
 
         [JsonProperty(ItemTypeNameHandling = TypeNameHandling.Auto)]
         public List<ICollideable> Entities { get; set; }
-        
+
         public Map World { get; set; }
 
         public bool ShouldSerializeWorld()
@@ -52,11 +52,11 @@ namespace GameObjects.Model
             Players = new List<Player>();
             frameNum = 0;
         }
-        
+
         public void Start()
         {
             GameOn = true;
-            StartTime = DateTime.Now;
+            StartTime = DateTime.UtcNow;
         }
 
         public void Frame()
@@ -64,73 +64,77 @@ namespace GameObjects.Model
             if (Paused) return;
             frameNum++;
             //Logger.Log("Model FPS: " + frameNum / (DateTime.Now - StartTime).TotalSeconds, LogLevel.Status);
-            lock (this) // execute actions for each player
+            
+            PolygonCollisionResult r;
+
+            Players.ForEach(p => p.Shoot(this));
+
+            foreach (ICollideable e in Entities)
             {
-                PolygonCollisionResult r;
+                e.Move(this);
+            }
 
-                Players.ForEach(p => p.Shoot(this));
+            //check for collision of all objects with World bounds
+            foreach (ICollideable e in Entities)
+            {
+                r = e.Collides(World);
+                if (r.Intersect)
+                {
+                    e.HandleCollision(World, r);
+                    break;
+                }
+            }
 
-                Entities.ForEach(j => j.Move(this));
-
-                //check for collision of all objects with World bounds
+            //check for collision of Bullets Astroids and Jets with Walls
+            foreach (Wall w in World.Walls)
+            {
                 foreach (ICollideable e in Entities)
                 {
-                    r = e.Collides(World);
+                    r = e.Collides(w);
                     if (r.Intersect)
                     {
-                        e.HandleCollision(World, r);
+                        e.HandleCollision(w, r);
                         break;
                     }
                 }
+            }
 
-                //check for collision of Bullets Astroids and Jets with Walls
-                foreach (Wall w in World.Walls)
+            //check for collision of Bullets and Astroids with Jets
+            List<Type> types = new List<Type>() { typeof(Astroid), typeof(Bullet) };
+
+            foreach (Jet j in Entities.OfType<Jet>())
+            {
+                foreach (ICollideable e in Entities.Where(e => types.Contains(e.GetType())))
                 {
-                    foreach (ICollideable e in Entities)
+                    r = e.Collides(j);
+                    if (r.Intersect)
                     {
-                        r = e.Collides(w);
-                        if (r.Intersect)
-                        {
-                            e.HandleCollision(w, r);
-                            break;
-                        }
+                        e.HandleCollision(j, r);
+                        break;
                     }
                 }
-
-                //check for collision of Bullets and Astroids with Jets
-                List<Type> types = new List<Type>() { typeof(Astroid), typeof(Bullet) };
-
-                foreach (Jet j in Entities.OfType<Jet>())
+            }
+            
+            //check for collision of Bullets with Astroids
+            foreach (Astroid a in Entities.OfType<Astroid>())
+            {
+                foreach (ICollideable e in Entities.OfType<Bullet>())
                 {
-                    foreach (ICollideable e in Entities.Where(e => types.Contains(e.GetType())))
+                    r = e.Collides(a);
+                    if (r.Intersect)
                     {
-                        r = e.Collides(j);
-                        if (r.Intersect)
-                        {
-                            e.HandleCollision(j, r);
-                            break;
-                        }
+                        e.HandleCollision(a, r);
+                        break;
                     }
                 }
+            }
 
-                //check for collision of Bullets with Astroids
-                foreach (Astroid a in Entities.OfType<Astroid>())
-                {
-                    foreach (ICollideable e in Entities.OfType<Bullet>())
-                    {
-                        r = e.Collides(a);
-                        if (r.Intersect)
-                        {
-                            e.HandleCollision(a, r);
-                            break;
-                        }
-                    }
-                }
+            Entities.RemoveAll(b => !b.isAlive);
 
-                Entities.RemoveAll(b => !b.isAlive);
-
+            if (GameConfig.EnableAstroids)
+            {
                 //Spawn asteroid after timeout
-                if (GameConfig.EnableAstroids && frameNum % GameConfig.AsteroidTimeout == 0)
+                if (GameConfig.EnableAstroids && GameTime.TotalElapsedSeconds % GameConfig.AsteroidTimeout < 1)
                 {
                     Entities.Add(new Astroid(World.Size));
                 }

@@ -9,8 +9,6 @@ namespace GameObjects.Model
     {
         public override Vector Pos { get => Body.Pos; set => Body.Pos = value; }     
         
-        public static int linearSpeed = GameConfig.bulletSpeed;
-
         public override Vector Speed { get => Body.Tail; }
         
         public int Size { get => Body.Size; }       
@@ -24,7 +22,7 @@ namespace GameObjects.Model
         public Bullet(Player owner, Vector pos, Vector speed, int size, Color color)
         {
             Owner = owner;            
-            Body = new Ray(pos, speed*0.5, size);
+            Body = new Ray(pos, speed*0.25, size);
             Color = color;
             isAlive = true;
         }   
@@ -67,13 +65,12 @@ namespace GameObjects.Model
 
         public override void Move(GameState gameObjects)
         { 
-            Offset(Speed);
+            Offset(Speed * GameConfig.GameSpeed * GameTime.DeltaTime );
         }
 
         public void Offset(Vector by)
         {
            Body.Offset(by);
         }
-
     }
 }

@@ -37,7 +37,7 @@ namespace GameObjects.Model
     {
         private int KillsGoal { get; set; } = 500;
 
-        public int RespawnTime { get; set; } = 200;
+        public float RespawnTime { get; set; } = 5;
 
         private Dictionary<int, Stat> stats { get; set; } // int is Player.ID 
 
@@ -54,7 +54,7 @@ namespace GameObjects.Model
             if (killer != null)
                 stats[killer.ID].Kills += 1;
             stats[victim.ID].Deaths += 1;
-            victim.DeathTime = gameObjects.frameNum;
+            victim.DeathTime = GameTime.TotalElapsedSeconds;
             victim.isAlive = false;
             Logger.Log(ShowStats(), LogLevel.Info);
         }
@@ -105,14 +105,11 @@ namespace GameObjects.Model
             {
                 if (!player.isAlive)
                 {
-                    int tillRespawn = player.DeathTime + RespawnTime - gameObjects.frameNum;
+                    float tillRespawn = player.DeathTime + RespawnTime - GameTime.TotalElapsedSeconds;
                     if (tillRespawn > 0)
                     {
-                        if (tillRespawn % 10 == 0)
-                        {
-                            s.Notify(player, Notification.Death,
-                                $" {player.Name} is DEAD. He will respawn in {tillRespawn} frames");
-                        }
+                        s.Notify(player, Notification.Death,
+                            $" {player.Name} is DEAD. He will respawn in {(int)tillRespawn} seconds!");
                     }
                     else
                     {

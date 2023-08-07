@@ -15,7 +15,7 @@ namespace GameObjects.Model
 
         public virtual Vector Pos { get; set; }
 
-        public virtual Vector Speed { get; set; }
+        public virtual Vector Speed { get; set; }//TODO: rename speed to velocity
 
         public virtual bool isAlive { get; set; }
 
