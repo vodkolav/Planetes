@@ -39,7 +39,7 @@ namespace PlanetesWPF
             };
             L = new Lobby(this);
             BB = new Billboard();
-            Logger.Instance.Init($"..\\..\\..\\Logs\\{C}_Log_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv");
+            Logger.RedirectToFile($"..\\..\\..\\Logs\\{C}_Log_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv");
             PolygonCollision.DrawingContext.GraphicsContainer = new WPFGraphicsContainer();
             DataContext = (WPFGraphicsContainer)PolygonCollision.DrawingContext.GraphicsContainer;
         }

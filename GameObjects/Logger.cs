@@ -53,21 +53,22 @@ namespace GameObjects
 
         public Logger()
         {
-            T = new Thread(Process);
-            T.IsBackground = true;
-            T.Name = "Logger";
+            T = new Thread(WriteLoop)
+            {
+                IsBackground = true,
+                Name = "Logger"
+            };
             messages = new BlockingCollection<LogMsg>();
             output = Console.Out;
             T.Start();
         }
 
-        public void Init(string filepath)
+        public static void RedirectToFile( string filepath)
         {
-            // StreamWriter outputFile = outputFile;
-            output = new StreamWriter(filepath); 
+            Instance.output = new StreamWriter(filepath);
         }
 
-        public static void Process()
+        public static void WriteLoop()
         {
             foreach (var message in Instance.messages.GetConsumingEnumerable())
             {
@@ -77,19 +78,28 @@ namespace GameObjects
         }
 
 
-
-
+        public static void AddMessage(LogMsg lm)
+        {
+            try
+            {
+                Instance.messages.Add(lm);
+            }
+            catch (ObjectDisposedException)
+            {
+                // when disposing of logger, the app still sends log messages, which throws ObjectDisposedException.
+                // We just ignore it
+            }
+        }
 
         public static void Log(Exception exception, LogLevel ll)
         {
             if (!loglevels.Contains(ll))
                 return;
-            Instance.messages.Add(new LogMsg{Exception = exception, loglevel = ll});
+            AddMessage(new LogMsg { Exception = exception, loglevel = ll });
         }
 
         public static void Log(string message, LogLevel ll)
         {
-
             if (!loglevels.Contains(ll))
                 return;
             if (ll is LogLevel.Debug)
@@ -107,7 +117,7 @@ namespace GameObjects
             }
             else
             {
-                Instance.messages.Add(new LogMsg { Message = message, loglevel = ll });
+                AddMessage(new LogMsg { Message = message, loglevel = ll });
             }
         }
 

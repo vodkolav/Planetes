@@ -188,7 +188,7 @@ namespace GameObjects
             lock (gameObjects)
             {
                 LastDrawnFrame = gameObjects.frameNum;
-                Jet debugged = gameObjects.Jets.Single(j => j.Owner.Name.Contains("Bot1")); // WPFplayer
+                Jet debugged = gameObjects.Players.Single(p => p.Name.Contains("Bot1")).Jet; // WPFplayer
                 float dt = (float)(DateTime.UtcNow - gameObjects.StartTime).TotalSeconds;
                 Logger.Log($"{gameObjects.frameNum},{GameTime.DeltaTime:F4}, " +
                            $"{dt:F4}, {debugged.LastOffset.Magnitude:F4}, {debugged.Pos.Magnitude}, " +

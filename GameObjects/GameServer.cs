@@ -34,6 +34,8 @@ namespace GameObjects
 
         public Match Match { get; set; }
 
+        private Dictionary<Tuple<int, Notification>,int> notificationTracking { get; set; }
+
         public List<Bot> Bots { get; set; }
 
         //the Tuple holds: int ids of player to send message to, enum Notification type, and string the message
@@ -55,6 +57,7 @@ namespace GameObjects
             Bots = new List<Bot>();
             messageQ = new BlockingCollection<Tuple<string, Notification, string>>();
             hubContext = GlobalHost.ConnectionManager.GetHubContext<GameHub>();
+            notificationTracking = new Dictionary<Tuple<int, Notification>, int>();
             R = new Random();
         }
         public void Listen(int port)
@@ -149,20 +152,40 @@ namespace GameObjects
 
         public void Notify(Player player, Notification about, string message)
         {
-            messageQ.Add(new Tuple<string, Notification, string>(player.ConnectionID, about, message));
+            Tuple<int, Notification> val = new Tuple<int, Notification>(player.ID, about);
+            int lastNotif;
+            // To prevent server from spamming clients with same type of notification every frame
+            // we save the rounded second when a notification type was last sent to a player.
+            // and disregard all same notifications that come, until the next second comes
+            // So, every player gets notified about a type of event once every second at most.
+            if (notificationTracking.TryGetValue(val, out lastNotif))
+            {
+                if (lastNotif != (int)GameTime.TotalElapsedSeconds)
+                {
+                    messageQ.Add(new Tuple<string, Notification, string>(player.ConnectionID, about, message));
+                    notificationTracking[val] = (int)GameTime.TotalElapsedSeconds;
+                }
+                else
+                {
+                    //wait
+                }
+            }
+            else
+            {
+                messageQ.Add(new Tuple<string, Notification, string>(player.ConnectionID, about, message));
+                notificationTracking.Add(val, (int)GameTime.TotalElapsedSeconds);
+            }
+
         }
 
         public void DispatchMessages()
         {
-            if (messageQ.Count != 0)
+            foreach (var mes in messageQ.GetConsumingEnumerable())
             {
-                foreach (var mes in messageQ.GetConsumingEnumerable())
-                {
-                    string to = mes.Item1;
-                    Notification type = mes.Item2;
-                    string mess = mes.Item3;
-                    hubContext.Clients.Client(to).Notify(type, mess);
-                }
+                string to = mes.Item1;
+                Notification type = mes.Item2;
+                string mess = mes.Item3;
+                hubContext.Clients.Client(to).Notify(type, mess);
             }
         }
 
@@ -223,6 +246,7 @@ namespace GameObjects
                 
                 string CSVheader = "frame, DeltaTime, UtcNow, JetSpeed, JetPosMag, JetPosX, JetPosY , Source";
                 Logger.Log(CSVheader, LogLevel.CSV);
+                _ = Task.Run(DispatchMessages);
 
                 while (gameObjects.GameOn)
                 {
@@ -241,7 +265,7 @@ namespace GameObjects
                     GameTime.DeltaTime = (dt - GameTime.TotalElapsedSeconds);
                     GameTime.TotalElapsedSeconds = dt;
 
-                    Jet debugged = gameObjects.Jets.Single(j => j.Owner.Name.Contains("Bot1"));  //"WPFplayer"
+                    Jet debugged = gameObjects.Players.Single(p => p.Name.Contains("Bot1")).Jet;//WPFplayer
                     string csvLine = $"{gameObjects.frameNum},{GameTime.DeltaTime:F4}, " +
                                      $"{dt:F4}, {debugged.LastOffset.Magnitude:F4}, " +
                                      $"{debugged.Pos.Magnitude}, {debugged.Pos.X}, {debugged.Pos.Y}, GameLoop";
@@ -259,8 +283,6 @@ namespace GameObjects
                     {
                         await hubContext.Clients.All.UpdateModel(gameObjects);
                     }
-
-                    await Task.Run(DispatchMessages);
                     //Logger.Log("frameNum: " + gameObjects.frameNum, LogLevel.Status);// + "| " + tdiff.ToString()
                 }
             }
