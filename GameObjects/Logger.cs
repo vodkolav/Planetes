@@ -89,6 +89,10 @@ namespace GameObjects
                 // when disposing of logger, the app still sends log messages, which throws ObjectDisposedException.
                 // We just ignore it
             }
+            catch (InvalidOperationException)
+            {
+                //same here
+            }
         }
 
         public static void Log(Exception exception, LogLevel ll)

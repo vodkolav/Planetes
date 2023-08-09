@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Media;
+using GameObjects.Model;
 using PolygonCollision;
 
 namespace GameObjects
@@ -26,13 +27,11 @@ namespace GameObjects
 
         public static float Cooldown { get { return 0.1f; } }
 
-        public static bool EnableAstroids { get { return false; } }
+        public static bool EnableAstroids { get { return true; } }
 
-        public static float AsteroidTimeout { get { return 5; } }
+        public static float AsteroidTimeout { get { return 1000; } }
 
-        public static float  Thrust { get { return 4f; } } 
-
-
+        public static float  Thrust { get { return 8f; } }
 
         public static int WallWidth { get { return 30; } }
 
@@ -93,6 +92,32 @@ namespace GameObjects
                 int x = r.Next(WallWidth * 3, WorldSize.Width - WallWidth * 3);
                 int y = r.Next(WallWidth * 3, WorldSize.Height - WallWidth * 3);
                 return new Vector(x, y);
+            }
+        }
+
+        public static int TossInt(int max)
+        {
+            return r.Next(max);
+        }
+
+        public static int TossInt( int min, int max)
+        {
+            return r.Next(min, max);
+        }
+
+        public static  AstType TossAsteroidType
+        {
+            get
+            {
+                switch (TossInt(7))
+                {
+                    case 1:
+                        return AstType.Ammo;
+                    case 2:
+                        return AstType.Health;
+                    default:
+                        return AstType.Rubble;
+                }
             }
         }
     }

@@ -36,22 +36,6 @@ namespace GameObjects.Model
 
         public override int Power {  get {return (int)Size; } }
         
-        public void TossType(Random random)
-        {
-            switch (random.Next(10))
-            {
-                case (1):
-                    Type = AstType.Ammo;
-                    break;
-                case 2:
-                    Type = AstType.Health;
-                    break;
-                default:
-                    Type = AstType.Rubble;
-                    break;
-            }
-        }
-        
         [JsonIgnore]
         public Color Color
         {
@@ -69,15 +53,15 @@ namespace GameObjects.Model
             }
         }
 
-        public Astroid(Size worldSize)
+
+        public Astroid(AstType type)
         {
-            Random random = new Random();
-            Body = new Circle(new Vector(random.Next(worldSize.Width), random.Next(worldSize.Height)), random.Next(20) + 5);
-            int linearSpeed = random.Next(1, (int)GameConfig.Lightspeed/2);
-            double Angle = Math.PI / 180 * random.Next(360);
+            Body = new Circle(GameConfig.TossPoint, GameConfig.TossInt(10,30));
+            double linearSpeed = GameConfig.TossInt(1,(int)(GameConfig.Lightspeed * 0.5));
+            double Angle = Math.PI / 180 * GameConfig.TossInt(360);
             Vector mult = new Vector((float)Math.Cos(Angle), (float)Math.Sin(Angle));
             Speed = mult * linearSpeed;
-            TossType(random);
+            Type = type;
             isAlive = true;
         }
 
@@ -112,11 +96,11 @@ namespace GameObjects.Model
             isAlive = false;
             if (Type == AstType.Ammo)
             {
-                j.Recharge((int)Size);
+                j.Recharge(Power);
             }
             else if (Type == AstType.Health)
             {
-                j.Heal(1);
+                j.Heal(Power);
             }
             else
                 j.Hit(this);
@@ -129,7 +113,7 @@ namespace GameObjects.Model
 
         public override void Move(GameState gameObjects)
         {
-            Offset(Speed);
+            Offset(Speed * GameConfig.GameSpeed * GameTime.DeltaTime);//*GameTime.DeltaTime);
         }
 
         private void Offset(Vector by)

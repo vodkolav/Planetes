@@ -134,9 +134,12 @@ namespace GameObjects.Model
             if (GameConfig.EnableAstroids)
             {
                 //Spawn asteroid after timeout
-                if (GameConfig.EnableAstroids && GameTime.TotalElapsedSeconds % GameConfig.AsteroidTimeout < 1)
+
+                int chance = GameConfig.TossInt((int)GameConfig.AsteroidTimeout);
+
+                if (GameConfig.EnableAstroids && chance<1) //GameTime.TotalElapsedSeconds % GameConfig.AsteroidTimeout < 0.1)
                 {
-                    Entities.Add(new Astroid(World.Size));
+                    Entities.Add(new Astroid(GameConfig.TossAsteroidType));
                 }
             }
         }
