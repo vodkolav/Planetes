@@ -9,6 +9,10 @@ using GameObjects.Model;
 
 namespace GameObjects
 {
+    /// <summary>
+    /// Local Client references server's gameObjects directly, disregarding SignalR communication.
+    /// Useful in debugging when you want to rule out the network latency.
+    /// </summary>
     public class LocalClient : GameClient
     {
         

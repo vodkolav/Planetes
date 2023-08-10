@@ -11,9 +11,11 @@ namespace PlanetesWPF
         List<GameRecorder> cassetes = new List<GameRecorder>(10);
         GameRecorder current;
         WPFGraphicsContainer graphicsContainer;
+        private WriteableBitmap Source;
         public RecorderController(WPFGraphicsContainer gc )
         {
             graphicsContainer = gc;
+            Source = graphicsContainer.CurrentView;
             ManageCassette(graphicsContainer.CurrentView);
         }
 
@@ -29,6 +31,7 @@ namespace PlanetesWPF
             {
                 current = new GameRecorder(imageSample);
                 current.OnSaveComplete +=  ClearCassetes;
+                current.FrameRate = 5;
                 cassetes.Add(current);
             }
         }
@@ -47,10 +50,15 @@ namespace PlanetesWPF
             current.Start();
         }
 
-        public void AddFrame( int frameNum)
+        public void AddFrame(int frameNum)
         {
-            WriteableBitmap Source = graphicsContainer.CurrentView;
             if (current.State == RecordingState.Recording)
+            {
+                if (current.LastDrawnFrame >= frameNum) // && frameNum % 4 != 0)
+                {
+                    return;
+                }
+
                 if (Source != null)
                 {
                     //Im gonna need this here : 
@@ -61,6 +69,7 @@ namespace PlanetesWPF
                     if (!(Source.Width == 0) && !(Source.Height == 0))
                     {
                         current.AddFrame(Source);
+                        current.LastDrawnFrame = frameNum;
                         //encoder.Frames.Add(BitmapFrame.Create(Source.CloneCurrentValue()));                       
                     }
                     else
@@ -68,6 +77,7 @@ namespace PlanetesWPF
                 }
                 else
                     throw new ArgumentException("Argument Frame cannot be nothing");
+            }
         }
 
         internal void End()

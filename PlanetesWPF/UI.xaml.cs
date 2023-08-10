@@ -33,6 +33,7 @@ namespace PlanetesWPF
         public UI()
         {
             InitializeComponent();
+            //C = new LocalClient(this)
             C = new GameClient(this)
             {
                 PlayerName = PlayerName

@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -30,7 +31,11 @@ namespace PlanetesWPF
         PixelFormat Format;
         BitmapPalette Palette;       
         int Stride;
-        public double ScaleFactor { get; set; } = 0.5; 
+        private int _framerate;
+
+        public double ScaleFactor { get; set; } = 0.666;
+
+        public int LastDrawnFrame { get; internal set; }
 
         public GameRecorder(WriteableBitmap imageSample)
         {
@@ -89,7 +94,7 @@ namespace PlanetesWPF
 
         private void Save()
         {
-            string filename = string.Format("game {0}.gif", DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss"));
+            string filename = string.Format("game {0}_{1}.gif", DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss"),GameConfig.TossInt(999));
             using (FileStream stream = new FileStream(filename, FileMode.Create))
             {
                 try
@@ -142,7 +147,7 @@ namespace PlanetesWPF
             }
             else
                 throw new Exception("Cannot encode the Gif. The frame collection is empty.");
-
+         
             // Locate the right location where to insert the metadata in the binary
             // This will be just before the first label &H0021F9 (Graphic Control Extension)
             int MetadataPTR = -1;
@@ -244,11 +249,11 @@ namespace PlanetesWPF
         ///     ''' characters (Any character above this limit will be truncated). The string will be encoded UTF-7. 
         ///     ''' </summary>
         public List<string> MetadataString { get; set; } = new List<string>();
-
+        
         /// <summary>
-        ///     '''  Get or set the amount of time each frame will be shown (in milliseconds). The default value is 200ms
+        ///     '''  Get or set the amount of time each frame will be shown (in tens of milliseconds). The default value is 200ms
         ///     ''' </summary>
-        public int FrameRate { get; set; } = (int)GameConfig.FrameInterval.TotalMilliseconds/10;
+        public int FrameRate { get => _framerate; set => _framerate = Math.Max(2,value); }  //(int)(GameTime.DeltaTime);//  (int)GameConfig.FrameInterval.TotalMilliseconds/10;
     }
 }
 
