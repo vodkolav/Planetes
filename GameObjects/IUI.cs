@@ -16,7 +16,7 @@ namespace GameObjects
 
         void bindHUDS();
 
-        void Notify(string message);
+        void Notify(Notification type, string message);
 
         void AnnounceDeath(string message);
 

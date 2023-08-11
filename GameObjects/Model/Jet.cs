@@ -285,7 +285,7 @@ namespace GameObjects.Model
                 if (Ammo != 0 && GameTime.TotalElapsedSeconds > LastFired + Cooldown)
                 {
                     LastFired = GameTime.TotalElapsedSeconds;
-                    Bullet bullet = new Bullet(Owner, Gun, speed: Bearing.GetNormalized() * GameConfig.bulletSpeed /*+ Speed*/, size: 3, color: Color);
+                    Bullet bullet = new Bullet(Owner, Gun, Bearing.GetNormalized(), GameConfig.bulletSpeed /*+ Speed*/, size: 3, color: Color);
                     gameObjects.Entities.Add(bullet);
                     Ammo--;
                 }

@@ -23,7 +23,7 @@ namespace GameObjects
 
         public static float Lightspeed { get { return 40 ; } }
 
-        public static int bulletSpeed { get { return 200; } }
+        public static int bulletSpeed { get { return 40; } }
 
         public static float Cooldown { get { return 0.1f; } }
 
@@ -39,6 +39,10 @@ namespace GameObjects
 
         public static int StartingAmmo { get { return 1000; } }
 
+        #region debug
+        public static bool LogRedirectToFile { get { return false; } }
+        
+        #endregion
 
 
         public static ConcurrentBag<Color> _colors = new ConcurrentBag<Color>()

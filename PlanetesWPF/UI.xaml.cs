@@ -40,7 +40,7 @@ namespace PlanetesWPF
             };
             L = new Lobby(this);
             BB = new Billboard();
-            Logger.RedirectToFile($"..\\..\\..\\Logs\\{C}_Log_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv");
+            Logger.LogFile = $"..\\..\\..\\Logs\\{C}_Log_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv";
             PolygonCollision.DrawingContext.GraphicsContainer = new WPFGraphicsContainer();
             DataContext = (WPFGraphicsContainer)PolygonCollision.DrawingContext.GraphicsContainer;
         }
@@ -110,7 +110,7 @@ namespace PlanetesWPF
                 BB.Hide();
             });
         }
-
+        
         public void bindHUDS()
         {            
             foreach (Player p in C.gameObjects.Players)
@@ -185,7 +185,7 @@ namespace PlanetesWPF
             await C.LeaveLobby();
         }
 
-        public void Notify(string message)
+        public void Notify(Notification type, string message)
         {
             //should make a separate, non-blocking notification window.
            MessageBox.Show(message);
@@ -265,7 +265,7 @@ namespace PlanetesWPF
         {
             var URL = hostNetworkGame();
             
-            S.AddBot(); 
+            S.AddBot<Bot2>(); 
             S.AddBot<Bot3>();
             await joinNetworkGame(URL);
             //await C.StartServer();

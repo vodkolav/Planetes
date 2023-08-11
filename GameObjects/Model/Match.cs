@@ -35,7 +35,7 @@ namespace GameObjects.Model
 
     public class Match
     {
-        private int KillsGoal { get; set; } = 500;
+        private int KillsGoal { get; set; } = 3;
 
         public float RespawnTime { get; set; } = 5;
 
@@ -109,7 +109,7 @@ namespace GameObjects.Model
                     if (tillRespawn > 0)
                     {
                         s.Notify(player, Notification.Death,
-                            $" {player.Name} is DEAD. He will respawn in {(int)tillRespawn} seconds!");
+                            $" {player.Name} is DEAD. He will respawn in {(int)tillRespawn+1} seconds!");
                     }
                     else
                     {
@@ -120,22 +120,23 @@ namespace GameObjects.Model
             }
             //&& gameObjects.frameNum % 100 != 0)   /// && player.DeathTime + RespawnTime >= gameObjects.frameNum
 
-            //check if a player reached KillsGoal. If so, game over
-            /*var achievers = stats.Where(k => k.Value.Kills >= KillsGoal);
+            //check if some player reached KillsGoal. If so, game over
+            var achievers = stats.Where(k => k.Value.Kills >= KillsGoal);
 
             if (achievers.Any())
             {
                 Player winner = gameObjects.Players.Single(p => p.ID == achievers.Single().Key);
 
                 //Notify winner
-                s.Notify(winner, Notification.Won, "Congrats! you win! ");
+                s.Notify(winner, Notification.Won, "Yay! you win! ");
                 foreach (Player p in gameObjects.Players.Where(p => p != winner))
                 {
                     // notify everyone they lost and who won
                     s.Notify(p, Notification.Lost, $"You lose, sorry. \n {winner.Name} is the winner ");
                 }
-                throw new Exception("game over");
-            }*/
+             gameObjects.gameOver();               
+            }
+
 
             //TODO:
             // close clients on UIs 

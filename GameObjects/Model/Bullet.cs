@@ -7,25 +7,29 @@ namespace GameObjects.Model
     [JsonObject(IsReference = true)]
     public class Bullet : ICollideable
     {
-        public override Vector Pos { get => Body.Pos; set => Body.Pos = value; }     
-        
-        public override Vector Speed { get => Body.Tail; }
-        
+        [JsonIgnore]
+        public override Vector Pos { get => Body.Pos; set => Body.Pos = value; }
+
+        [JsonIgnore]
         public int Size { get => Body.Size; }       
         
-        Ray Body { get; set; }
+        public Ray Body { get; set; }
 
         public Color Color { get; set; }
 
         public override int Power { get; internal set; } = 1;
 
-        public Bullet(Player owner, Vector pos, Vector speed, int size, Color color)
+        public Bullet(Player owner, Vector pos, Vector bearing, int speed, int size, Color color)
         {
-            Owner = owner;            
-            Body = new Ray(pos, speed*0.25, size);
+            Owner = owner;
+            Vector tmp = bearing.GetNormalized();
+            Body = new Ray(pos, tmp * size * 4, size);
+            Speed = tmp * speed;
             Color = color;
             isAlive = true;
         }   
+
+        public Bullet() { }
 
         public override PolygonCollisionResult Collides(Astroid a)
         {

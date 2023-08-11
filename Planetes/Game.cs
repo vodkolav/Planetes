@@ -302,11 +302,11 @@ namespace Planetes
             //await C.StartServer();
         }
 
-        public void Notify(string message)
+        public void Notify(Notification type, string message)
         {
             if (InvokeRequired)
             {
-                Invoke(new Action<string>(Notify), new object[] { message });
+                Invoke(new Action<Notification, string>(Notify), type, message);
             }
             else
             {

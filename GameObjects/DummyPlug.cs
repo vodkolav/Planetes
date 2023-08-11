@@ -43,7 +43,7 @@ namespace GameObjects
             await Task.Delay(0);
         }
 
-        public void Notify(string message)
+        public void Notify(Notification type, string message)
         {
         }
 
