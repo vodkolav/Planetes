@@ -33,10 +33,10 @@
                           Fill="Black" Data="M 0 0 L 3 3 L 6 0 Z"/>
                             </StackPanel>
                         </MenuItem.Header>
-                        <MenuItem Header="Host Game" Click="MenuItem_Click_1" >
+                        <MenuItem Header="Host Game" Click="miHostGame_click" >
 
                         </MenuItem>
-                        <MenuItem Header="Join Game" Click="MenuItem_Click"/>
+                        <MenuItem Header="Join Game" Click="miJoinGame_Click"/>
                     </MenuItem>
                     <MenuItem >
                         <MenuItem.Header>
@@ -46,7 +46,7 @@
                           Fill="Black" Data="M 0 0 L 3 3 L 6 0 Z"/>
                             </StackPanel>
                         </MenuItem.Header>
-                        <MenuItem Header="Against 2 bots" Click="MenuItem_Click_1"/>
+                        <MenuItem Header="Against 2 bots" Click="miHostGame_click"/>
                         <MenuItem Header="Menu 2-2"/>
                         <MenuItem Header="Menu 2-3"/>
                     </MenuItem>

@@ -29,5 +29,7 @@ namespace GameObjects
         void UpdateLobby(GameState go);
 
         void Start();
+
+        void GameOver();
     }
 }

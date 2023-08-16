@@ -50,10 +50,6 @@ namespace GameObjects
             }
         }
 
-        public void Over()
-        {
-            _gameServer.Stop();
-        }
 
         public void JoinLobby(PlayerInfo playerInfo)
         {

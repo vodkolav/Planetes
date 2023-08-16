@@ -35,7 +35,7 @@ namespace GameObjects.Model
 
     public class Match
     {
-        private int KillsGoal { get; set; } = 3;
+        private int KillsGoal { get; set; } = GameConfig.KillsGoal;
 
         public float RespawnTime { get; set; } = 5;
 
@@ -134,7 +134,7 @@ namespace GameObjects.Model
                     // notify everyone they lost and who won
                     s.Notify(p, Notification.Lost, $"You lose, sorry. \n {winner.Name} is the winner ");
                 }
-             gameObjects.gameOver();               
+                gameObjects.GameOn = false;                
             }
 
 

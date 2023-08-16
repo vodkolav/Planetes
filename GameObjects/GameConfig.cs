@@ -15,6 +15,8 @@ namespace GameObjects
 
         public static Size WorldSize { get { return new Size(1200, 600); } }
 
+        public static int KillsGoal { get { return 1; } }
+
         public static float GameSpeed => 7.0f;
 
         public static TimeSpan FrameInterval { get { return new TimeSpan(0, 0, 0, 0, 8); } } //TODO: drop this

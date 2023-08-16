@@ -12,6 +12,8 @@ namespace PlanetesWPF
         GameRecorder current;
         WPFGraphicsContainer graphicsContainer;
         private WriteableBitmap Source;
+        internal bool isRecording { get {  return current.State == RecordingState.Recording; } }
+
         public RecorderController(WPFGraphicsContainer gc )
         {
             graphicsContainer = gc;
@@ -52,6 +54,7 @@ namespace PlanetesWPF
 
         public void AddFrame(int frameNum)
         {
+            //TODO: add frame delay, so that gif is smoother
             if (current.State == RecordingState.Recording)
             {
                 if (current.LastDrawnFrame >= frameNum) // && frameNum % 4 != 0)

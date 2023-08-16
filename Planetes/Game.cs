@@ -280,11 +280,16 @@ namespace Planetes
             }
         }
 
+        public void GameOver()
+        {
+            //TODO : implement closing everythiong logic
+        }
+
         public void TerminateServer()
         {
             if (isServer)
             {
-                S.Stop();
+                S.Terminate();
             }
             else
             {

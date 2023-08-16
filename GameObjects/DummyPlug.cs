@@ -51,6 +51,10 @@ namespace GameObjects
         {
         }
 
+        public void GameOver()
+        {
+        }
+
         public void AnnounceRespawn(string message)
         {
             

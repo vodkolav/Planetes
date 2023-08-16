@@ -47,6 +47,7 @@ namespace GameObjects
         {
             LogLevel.Debug,
             LogLevel.Info,
+            LogLevel.Warning,
             LogLevel.Status,
             LogLevel.CSV
         };
@@ -59,13 +60,25 @@ namespace GameObjects
                 Name = "Logger"
             };
             messages = new BlockingCollection<LogMsg>();
-            output = Console.Out;
+            RedirectToFile(GameConfig.LogRedirectToFile);
             T.Start();
         }
 
-        public static void RedirectToFile( string filepath)
+        public static string LogFile { get; set; }
+
+        public static void RedirectToFile(bool swtch)
         {
-            Instance.output = new StreamWriter(filepath);
+            if (swtch)
+            {
+                if (LogFile is null)
+                {
+                    throw new NullReferenceException("LogFile param must be populated for this to work");
+                }
+
+                Instance.output = new StreamWriter(LogFile);
+            }
+            else
+                Instance.output = Console.Out;
         }
 
         public static void WriteLoop()
@@ -76,7 +89,6 @@ namespace GameObjects
             }
             Instance.messages.Dispose();
         }
-
 
         public static void AddMessage(LogMsg lm)
         {

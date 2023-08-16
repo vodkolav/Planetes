@@ -89,6 +89,7 @@ namespace GameObjects
                 Proxy.On<int>("JoinedLobby", (pID) => PlayerId = pID);
                 Proxy.On<Notification, string>("Notify", Notify);
                 Proxy.On("Start", Start);
+                Proxy.On("GameOver", GameOver);
                 await Conn.Start(new WebSocketTransport());               
                 PlayerInfo info = new PlayerInfo() {
                     PlayerName = PlayerName,
@@ -107,6 +108,7 @@ namespace GameObjects
         public async Task LeaveLobby()
         {
             await Proxy.Invoke<GameState>("LeaveLobby", new object[] { PlayerId });
+            Conn.Stop();
         }
 
         public virtual void updateGameState(GameState go)
@@ -132,36 +134,38 @@ namespace GameObjects
             {
                 case Notification.Death:
                 {
-                    Die(message);
-                    break;
+                    UI.AnnounceDeath(message);
+                        break;
                 }
                 case Notification.Respawn:
                 {
-                    Respawn(message);
+                    UI.AnnounceRespawn(message);
                     break;
                 }
                 case Notification.Message:
                 {
-                    UI.Notify(message);
+                    UI.Notify(type,message);
                     break;
                 }
                 case Notification.Kicked:
                 {
-                    UI.Notify(message);
+                    UI.Notify(type,message);
                     UI.CloseLobby();
                     break;
                 }
+                case Notification.Won:
+                {
+                    UI.Notify(type, message);
+                    Conn.Stop();
+                    break;
+                }
+                case Notification.Lost:
+                {
+                    UI.Notify(type, message);
+                    Conn.Stop();
+                    break;
+                }
             }
-        }
-
-        private void Respawn(string message)
-        {
-            UI.AnnounceRespawn(message);
-        }
-
-        protected virtual void Die(string message)
-        {
-            UI.AnnounceDeath(message);
         }
 
         public async Task StartServer()
@@ -175,6 +179,11 @@ namespace GameObjects
             Yoke.bindWASD();
             Yoke.bindMouse();
             UI.Start();
+        }
+
+        public void GameOver()
+        {
+            UI.GameOver();           
         }
 
         public void Draw()
@@ -191,33 +200,40 @@ namespace GameObjects
 
             lock (gameObjects)
             {
-                LastDrawnFrame = gameObjects.frameNum;
-                Jet debugged = gameObjects.Players.Single(p => p.Name.Contains("Bot1")).Jet; // WPFplayer
-                float dt = (float)(DateTime.UtcNow - gameObjects.StartTime).TotalSeconds;
-                Logger.Log($"{gameObjects.frameNum},{GameTime.DeltaTime:F4}, " +
-                           $"{dt:F4}, {debugged.LastOffset.Magnitude:F4}, {debugged.Pos.Magnitude}, " +
-                           $"{debugged.Pos.X}, {debugged.Pos.Y}, Draw", LogLevel.CSV);
-
-
-                DrawingContext.GraphicsContainer.ViewPortOffset = -Me.viewPort.Origin;
-
-                World.Draw();
-
-                foreach (Star s in World.Stars.Where(s => Me.viewPort.Collides(s).Intersect))
+                try
                 {
-                    s.Draw();
+                    LastDrawnFrame = gameObjects.frameNum;
+                    Jet debugged = gameObjects.Players.Single(p => p.Name.Contains("Bot1")).Jet; // WPFplayer
+                    float dt = (float)(DateTime.UtcNow - gameObjects.StartTime).TotalSeconds;
+                    Logger.Log($"{gameObjects.frameNum},{GameTime.DeltaTime:F4}, " +
+                               $"{dt:F4}, {debugged.LastOffset.Magnitude:F4}, {debugged.Pos.Magnitude}, " +
+                               $"{debugged.Pos.X}, {debugged.Pos.Y}, Draw", LogLevel.CSV);
+
+
+                    DrawingContext.GraphicsContainer.ViewPortOffset = -Me.viewPort.Origin;
+
+                    World.Draw();
+
+                    foreach (Star s in World.Stars.Where(s => Me.viewPort.Collides(s).Intersect))
+                    {
+                        s.Draw();
+                    }
+
+
+                    //TODO: Make Wall also collidable
+                    foreach (Wall w in World.Walls.Where(w => Me.viewPort.Collides(w).Intersect))
+                    {
+                        w.Draw();
+                    }
+
+                    foreach (ICollideable j in gameObjects.Entities.Where(e => Me.viewPort.Collides(e).Intersect))
+                    {
+                        j.Draw();
+                    }
                 }
-
-
-                //TODO: Make Wall also collidable
-                foreach (Wall w in World.Walls.Where(w => Me.viewPort.Collides(w).Intersect))
+                catch (Exception e)
                 {
-                    w.Draw();
-                }         
-
-                foreach (ICollideable j in gameObjects.Entities.Where(e => Me.viewPort.Collides(e).Intersect))
-                {                    
-                    j.Draw(); 
+                    Logger.Log(e,LogLevel.Debug);
                 }
             }
         }

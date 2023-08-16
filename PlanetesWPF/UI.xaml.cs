@@ -368,6 +368,10 @@ namespace PlanetesWPF
         }
         #endregion
         
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (C.GameOn)

@@ -31,6 +31,10 @@ namespace PlanetesWPF
             Color c = Color.FromArgb(p.Jet.Color.A, p.Jet.Color.R, p.Jet.Color.G, p.Jet.Color.B);
             Background = new SolidColorBrush(c);
         }
+        internal void unbind()
+        {
+            lblName.Content = "";
+        }
 
         //TODO: remake this with data binding
         public void Draw()

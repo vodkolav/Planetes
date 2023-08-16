@@ -140,11 +140,6 @@ namespace GameObjects
             }
         }
 
-        protected sealed override void Die(string message)
-        {
-            //computer.Join();
-            base.Die(message);
-        }
 
         protected virtual void Prepare()
         {
@@ -384,22 +379,16 @@ namespace GameObjects
         public Bot2() : base()
         { }
 
-
+        /// <summary>
+        /// Bot2 is basically sentry. It remains static and fires at any enemy coming into range
+        /// </summary>
         protected override void FrameReact()
         {
+            var inrange = Me.Enemies.Where(e => (e.Jet.Pos - Jet.Pos).Magnitude < 200);
 
-
-            if (Jet.Pos.Y < gameObjects.Players[0].Jet.Pos.Y)
+            if (inrange.Any()) 
             {
-                Yoke.Press(HOTAS.Up);
-            }
-            else
-            {
-                Yoke.Press(HOTAS.Down);
-            }
-
-            if (Jet.Pos.Y - gameObjects.Players[0].Jet.Pos.Y < 50)
-            {
+                Yoke.Aim(inrange.First().Jet.Pos);
                 Yoke.Press(HOTAS.Shoot);
             }
             else

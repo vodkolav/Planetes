@@ -7,7 +7,8 @@ using PolygonCollision;
 namespace GameObjects.Model
 {
     public enum Action { Press, Release, Aim, SetViewPort }
-    public enum Notification { Joined, Kicked, Death, Respawn, Won, Lost, Message }
+
+    public enum Notification { Joined, Kicked, Death, Respawn, Won, Lost, Message, GameOver }
      
     public struct PlayerInfo
     {

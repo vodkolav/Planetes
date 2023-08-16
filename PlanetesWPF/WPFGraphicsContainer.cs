@@ -6,6 +6,9 @@ using GameObjects;
 
 namespace PlanetesWPF
 {
+    /// <summary>
+    /// ViewModel for the Visor
+    /// </summary>
     public class WPFGraphicsContainer : IGraphicsContainer, INotifyPropertyChanged
     {
         private WriteableBitmap B;

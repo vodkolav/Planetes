@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:PlanetesWPF"
         xmlns:Model="clr-namespace:GameObjects.Model;assembly=GameObjects" x:Class="PlanetesWPF.Lobby"
         mc:Ignorable="d"
-        Title="Lobby" Height="450" Width="800">
+        Title="Lobby" Height="450" Width="800" Closing="Window_Closing">
     <Window.DataContext>
         <Model:Player/>
     </Window.DataContext>
