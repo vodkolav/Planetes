@@ -38,11 +38,12 @@ namespace PlanetesWPF
             {
                 PlayerName = PlayerName
             };
-            L = new Lobby(this);
-            BB = new Billboard();
             Logger.LogFile = $"..\\..\\..\\Logs\\{C}_Log_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv";
+            BB = new Billboard();
             PolygonCollision.DrawingContext.GraphicsContainer = new WPFGraphicsContainer();
             DataContext = (WPFGraphicsContainer)PolygonCollision.DrawingContext.GraphicsContainer;
+            S = GameServer.Instance;
+            S.Listen(2861);
         }
 
         /// <summary>
@@ -64,18 +65,90 @@ namespace PlanetesWPF
                     }
                 case "joinNetworkGame":
                     {
-                        C.joinNetworkGame($"http://192.168.1.11:2861/");
+                        _ = joinNetworkGame($"http://192.168.1.11:2861/");
                         break;
                     }
                 case "SinglePlayer":
                     {
-                        _ = HostSingleplayer();
+                        HostSingleplayer();
                         break;
                     }
             }
-            Text += "Planetes: " + C.PlayerId;
         }
-     
+
+        public string hostNetworkGame()
+        {
+            S.NewGame();
+            return S.URL;
+        }
+
+        /// <summary>
+        /// Used when joining lobby manually
+        /// </summary>
+        /// <param name="URL"></param>
+        /// <returns></returns>
+        public async Task joinNetworkGame(string URL)
+        {
+            Text += " (Client)";
+
+            //C = new LocalClient(this)
+            C = new GameClient(this)
+            {
+                PlayerName = PlayerName
+            };
+            Logger.LogFile = $"..\\..\\..\\Logs\\{C}_Log_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv";
+
+            C.joinNetworkGame(URL);
+
+            bool GameStarted = OpenLobby(this);
+
+            if (GameStarted)
+            {
+                await C.StartServer();
+            }
+            else
+            {
+                C.Leave();
+                if (isServer)
+                {
+                    S.Terminate();                    
+                }
+                else
+                {
+                    Logger.Log("You are not the server, you can't stop it", LogLevel.Info);
+                }
+            }
+        }
+
+        public void HostSingleplayer()
+        {
+            var URL = hostNetworkGame();
+
+            S.AddBot<Bot2>();
+            S.AddBot<Bot3>();
+            _ = joinNetworkGame(URL);
+        }
+
+        private bool OpenLobby(UI uI)
+        {
+            L = new Lobby(this);
+            return L.OpenLobby_WaitForGuestsAndBegin(uI);
+        }
+
+        public void CloseLobby()
+        {
+            Dispatcher.BeginInvoke(new System.Action(() =>
+                {
+                    L.Close();
+                }
+            ));
+        }
+
+        public void UpdateLobby(GameState go)
+        {
+            L.UpdateLobby(go);
+        }
+
         /// <summary>
         /// Convert from device-independent 1/60th inch WPF units to amount of pixels
         /// </summary>
@@ -117,7 +190,7 @@ namespace PlanetesWPF
             {
                 if (p.ID == C.PlayerId)
                 {
-                    hudLeft.bind(C, p);
+                    hudLeft.bind(C, p);                    
                 }
                 else
                 {
@@ -128,14 +201,6 @@ namespace PlanetesWPF
             }
         }
 
-        public void CloseLobby()
-        {
-            Dispatcher.BeginInvoke(new System.Action(() =>
-            {
-                L.Close();
-            }
-            ));
-        }
 
         internal void AddBot()
         {
@@ -157,33 +222,7 @@ namespace PlanetesWPF
             {
                 Logger.Log("You can only kick yourself", LogLevel.Info);
             }
-        }
-
-        public void DrawGraphics()
-        {
-            // here are 3 options of alternative approaches for drawing in WPF:
-
-            //DrawingVisual, here'is a good examplws site:
-            //http://windowspresentationfoundationinfo.blogspot.com/2014_07_01_archive.html?view=classic
-
-            // consider using SkiaSharp instead of DrawableBitmapEx
-            // example here : https://github.com/swharden/Csharp-Data-Visualization/tree/main/dev/old/2019-09-08-SkiaSharp-openGL
-
-            // or SFML: 
-            // https://www.sfml-dev.org/download/bindings.php
-            
-            ((WPFGraphicsContainer) PolygonCollision.DrawingContext.GraphicsContainer).Draw(C);
-            
-            foreach (var hud in wpHUDs.Children)
-            {
-                ((HUD)hud).Draw();
-            }
-        }
-        
-        public async Task LeaveLobby()
-        {
-            await C.LeaveLobby();
-        }
+        }  
 
         public void Notify(Notification type, string message)
         {
@@ -201,77 +240,65 @@ namespace PlanetesWPF
                 }));
         }
 
+
+        public void GameOver()
+        {
+            //TODO: Show results dialog. on press ok, reset
+            Dispatcher.Invoke(
+                new System.Action(() =>
+                {
+                    CompositionTarget.Rendering -= DrawGraphics;
+                    PolygonCollision.DrawingContext.GraphicsContainer.Clear();
+                    hudLeft.unbind();
+                    wpHUDs.Children.Clear();
+                }));
+        }
+
+        #region graphics
+
         public void StartGraphics()
         {
             ((WPFGraphicsContainer) PolygonCollision.DrawingContext.GraphicsContainer).UpdateBitmap(VisorSize.Width, VisorSize.Height);
-            
             RC = new RecorderController((WPFGraphicsContainer)PolygonCollision.DrawingContext.GraphicsContainer);
             bindHUDS();
-            CompositionTarget.Rendering += (s, e) => DrawGraphics();            
-            CompositionTarget.Rendering += (s, e) => RC.AddFrame(C.gameObjects.frameNum); //TODO: Add this only when recording
-            Closing += (s, e) => RC.End();
-            Closing += (s, e) => Logger.Instance.Dispose();
-        }
-        
-        public void UpdateLobby(GameState go)
-        {
-            L.UpdateLobby(go);
+            CompositionTarget.Rendering += DrawGraphics;        
+                       Closing += (s, e) => RC.End();           
         }
 
-        public string hostNetworkGame()
+        public void DrawGraphics()
         {
-            Text += " (Server)";
-            S = GameServer.Instance;
+            // Here are 3 options of alternative approaches for drawing in WPF:
+            //DrawingVisual, here'is a good examplws site:
+            //http://windowspresentationfoundationinfo.blogspot.com/2014_07_01_archive.html?view=classic
 
-            S.Listen(2861);
-            return S.URL;
-        }
-
-        /// <summary>
-        /// Used when joining lobby manually
-        /// </summary>
-        /// <param name="URL"></param>
-        /// <returns></returns>
-        public async Task joinNetworkGame(string URL)
-        {
-            Text += " (Client)";
-            C.joinNetworkGame(URL);
+            // consider using SkiaSharp instead of DrawableBitmapEx
+            // example here : https://github.com/swharden/Csharp-Data-Visualization/tree/main/dev/old/2019-09-08-SkiaSharp-
             
-            bool GameStarted = L.OpenLobby_WaitForGuestsAndBegin(this);
+            // or SFML: 
+            // https://www.sfml-dev.org/download/bindings.php
+            if (C.GameOn)
+            {
+                ((WPFGraphicsContainer)PolygonCollision.DrawingContext.GraphicsContainer).Draw(C);
 
-            if (GameStarted)
-            {
-                await C.StartServer();
-            }
-            else
-            {
-                TerminateServer();
+                foreach (var hud in wpHUDs.Children)
+                {
+                    ((HUD)hud).Draw();
+                }
             }
         }
 
-        public void TerminateServer()
+        public void DrawGraphics(object sender, EventArgs e)
         {
-            if (isServer)
+            DrawGraphics();
+            if (RC.isRecording)
             {
-                S.Stop();
-            }
-            else
-            {
-                Logger.Log("You are not the server, you can't stop it", LogLevel.Info);
-            }
+                RC.AddFrame(C.gameObjects.frameNum); //TODO: Add this only when recording
+            }            
         }
+        #endregion
 
-        public async Task HostSingleplayer()
-        {
-            var URL = hostNetworkGame();
-            
-            S.AddBot<Bot2>(); 
-            S.AddBot<Bot3>();
-            await joinNetworkGame(URL);
-            //await C.StartServer();
-        }
-
-        private async void MenuItem_Click(object sender, RoutedEventArgs e)
+        #region events
+        private async void miJoinGame_Click(object sender, RoutedEventArgs e)
         {
             IpDialog ipd = new IpDialog();
             var dr = ipd.ShowDialog();
@@ -284,22 +311,13 @@ namespace PlanetesWPF
                 {
                     MessageBox.Show("Could not connect to server!\n" + ex.Message);
                 }
-
-
-            //await joinNetworkGame(url);
         }
-
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            Application.Current.Shutdown();
-        }
-
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             AutoStart("SinglePlayer");// "HostSingleplayer");
         }
 
-        private void MenuItem_Click_1(object sender, RoutedEventArgs e)
+        private void miHostGame_click(object sender, RoutedEventArgs e)
         {
             AutoStart("SinglePlayer");
         }
@@ -379,5 +397,6 @@ namespace PlanetesWPF
                 C.SetViewPort(VisorSize);
             }
         }
+        #endregion
     }
 }

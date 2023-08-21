@@ -84,10 +84,9 @@ namespace PlanetesWPF
             ((UI)Owner).KickPlayer(kickedone);
         }
 
-        private async void btnCancel_Click(object sender, RoutedEventArgs e)
+        private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
-            await((UI)Owner).LeaveLobby();
-            Logger.Log("Ну нахер", LogLevel.Info);
+            Logger.Log("Nu Naher", LogLevel.Info);
             DialogResult = false;
             Close();
         }

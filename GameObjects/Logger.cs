@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading;
 
 namespace GameObjects
@@ -17,15 +18,38 @@ namespace GameObjects
             {
                 if (Exception is null)
                 {
-                    return _message;
+                    return "GameObjects.Logger.message:" + _message;
                 }
-                return Exception.Message;
+                return "GameObjects.Logger.Exception:" + Exception.Message;
             }
             set { _message = value; }
         }
     }
 
-    public enum LogLevel {Nothing, Status, Info, Warning, Debug, CSV, All }
+    public enum LogLevel {Nothing, Status, Info, Warning, Debug, CSV, Trace, All }
+
+
+    public class LogWriter : StreamWriter
+    {
+        public LogWriter(Stream stream) : base(stream)
+        {
+        }
+
+        public LogWriter(string path) : base(path)
+        {
+        }
+
+        public override Encoding Encoding => Encoding.UTF8;
+
+        public override void WriteLine(string message)
+        {
+            Logger.Log("Intercepted trace: " + message, LogLevel.Trace);
+        }
+        public override void Write(string message)
+        {
+            Logger.Log("Intercepted trace: " + message, LogLevel.Trace);
+        }     
+    }
 
     public class Logger
     {
@@ -33,6 +57,14 @@ namespace GameObjects
         private BlockingCollection<LogMsg> messages;
         private Thread T;
         private TextWriter output { get; set; }
+
+        private LogWriter _trace_interceptor { get; set; }
+
+        public static TextWriter TraceInterceptor
+        {
+            get { return Instance._trace_interceptor; }
+        }
+
         private readonly static Lazy<Logger> _instance = new Lazy<Logger>(() => new Logger());
 
         public static Logger Instance
@@ -49,7 +81,8 @@ namespace GameObjects
             LogLevel.Info,
             LogLevel.Warning,
             LogLevel.Status,
-            LogLevel.CSV
+            LogLevel.CSV,
+            LogLevel.Trace
         };
 
         public Logger()
@@ -60,7 +93,8 @@ namespace GameObjects
                 Name = "Logger"
             };
             messages = new BlockingCollection<LogMsg>();
-            RedirectToFile(GameConfig.LogRedirectToFile);
+            output = Console.Out;
+            _trace_interceptor = new LogWriter("wtf.txt");
             T.Start();
         }
 
@@ -83,6 +117,7 @@ namespace GameObjects
 
         public static void WriteLoop()
         {
+            RedirectToFile(GameConfig.LogRedirectToFile);
             foreach (var message in Instance.messages.GetConsumingEnumerable())
             {
                 Write(message);
@@ -157,6 +192,9 @@ namespace GameObjects
                 case LogLevel.CSV:
                     Instance.output.WriteLine(msg.Message);
                     break;
+                case LogLevel.Trace:
+                    Instance.output.WriteLine(msg.Message);
+                    break;
                 default:
                     break;
             }
@@ -166,6 +204,7 @@ namespace GameObjects
         {            
             messages.CompleteAdding();
             output.Dispose();
+            _trace_interceptor.Dispose();
         }
     }
 }

@@ -10,10 +10,11 @@ using System.Net;
 using System.Net.Sockets;
 using GameObjects.Model;
 using Newtonsoft.Json;
+using System.Windows;
 
 namespace GameObjects
 {
-    public class GameServer
+    public class GameServer 
     {
         private Random R;
 
@@ -49,17 +50,24 @@ namespace GameObjects
 
         public GameServer()
         {
-            thrdGameLoop = new Thread(GameLoop)
-            {
-                Name = "GameLoop"
-            };
-            gameObjects = new GameState(GameConfig.WorldSize);
-            Bots = new List<Bot>();
             messageQ = new BlockingCollection<Tuple<string, Notification, string>>();
             hubContext = GlobalHost.ConnectionManager.GetHubContext<GameHub>();
             notificationTracking = new Dictionary<Tuple<int, Notification>, int>();
             R = new Random();
+            _ = Task.Run(DispatchMessages);
         }
+
+        public void NewGame()
+        {
+            gameObjects = new GameState(GameConfig.WorldSize);
+            gameObjects.GameOn = GameStatus.Lobby;
+            Bots = new List<Bot>(); // TODO: remove old bots connections from hub
+            thrdGameLoop = new Thread(GameLoop)
+            {
+                Name = "GameLoop"
+            };
+        }
+
         public void Listen(int port)
         {
             try
@@ -76,49 +84,97 @@ namespace GameObjects
             }
         }
 
-        public static string GetLocalIPAddress()
-        {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    return ip.ToString();
-                }
-            }
-            throw new Exception("Local IP Address Not Found!");
-        }
-
         public int Join(string ConnectionID, PlayerInfo playerInfo)
         {
-            int playerID = R.Next(1_000_000, 9_999_999); //GetHashCode();
-            Player newplayer = new Player(playerID, ConnectionID, playerInfo, gameObjects);
-            gameObjects.Players.Add(newplayer);
-            //string gobj = JsonConvert.SerializeObject(gameObjects); //only for debugging - to check what got serialized
-            gameObjects.Entities.Add(newplayer.Jet);
-            return playerID;
+
+            lock (gameObjects)
+            {
+                if (gameObjects.Players.Count >= 9)
+                {
+                    throw new InvalidOperationException("There can only be up to 9 players in a game ");
+                }
+
+                if (gameObjects.GameOn != GameStatus.Lobby)
+                {
+                    throw new InvalidOperationException("can't join game, lobby is not open");
+                }
+
+                int playerID = R.Next(1_000_000, 9_999_999); //GetHashCode();
+                Player newplayer = new Player(playerID, ConnectionID, playerInfo, gameObjects);
+                gameObjects.Players.Add(newplayer);
+                //string gobj = JsonConvert.SerializeObject(gameObjects); //only for debugging - to check what got serialized
+                gameObjects.Entities.Add(newplayer.Jet);
+                return playerID;
+            }
+        }        
+
+        public void Kick(Player kickedone)
+        {
+            Notify(kickedone, Notification.Kicked, "You were kicked by server");          
+            Leave(kickedone);            
+        }
+
+        internal void Leave(string connectionID)
+        {
+            try
+            {
+                Player quitter = gameObjects.Players.Single(p => p.ConnectionID == connectionID);
+                Leave(quitter);
+            }
+            catch (ArgumentNullException ex)
+            {
+                //should happen when client failed to join server
+                Logger.Log(ex, LogLevel.Warning);
+            }
+        }
+
+        internal void Leave(Player pl)
+        {
+            GameConfig.ReturnColor(pl.Color);
+            gameObjects.Entities.RemoveAll(j => j.Owner.ID == pl.ID);
+            gameObjects.Players.RemoveAll(p => p.ID == pl.ID);
+            hubContext.Clients.All.UpdateLobby(gameObjects);
+            hubContext.Clients.Client(pl.ConnectionID).Leave();
+        }
+
+        private void GameOver()
+        {
+            //tell all clients to end game
+            hubContext.Clients.All.UpdateModel(gameObjects);
+            hubContext.Clients.All.GameOver();
+            gameObjects.Players.ForEach(p => GameConfig.ReturnColor(p.Color));
+            // Make sure to resume any paused threads
+            _pauseEvent.Set();
         }
 
         /// <summary>
-        /// Allows to chose what type of bot you want it to be
+        /// Game forcefully terrminated by user
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <exception cref="IndexOutOfRangeException"></exception>
-        public void AddBot<T>() where T : Bot, new()
+        public void Terminate(string message = "Game aborted by server")
         {
-            if (gameObjects.Players.Count > 8)
+            switch (gameObjects.GameOn)
             {
-                throw new IndexOutOfRangeException("There can only be 9 players in a game ");
+                case GameStatus.On:
+                    // Server terminated mid-game
+                    _shutdownEvent.Set();
+                    break;
+
+                case GameStatus.Lobby:
+                    // server terminated in Lobby
+                    NotifyAll(Notification.GameOver, message);
+                    hubContext.Clients.All.Leave();
+                    break;
+
+                default: 
+                    Logger.Log(message, LogLevel.Info);
+                    NotifyAll(Notification.GameOver, message);
+                    hubContext.Clients.All.Leave();
+                    break;
+
             }
-            else
-            {                              
-                Bot DMYSYS = new T();
-                DMYSYS.joinNetworkGame(URL);
-                //DMYSYS.Me.Name = "Rei";
-                //DMYSYS.Me.Jet.Color = Color.White;
-                //DMYSYS.UpdateMe();
-                Bots.Add(DMYSYS);
-            }
+            // Wait for the thread to exit
+            thrdGameLoop.Join();
+            gameObjects.GameOn = GameStatus.Cancelled;
         }
 
         /// <summary>
@@ -129,63 +185,28 @@ namespace GameObjects
             AddBot<Bot1>();
         }
 
-        public void Kick(Player kickedone)
+        /// <summary>
+        /// Allows to chose what type of bot you want it to be
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <exception cref="IndexOutOfRangeException"></exception>
+        public void AddBot<T>() where T : Bot, new()
         {
-            Notify(kickedone, Notification.Kicked, "You were kicked by server");
-            Leave(kickedone);
-            _ = Task.Run(DispatchMessages);
-        }
-
-        internal void Leave(int playerID)
-        {
-            Player pl = gameObjects.Players.Single(p => p.ID == playerID);
-            Leave(pl);
-        }
-
-        internal void Leave(Player pl)
-        {
-            GameConfig.ReturnColor(pl.Color);
-            gameObjects.Entities.RemoveAll(j => j.Owner.ID == pl.ID);
-            gameObjects.Players.RemoveAll(p => p.ID == pl.ID);
-            hubContext.Clients.All.UpdateLobby(gameObjects);
-        }
-
-        public void Notify(Player player, Notification about, string message)
-        {
-            Tuple<int, Notification> val = new Tuple<int, Notification>(player.ID, about);
-            int lastNotif;
-            // To prevent server from spamming clients with same type of notification every frame
-            // we save the rounded second when a notification type was last sent to a player.
-            // and disregard all same notifications that come, until the next second comes
-            // So, every player gets notified about a type of event once every second at most.
-            if (notificationTracking.TryGetValue(val, out lastNotif))
+            try
             {
-                if (lastNotif != (int)GameTime.TotalElapsedSeconds)
-                {
-                    messageQ.Add(new Tuple<string, Notification, string>(player.ConnectionID, about, message));
-                    notificationTracking[val] = (int)GameTime.TotalElapsedSeconds;
-                }
-                else
-                {
-                    //wait
-                }
+                Bot DMYSYS = new T();
+                DMYSYS.joinNetworkGame(URL);
+                //DMYSYS.Me.Name = "Rei";
+                //DMYSYS.Me.Jet.Color = Color.White;
+                //DMYSYS.UpdateMe();
+                Bots.Add(DMYSYS);
+                // TODO: maybe make bots inherit from LocalClient,
+                // so that they don't consume network trafic
             }
-            else
+            catch (Exception ex)
             {
-                messageQ.Add(new Tuple<string, Notification, string>(player.ConnectionID, about, message));
-                notificationTracking.Add(val, (int)GameTime.TotalElapsedSeconds);
-            }
-
-        }
-
-        public void DispatchMessages()
-        {
-            foreach (var mes in messageQ.GetConsumingEnumerable())
-            {
-                string to = mes.Item1;
-                Notification type = mes.Item2;
-                string mess = mes.Item3;
-                hubContext.Clients.Client(to).Notify(type, mess);
+                MessageBox.Show("Bot reports error: " + ex.Message);
+                Logger.Log(ex, LogLevel.Debug);
             }
         }
 
@@ -197,27 +218,6 @@ namespace GameObjects
             Logger.Log("Fight!", LogLevel.Info);
             thrdGameLoop.Start();
             hubContext.Clients.All.Start();
-        }
-
-        /// <summary>
-        /// Define enemies for each player
-        /// </summary>
-        public void Stop(string message = "Game aborted")
-        {
-            // Signal the shutdown event
-            _shutdownEvent.Set();
-            Logger.Log(message, LogLevel.Info);
-
-            gameObjects.GameOn = false;
-            //if (thrdGameLoop != null)
-            //	thrdGameLoop.Abort();
-            webapp.Dispose();
-
-            // Make sure to resume any paused threads
-            _pauseEvent.Set();
-
-            // Wait for the thread to exit
-            thrdGameLoop.Join();
         }
 
         public void Pause()
@@ -245,10 +245,9 @@ namespace GameObjects
                 GameTime.TotalElapsedSeconds = (float)(DateTime.UtcNow - gameObjects.StartTime).TotalSeconds;
                 
                 string CSVheader = "frame, DeltaTime, UtcNow, JetSpeed, JetPosMag, JetPosX, JetPosY , Source";
-                Logger.Log(CSVheader, LogLevel.CSV);
-                _ = Task.Run(DispatchMessages);
+                Logger.Log(CSVheader, LogLevel.CSV);                
 
-                while (gameObjects.GameOn)
+                while (gameObjects.GameOn == GameStatus.On)
                 {
                     _pauseEvent.WaitOne(Timeout.Infinite);
 
@@ -265,11 +264,11 @@ namespace GameObjects
                     GameTime.DeltaTime = (dt - GameTime.TotalElapsedSeconds);
                     GameTime.TotalElapsedSeconds = dt;
 
-                    Jet debugged = gameObjects.Players.Single(p => p.Name.Contains("Bot1")).Jet;//WPFplayer
+                    /*Jet debugged = gameObjects.Players.Single(p => p.Name.Contains("Bot1")).Jet;//WPFplayer
                     string csvLine = $"{gameObjects.frameNum},{GameTime.DeltaTime:F4}, " +
                                      $"{dt:F4}, {debugged.LastOffset.Magnitude:F4}, " +
                                      $"{debugged.Pos.Magnitude}, {debugged.Pos.X}, {debugged.Pos.Y}, GameLoop";
-                    Logger.Log(csvLine, LogLevel.CSV);
+                    Logger.Log(csvLine, LogLevel.CSV);*/
                     
                     lock (gameObjects) 
                     {
@@ -288,6 +287,9 @@ namespace GameObjects
                     }
                     //Logger.Log("frameNum: " + gameObjects.frameNum, LogLevel.Status);// + "| " + tdiff.ToString()
                 }
+
+                GameOver();
+                // game over 
             }
             catch (Exception e)
             {
@@ -299,5 +301,86 @@ namespace GameObjects
         {
             string json = JsonConvert.SerializeObject(go, Formatting.Indented);
         }
+
+        public static string GetLocalIPAddress()
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return ip.ToString();
+                }
+            }
+            throw new Exception("Local IP Address Not Found!");
+        }
+
+        #region notifications
+
+        /// <summary>
+        /// Notifies Player player about message
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="about"></param>
+        /// <param name="message"></param>
+        public void Notify(Player player, Notification about, string message)
+        {
+            if (gameObjects.GameOn == GameStatus.Over || gameObjects.GameOn == GameStatus.Cancelled)
+                return;
+
+            Tuple<int, Notification> val = new Tuple<int, Notification>(player.ID, about);
+            int lastNotif;
+            // To prevent server from spamming clients with same type of notification every frame
+            // we save the rounded second when a notification type was last sent to a player.
+            // and disregard all same notifications that come, until the next second comes
+            // So, every player gets notified about a type of event once every second at most.
+            if (notificationTracking.TryGetValue(val, out lastNotif))
+            {
+                if (lastNotif != (int)GameTime.TotalElapsedSeconds)
+                {
+                    messageQ.Add(new Tuple<string, Notification, string>(player.ConnectionID, about, message));
+                    notificationTracking[val] = (int)GameTime.TotalElapsedSeconds;
+                }
+                else
+                {
+                    //wait
+                }
+            }
+            else
+            {
+                messageQ.Add(new Tuple<string, Notification, string>(player.ConnectionID, about, message));
+                notificationTracking.Add(val, (int)GameTime.TotalElapsedSeconds);
+            }
+
+        }
+
+        /// <summary>
+        /// Notifies all clients of the same
+        /// </summary>
+        /// <param name="about"></param>
+        /// <param name="message"></param>
+        public void NotifyAll(Notification about, string message)
+        {
+            hubContext.Clients.All.Notify(about, message);
+        }
+
+        public void DispatchMessages()
+        {
+            foreach (var mes in messageQ.GetConsumingEnumerable())
+            {
+                string to = mes.Item1;
+                Notification type = mes.Item2;
+                string mess = mes.Item3;
+                try
+                {                    
+                    hubContext.Clients.Client(to).Notify(type, mess);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log(ex, LogLevel.Debug);
+                }
+            }
+        }
+        #endregion
     }
 }

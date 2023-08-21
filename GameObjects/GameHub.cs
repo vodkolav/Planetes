@@ -51,25 +51,36 @@ namespace GameObjects
         }
 
 
-        public void JoinLobby(PlayerInfo playerInfo)
+        public void Join(PlayerInfo playerInfo)
         {
-            try
+            lock (_gameServer.gameObjects)
             {
-                int playerID = _gameServer.Join(Context.ConnectionId, playerInfo);
-                Clients.Client(Context.ConnectionId).JoinedLobby(playerID);
-                Clients.All.UpdateLobby(_gameServer.gameObjects);
-            }
-            catch (Exception e)
-            {
-                Logger.Log(e, LogLevel.Debug);
+                try
+                {
+                    int playerID = _gameServer.Join(Context.ConnectionId, playerInfo);
+                    Clients.Client(Context.ConnectionId).JoinedLobby(playerID);
+                    Clients.All.UpdateLobby(_gameServer.gameObjects);
+                }
+                catch (InvalidOperationException e)
+                {  //TODO: test this JoinFailed scenario
+                    Clients.Client(Context.ConnectionId).Notify(Notification.JoinFailed, e.Message);
+                    Clients.Client(Context.ConnectionId).Leave();
+                }
+                catch (Exception e)
+                {
+                    Logger.Log(e, LogLevel.Debug);
+                    Clients.Client(Context.ConnectionId).Leave();
+                }
             }
         }
 
-
-        public void LeaveLobby(int playerID)
+        public void Leave()
         {
-            _gameServer.Leave(playerID);
-            //Clients.All.UpdateModel(_gameServer.gameObjects);
+            lock (_gameServer.gameObjects)
+            {
+                _gameServer.Leave(Context.ConnectionId);
+                //Clients.All.UpdateModel(_gameServer.gameObjects);
+            }
         }
 
         public void Start()
@@ -88,11 +99,10 @@ namespace GameObjects
         }
 
         public override Task OnDisconnected(bool stopCalled)
-        {
+        {            
             //string name = Context.User.Identity.Name;
-            //_connections.Remove(name, Context.ConnectionId);
-            Logger.Log("disconnected", LogLevel.Info);            
-            return Clients.All.disconnected("diconnected");
+            //_connections.Remove(name, Context.ConnectionId);                    
+            return base.OnDisconnected(stopCalled); 
         }
 
         public override Task OnReconnected()

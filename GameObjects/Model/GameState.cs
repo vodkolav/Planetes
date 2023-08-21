@@ -6,11 +6,13 @@ using PolygonCollision;
 
 namespace GameObjects.Model
 {
+    public enum GameStatus {Ready, Lobby, Cancelled, On, Over }
+
     public class GameState
     {
         public static TimeSpan FrameInterval = GameConfig.FrameInterval; // default. If you want to Change it, do it from GameConfig
 
-        public bool GameOn { get; set; } = false;
+        public GameStatus GameOn { get; set; } = GameStatus.Ready;
 
         public bool Paused { get; set; } // TODO: allow players to pause game 
 
@@ -38,7 +40,7 @@ namespace GameObjects.Model
             // don't remove! even though it has 0 references, this function is essential
             // We need to serialize the World only in lobby phase. 
             // Since the worlds is static, once the game has started, no need to send World to clients anymore
-            return !GameOn;
+            return GameOn!= GameStatus.On ;
         }
 
         public GameState()
@@ -55,7 +57,7 @@ namespace GameObjects.Model
 
         public void Start()
         {
-            GameOn = true;
+            GameOn = GameStatus.On;
             StartTime = DateTime.UtcNow;
         }
 

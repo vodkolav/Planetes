@@ -134,7 +134,7 @@ namespace GameObjects.Model
                     // notify everyone they lost and who won
                     s.Notify(p, Notification.Lost, $"You lose, sorry. \n {winner.Name} is the winner ");
                 }
-                gameObjects.GameOn = false;                
+                gameObjects.GameOn = GameStatus.Over;                
             }
 
 

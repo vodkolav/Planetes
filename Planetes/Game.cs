@@ -115,9 +115,9 @@ namespace Planetes
             }
         }
 
-        public async Task LeaveLobby()
+        public void LeaveLobby()
         {
-            await C.LeaveLobby();
+            C.Leave();
         }
 
         public void timerDraw_Tick(object sender, EventArgs e)
@@ -276,25 +276,21 @@ namespace Planetes
             }
             else
             {
-                TerminateServer();
+                C.Leave();
+                if (isServer)
+                {
+                    S.Terminate();
+                }
+                else
+                {
+                    Logger.Log("You are not the server, you can't stop it", LogLevel.Info);
+                }
             }
         }
 
         public void GameOver()
         {
             //TODO : implement closing everythiong logic
-        }
-
-        public void TerminateServer()
-        {
-            if (isServer)
-            {
-                S.Terminate();
-            }
-            else
-            {
-                Logger.Log("You are not the server, you can't stop it", LogLevel.Info);
-            }
         }
 
         public async Task HostSingleplayer()

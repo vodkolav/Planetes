@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using GameObjects.Model;
+﻿using GameObjects.Model;
 using PolygonCollision;
 
 namespace GameObjects
@@ -21,8 +20,6 @@ namespace GameObjects
         void AnnounceDeath(string message);
 
         void AnnounceRespawn(string message);
-
-        Task LeaveLobby();
 
         void CloseLobby();
 

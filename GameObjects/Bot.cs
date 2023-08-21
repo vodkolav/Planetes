@@ -26,7 +26,7 @@ namespace GameObjects
             PlayerName = GetType().Name;
             computer = new Thread(BotLoop)
             { 
-                Name = "BotThread",
+                Name = PlayerName + "_Bot_Thread",
                 IsBackground = true
             };
         }
@@ -115,7 +115,7 @@ namespace GameObjects
                 TimeSpan tdiff;
                 memory = new Dictionary<string, object>();
                 Prepare();
-                while (Me != null)
+                while (gameObjects.GameOn <= GameStatus.On)
                 {
                     dt = DateTime.UtcNow;
                     //TODO: cancel the call of this function if it takes longer than ReactionInterval 
@@ -132,14 +132,13 @@ namespace GameObjects
                     Thread.Sleep(ReactionInterval - tdiff);//this is bad. There should be timer instead
 
                 }
-                Logger.Log("A BOT HAS DIED", LogLevel.Info);
+                Logger.Log(Me.Name + " BOT IS DISENGAGED", LogLevel.Info);
             }
             catch (Exception e)
             {
                 Logger.Log(e, LogLevel.Debug);
             }
         }
-
 
         protected virtual void Prepare()
         {
