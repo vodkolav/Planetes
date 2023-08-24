@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json;
-using PolygonCollision;
+﻿using System.Linq;
 using System.Windows.Media;
-using System.Linq;
+using Newtonsoft.Json;
+using PolygonCollision;
 
-namespace GameObjects
+namespace GameObjects.Model
 {
     [JsonObject(IsReference = true)]
     public class Wall

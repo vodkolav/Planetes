@@ -1,19 +1,19 @@
-﻿using Newtonsoft.Json;
-using PolygonCollision;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
+using PolygonCollision;
 
-namespace GameObjects
+namespace GameObjects.Model
 {
-    public class GameState
-    {
-        public static TimeSpan FrameInterval = GameConfig.FrameInterval; // default. If you want to Change it, do it from GameConfig
+    public enum GameStatus {Ready, Lobby, Cancelled, On, Over }
 
-        public bool GameOn { get; set; } = false;
+    public class GameState
+    {       
+        public GameStatus GameOn { get; set; } = GameStatus.Ready;
 
         public bool Paused { get; set; } // TODO: allow players to pause game 
-        [JsonIgnore]
+
         public DateTime StartTime { get; set; }
         public int frameNum { get; set; }
 
@@ -38,7 +38,7 @@ namespace GameObjects
             // don't remove! even though it has 0 references, this function is essential
             // We need to serialize the World only in lobby phase. 
             // Since the worlds is static, once the game has started, no need to send World to clients anymore
-            return !GameOn;
+            return GameOn!= GameStatus.On ;
         }
 
         public GameState()
@@ -53,106 +53,93 @@ namespace GameObjects
             frameNum = 0;
         }
 
+        public void Start()
+        {
+            GameOn = GameStatus.On;
+            StartTime = DateTime.UtcNow;
+        }
+
         public void Frame()
         {
             if (Paused) return;
             frameNum++;
             //Logger.Log("Model FPS: " + frameNum / (DateTime.Now - StartTime).TotalSeconds, LogLevel.Status);
-            lock (this) // execute actions for each player
+            
+            PolygonCollisionResult r;
+
+            Players.ForEach(p => p.Shoot(this));
+
+            foreach (ICollideable e in Entities)
             {
-                PolygonCollisionResult r;
+                e.Move(this);
+            }
 
-                Players.ForEach(p => p.Shoot(this));
+            //check for collision of all objects with World bounds
+            foreach (ICollideable e in Entities)
+            {
+                r = e.Collides(World);
+                if (r.Intersect)
+                {
+                    e.HandleCollision(World, r);
+                    break;
+                }
+            }
 
-                Entities.ForEach(j => j.Move(this));
-
-                //check for collision of all objects with World bounds
+            //check for collision of Bullets Astroids and Jets with Walls
+            foreach (Wall w in World.Walls)
+            {
                 foreach (ICollideable e in Entities)
                 {
-                    r = e.Collides(World);
+                    r = e.Collides(w);
                     if (r.Intersect)
                     {
-                        e.HandleCollision(World, r);
+                        e.HandleCollision(w, r);
                         break;
                     }
                 }
+            }
 
-                //check for collision of Bullets Astroids and Jets with Walls
-                foreach (Wall w in World.Walls)
-                {           
-                    foreach (ICollideable e in Entities)
-                    {
-                        r = e.Collides(w);
-                        if (r.Intersect)
-                        {
-                            e.HandleCollision(w, r);
-                            break;
-                        }
-                    }
-                }
+            //check for collision of Bullets and Astroids with Jets
+            List<Type> types = new List<Type>() { typeof(Astroid), typeof(Bullet) };
 
-                //check for collision of Bullets and Astroids with Jets
-                List<Type> types = new List<Type>() { typeof(Astroid), typeof(Bullet) }; 
-
-                foreach (Jet j in Entities.OfType<Jet>())
+            foreach (Jet j in Entities.OfType<Jet>())
+            {
+                foreach (ICollideable e in Entities.Where(e => types.Contains(e.GetType())))
                 {
-                    foreach (ICollideable e in Entities.Where(e => types.Contains(e.GetType())))
+                    r = e.Collides(j);
+                    if (r.Intersect)
                     {
-                        r = e.Collides(j);
-                        if (r.Intersect)
-                        {
-                            e.HandleCollision(j, r);
-                            break;
-                        }
+                        e.HandleCollision(j, r);
+                        break;
                     }
                 }
-
-                //check for collision of Bullets with Astroids
-                foreach (Astroid a in Entities.OfType<Astroid>())
+            }
+            
+            //check for collision of Bullets with Astroids
+            foreach (Astroid a in Entities.OfType<Astroid>())
+            {
+                foreach (ICollideable e in Entities.OfType<Bullet>())
                 {
-                    foreach (ICollideable e in Entities.OfType<Bullet>())
+                    r = e.Collides(a);
+                    if (r.Intersect)
                     {
-                        r = e.Collides(a);
-                        if (r.Intersect)
-                        {
-                            e.HandleCollision(a,r);
-                            break;
-                        }
+                        e.HandleCollision(a, r);
+                        break;
                     }
                 }
+            }
 
-                Entities.RemoveAll(b => b.HasHit);
+            Entities.RemoveAll(b => !b.isAlive);
 
+            if (GameConfig.EnableAstroids)
+            {
                 //Spawn asteroid after timeout
-                if (frameNum % GameConfig.AsteroidTimeout == 0)
-                {
-                    Entities.Add(new Astroid(World.Size));
-                }
-            }
-        }        
 
-        public Player Reap()
-        {
-            Player loser;
-            if ((loser = Players.FirstOrDefault(p => !p.isAlive)) != null)
-            {
-                Players.Remove(loser);
-                //Must remove a dead player from all other players enemies lists,
-                //otherwise from the point of view of the bullets the dead one still exists 
-                Players.ForEach(p => p.Enemies.Remove(loser));               
-                return loser;
-            }
-            return null;
-        }
+                int chance = GameConfig.TossInt(World.Size.Area / (int)GameConfig.AsteroidTimeout);
 
-        public void InitFeudingParties()
-        {
-            //simplest case: Free-For-All (All-Against-All)
-            foreach (Player p1 in Players)
-            {
-                foreach (Player p2 in Players)
+                if (GameConfig.EnableAstroids && chance<1) //GameTime.TotalElapsedSeconds % GameConfig.AsteroidTimeout < 0.1)
                 {
-                    p1.FeudWith(p2);
+                    Entities.Add(new Astroid(GameConfig.TossAsteroidType));
                 }
             }
         }

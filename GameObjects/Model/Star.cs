@@ -1,8 +1,8 @@
-﻿using PolygonCollision;
-using System.Windows.Media;
+﻿using System.Windows.Media;
 using Newtonsoft.Json;
+using PolygonCollision;
 
-namespace GameObjects
+namespace GameObjects.Model
 {
     [JsonObject(IsReference = true)]
     public class Star 

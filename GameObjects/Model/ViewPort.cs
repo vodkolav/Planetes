@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using PolygonCollision;
 
-namespace GameObjects
+namespace GameObjects.Model
 {
     [JsonObject(IsReference = true)]
     public class ViewPort
@@ -22,7 +22,8 @@ namespace GameObjects
             internal set
             {
                 if (Body != null) {
-                    Body  = new Rectangle(Origin, value);
+                    Vector newOrigin = Body.Center - value/2;
+                    Body  = new Rectangle(newOrigin, value);
                 }
                 else
                 {

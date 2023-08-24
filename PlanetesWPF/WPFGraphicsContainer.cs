@@ -1,18 +1,53 @@
 ﻿using PolygonCollision;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
+using System.ComponentModel;
+using GameObjects;
 
 namespace PlanetesWPF
 {
-    public class WPFGraphicsContainer : IGraphicsContainer
+    /// <summary>
+    /// ViewModel for the Visor
+    /// </summary>
+    public class WPFGraphicsContainer : IGraphicsContainer, INotifyPropertyChanged
     {
-        private readonly WriteableBitmap B;
+        private WriteableBitmap B;
 
-        public WPFGraphicsContainer(WriteableBitmap b)
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public WriteableBitmap CurrentView
         {
-            B = b;
+            get { return B; }
+            set
+            {
+                B = value;
+                PropertyChanged?.Invoke(
+                    this, new PropertyChangedEventArgs("CurrentView"));
+            }
         }
 
+        public WPFGraphicsContainer()
+        {
+            UpdateBitmap(600, 600);
+        }
+
+        public void Draw(GameClient C)
+        {
+            if (CurrentView != null)
+            {
+                // Wrap updates in a GetContext call, to prevent invalidation and nested locking/unlocking during this block
+                using (CurrentView.GetBitmapContext())
+                {
+                    C.Draw();
+                }
+            }
+        }
+
+        public void UpdateBitmap(int width, int height)
+        {
+            CurrentView = BitmapFactory.New(width, height);
+        }
+        
         public Vector ViewPortOffset { get; set; } = new Vector(0, 0);
 
         public void Clear()

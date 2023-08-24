@@ -2,6 +2,7 @@
 using System;
 using System.ComponentModel;
 using System.Windows.Forms;
+using GameObjects.Model;
 
 namespace Planetes
 {
@@ -66,9 +67,9 @@ namespace Planetes
             }
         }
 
-        private async void btnCancel_Click(object sender, EventArgs e)
+        private void btnCancel_Click(object sender, EventArgs e)
         {
-            await ((Game)Owner).LeaveLobby();
+            ((Game)Owner).LeaveLobby();
             Logger.Log("oops", LogLevel.Info);
             DialogResult = DialogResult.Ignore;
             Close();

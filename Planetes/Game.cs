@@ -1,10 +1,9 @@
 ﻿using GameObjects;
 using PolygonCollision;
 using System;
-using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using GameObjects.Model;
 
 namespace Planetes
 {
@@ -16,11 +15,14 @@ namespace Planetes
 
         public GameClient C { get; set; }
 
-        public Bitmap B { get; set; }
-
         public Lobby L { get; set; }
 
         public BillBoard Billboard { get; set; }
+
+        public PolygonCollision.Size VisorSize
+        {
+            get => new PolygonCollision.Size(pbxWorld.Width, pbxWorld.Height);
+        }
 
         public string PlayerName = "FormsPlayer";
 
@@ -36,6 +38,7 @@ namespace Planetes
             C.PlayerName = PlayerName;
             L = new Lobby(this);
             Billboard = new BillBoard(this);
+            DrawingContext.GraphicsContainer = new WFGraphicsContainer(pbxWorld);
         }
 
         public Game(string AutoStartgametype) : this()
@@ -53,7 +56,7 @@ namespace Planetes
                     }
                 case "joinNetworkGame":
                     {
-                        C.joinNetworkGame($"http://127.0.0.1:2861/", new PolygonCollision.Size(pbxWorld.Width, pbxWorld.Height));
+                        C.joinNetworkGame($"http://127.0.0.1:2861/");
                         break;
                     }
                 case "SinglePlayer":
@@ -89,16 +92,9 @@ namespace Planetes
 
         public void StartGraphics()
         {
-            B = new Bitmap(pbxWorld.Width, pbxWorld.Height);
-
-            Graphics G = Graphics.FromImage(B);
-            G.SmoothingMode = SmoothingMode.AntiAlias;
-            DrawingContext.GraphicsContainer = new WFGraphicsContainer(G);
-
-            pbxWorld.Image = B;
-
+            DrawingContext.GraphicsContainer.UpdateBitmap(pbxWorld.Width, pbxWorld.Height);
             bindHUDS();
-            timerDraw.Interval = (int)GameState.FrameInterval.TotalMilliseconds;// * 0.25);
+            timerDraw.Interval = 8;
             timerDraw.Start();
         }
 
@@ -119,9 +115,9 @@ namespace Planetes
             }
         }
 
-        public async Task LeaveLobby()
+        public void LeaveLobby()
         {
-            await C.LeaveLobby();
+            C.Leave();
         }
 
         public void timerDraw_Tick(object sender, EventArgs e)
@@ -135,7 +131,7 @@ namespace Planetes
         public void DrawGraphics()
         {
             C.Draw();
-            pbxWorld.Image = B;
+            pbxWorld.Image = ((WFGraphicsContainer)DrawingContext.GraphicsContainer).B;
             if (pbxWorld != null)
                 pbxWorld.Invoke(new System.Action(pbxWorld.Refresh));
             hudLeft.Draw();
@@ -270,7 +266,7 @@ namespace Planetes
         public async Task joinNetworkGame(string URL)
         {
             Text += " (Client)";
-            C.joinNetworkGame(URL, new PolygonCollision.Size(pbxWorld.Width, pbxWorld.Height));
+            C.joinNetworkGame(URL);
 
             bool GameStarted = L.OpenLobby_WaitForGuestsAndBegin();
 
@@ -280,20 +276,21 @@ namespace Planetes
             }
             else
             {
-                TerminateServer();
+                C.Leave();
+                if (isServer)
+                {
+                    S.Terminate();
+                }
+                else
+                {
+                    Logger.Log("You are not the server, you can't stop it", LogLevel.Info);
+                }
             }
         }
 
-        public void TerminateServer()
+        public void GameOver()
         {
-            if (isServer)
-            {
-                S.Stop();
-            }
-            else
-            {
-                Logger.Log("You are not the server, you can't stop it", LogLevel.Info);
-            }
+            //TODO : implement closing everythiong logic
         }
 
         public async Task HostSingleplayer()
@@ -306,11 +303,11 @@ namespace Planetes
             //await C.StartServer();
         }
 
-        public void Notify(string message)
+        public void Notify(Notification type, string message)
         {
             if (InvokeRequired)
             {
-                Invoke(new Action<string>(Notify), new object[] { message });
+                Invoke(new Action<Notification, string>(Notify), type, message);
             }
             else
             {
@@ -329,6 +326,19 @@ namespace Planetes
             {
                 Billboard.Show(this, message);               
             }           
+        }
+
+
+        public void AnnounceRespawn(string message)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action<string>(AnnounceRespawn), message);
+            }
+            else
+            {
+                Billboard.Hide();
+            }
         }
 
         public void CloseLobby()
@@ -371,6 +381,13 @@ namespace Planetes
 
         }
 
+        private void Game_SizeChanged(object sender, EventArgs e)
+        {
+            if (C.GameOn)
+            {
+                C.SetViewPort(VisorSize);
+            }
+        }
         #endregion
     }
 }

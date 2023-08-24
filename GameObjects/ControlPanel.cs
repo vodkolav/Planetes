@@ -4,10 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
+using Action = GameObjects.Model.Action;
 
 namespace GameObjects
 {
-    public enum HOTAS { Up, Down, Left, Right, Shoot, Aim, Brake, Nothing };
+    public enum HOTAS { Up, Down, Left, Right, Shoot, Brake, Nothing, Scuttle}
     public class ControlPanel
     {
         private Dictionary<Key, HOTAS> KeyBindings;
@@ -49,6 +50,7 @@ namespace GameObjects
             bindKey(Key.A, HOTAS.Left);
             bindKey(Key.D, HOTAS.Right);
             bindKey(Key.Space, HOTAS.Brake);
+            bindKey(Key.L, HOTAS.Scuttle);
         }
 
         public void bindARROWSto()
@@ -84,17 +86,18 @@ namespace GameObjects
             }
         }
             
-        public void Do(Action instruction, object argument)
+        public void Do(Action instruction, Vector argument)
         {
             //instructions will probably be required later, for example to apply abilities at something/someone
+
             if (isWorking)
-                Proxy.Invoke("Command", new object[] { PlayerID, new Tuple<Action, object>(instruction, argument) });
+                Proxy.Invoke("Do", new object[] { PlayerID, new Tuple<Action, Vector>(instruction, argument) });
         }
 
         public void Aim(Vector argument)
         {
             if (isWorking)
-                Proxy.Invoke("Aim", new object[] { PlayerID, new Tuple<Action, Vector>(Action.Aim, argument) });
+                Proxy.Invoke("Do", new object[] { PlayerID, new Tuple<Action, Vector>(Action.Aim, argument) });
             // these exceptions appear after waiting too long on a breakpoint. how to fix : https://stackoverflow.com/a/38161578
 
         }

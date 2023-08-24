@@ -10,12 +10,19 @@ using GameObjects;
 
 namespace PlanetesWPF
 {
-    public class GameRecorder
+    public enum RecordingState {Ready, Recording, Saving, Complete}
+
+    public class GameRecorder : IDisposable
     {
-        public bool IsRecording { get; set; } = false;
+
+        public event  Action<GameRecorder> OnSaveComplete;
+
+        public RecordingState State { get; set; } =  RecordingState.Ready;
+        
         BlockingCollection<byte[]> frames;
         GifBitmapEncoder encoder;
 
+        byte[] aPixels;
         int PixelWidth;
         int PixelHeight;
         double DpiX;
@@ -23,10 +30,16 @@ namespace PlanetesWPF
         PixelFormat Format;
         BitmapPalette Palette;       
         int Stride;
+        private int _framerate;
+
+        public double ScaleFactor { get; set; } = 0.666;
+
+        public int LastDrawnFrame { get; internal set; }
 
         public GameRecorder(WriteableBitmap imageSample)
         {
             frames = new BlockingCollection<byte[]>();
+            aPixels = new byte[imageSample.PixelHeight * imageSample.BackBufferStride];
             PixelWidth = imageSample.PixelWidth;
             PixelHeight = imageSample.PixelHeight;
             DpiX = imageSample.DpiX;
@@ -36,49 +49,56 @@ namespace PlanetesWPF
             Stride = imageSample.BackBufferStride;
         }
 
-        public void AddFrame(byte[] aPixels)
-        {           
-            frames.Add(aPixels);
+        public void AddFrame(WriteableBitmap imageSource)
+        {
+            if (State == RecordingState.Recording)
+            {
+                imageSource.CopyPixels(aPixels, imageSource.BackBufferStride, 0);
+                frames.Add(aPixels);
+            }
         }
+
         public void Feed(object Image)
         {
             encoder = new GifBitmapEncoder();
-            foreach (var aPixels in frames.GetConsumingEnumerable())
+            foreach (var pixels in frames.GetConsumingEnumerable())
             {
                 BitmapSource BF = BitmapSource.Create(PixelWidth, PixelHeight,
-                DpiX, DpiY, Format, Palette, aPixels, Stride);
-                var targetBitmap = new TransformedBitmap(BF, new ScaleTransform(0.5, 0.5));
-                encoder.Frames.Add(BitmapFrame.Create(targetBitmap));
+                DpiX, DpiY, Format, Palette, pixels, Stride);
+                if (ScaleFactor != 1.0f)
+                {
+                    BF = new TransformedBitmap(BF, new ScaleTransform(ScaleFactor, ScaleFactor));
+ }
+                encoder.Frames.Add(BitmapFrame.Create(BF));
                
             }
             Save();
-            frames = new BlockingCollection<byte[]>();
-            IsRecording = false;
         }       
 
         public void Start()
         {            
-            if (!IsRecording)
+            if (State is RecordingState.Ready )
             {
-                Logger.Log("Recording game to gif...", LogLevel.Info);
-                IsRecording = true;
+                Logger.Log($"Recording game to gif ({PixelWidth}x{PixelHeight} )...", LogLevel.Status);
+                State = RecordingState.Recording;
                 ThreadPool.QueueUserWorkItem(new WaitCallback(Feed));
             }
         }
 
         public void End()
         {
+            State = RecordingState.Saving;
             frames.CompleteAdding();
         }
 
         private void Save()
         {
-            string filename = string.Format("game {0}.gif", DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss"));
+            string filename = string.Format("game {0}_{1}.gif", DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss"),GameConfig.TossInt(999));
             using (FileStream stream = new FileStream(filename, FileMode.Create))
             {
                 try
                 {
-                    Logger.Log("Saving Gif...", LogLevel.Info);
+                    Logger.Log("Saving Gif...", LogLevel.Status);
                     Save(stream);
                 }
                 catch (Exception e)
@@ -86,7 +106,24 @@ namespace PlanetesWPF
                     Logger.Log(e, LogLevel.Debug);
                 }
             }
-            Logger.Log("done saving", LogLevel.Debug); 
+
+            State = RecordingState.Complete; //  IsComplete = true;
+            OnSaveComplete(this);
+            Logger.Log("done saving", LogLevel.Status);
+            Dispose();
+        }
+
+        internal bool Fits(WriteableBitmap imageSample)
+        {
+            return aPixels.Length == imageSample.PixelHeight * imageSample.BackBufferStride;
+        }
+        
+        public void Dispose()
+        {
+            OnSaveComplete = null;
+            frames.Dispose();
+            encoder = null;
+            aPixels = null;
         }
 
         /// <summary>
@@ -109,7 +146,7 @@ namespace PlanetesWPF
             }
             else
                 throw new Exception("Cannot encode the Gif. The frame collection is empty.");
-
+         
             // Locate the right location where to insert the metadata in the binary
             // This will be just before the first label &H0021F9 (Graphic Control Extension)
             int MetadataPTR = -1;
@@ -179,7 +216,7 @@ namespace PlanetesWPF
                             if (Data[x + 3] == 4)
                             {
                                 // word, little endian, the hundredths of second to show this frame
-                                byte[] Bte = BitConverter.GetBytes(FrameRate / 10);
+                                byte[] Bte = BitConverter.GetBytes(FrameRate);
                                 Data[x + 5] = Bte[0];
                                 Data[x + 6] = Bte[1];
                             }
@@ -211,11 +248,11 @@ namespace PlanetesWPF
         ///     ''' characters (Any character above this limit will be truncated). The string will be encoded UTF-7. 
         ///     ''' </summary>
         public List<string> MetadataString { get; set; } = new List<string>();
-
+        
         /// <summary>
-        ///     '''  Get or set the amount of time each frame will be shown (in milliseconds). The default value is 200ms
+        ///     '''  Get or set the amount of time each frame will be shown (in tens of milliseconds). The default value is 200ms
         ///     ''' </summary>
-        public int FrameRate { get; set; } = (int)GameConfig.FrameInterval.TotalMilliseconds;
+        public int FrameRate { get => _framerate; set => _framerate = Math.Max(2,value); }  //(int)(GameTime.DeltaTime);//  (int)GameConfig.FrameInterval.TotalMilliseconds/10;
     }
 }
 

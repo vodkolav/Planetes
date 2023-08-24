@@ -1,5 +1,5 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using GameObjects.Model;
+using PolygonCollision;
 
 namespace GameObjects
 {
@@ -7,22 +7,23 @@ namespace GameObjects
     {
         string Text { get; set; }
 
-        GameClient C { get; set; }
+
+        Size VisorSize { get;  }
 
         void DrawGraphics();
 
-        void bindHUDS();
-
-        void Notify(string message);
+        void Notify(Notification type, string message);
 
         void AnnounceDeath(string message);
 
-        Task LeaveLobby();
+        void AnnounceRespawn(string message);
 
-        void CloseLobby();
+        void CloseLobby(); //TODO: drop this. UI needs to determine it by itself.
 
         void UpdateLobby(GameState go);
 
         void Start();
+
+        void GameOver();
     }
 }

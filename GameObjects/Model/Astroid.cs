@@ -1,42 +1,41 @@
-﻿using Newtonsoft.Json;
-using PolygonCollision;
-using System;
+﻿using System;
 using System.Windows.Media;
+using Newtonsoft.Json;
+using PolygonCollision;
 
-namespace GameObjects
+namespace GameObjects.Model
 {
     public enum AstType { Rubble, Ammo, Health };
 
     public class Astroid : ICollideable
     {
         [JsonIgnore]
-        public float Size { get { return Body.R * 2; } }
+        public float Size
+        {
+            get { return Body.R * 2; }
+        }
+
         public Circle Body { get; set; }
-        public Vector Speed { get; set; }
 
         [JsonIgnore]
-        public override Circle BoundingCirc { get { return Body; } }
+        public override Circle BoundingCirc
+        {
+            get { return Body; }
+        }
 
         [JsonIgnore]
-        public override Vector Pos { get { return Body.Pos; } set { Body.Pos = value; } }
+        public override Vector Pos
+        {
+            get { return Body.Pos; }
+            set { Body.Pos = value; }
+        }
+
         public AstType Type { get; set; }
+
         public override Player Owner { get; set; }
 
-        public void TossType(Random random)
-        {
-            switch (random.Next(10))
-            {
-                case (1):
-                    Type = AstType.Ammo;
-                    break;
-                case 2:
-                    Type = AstType.Health;
-                    break;
-                default:
-                    Type = AstType.Rubble;
-                    break;
-            }
-        }
+        public override int Power {  get {return (int)Size; } }
+        
         [JsonIgnore]
         public Color Color
         {
@@ -54,16 +53,16 @@ namespace GameObjects
             }
         }
 
-        public Astroid(Size worldSize)
+
+        public Astroid(AstType type)
         {
-            Random random = new Random();
-            Body = new Circle(new Vector(random.Next(worldSize.Width), random.Next(worldSize.Height)), random.Next(20) + 5);
-            int linearSpeed = random.Next(1, (int)GameConfig.Lightspeed);
-            double Angle = Math.PI / 180 * random.Next(360);
+            Body = new Circle(GameConfig.TossPoint, GameConfig.TossInt(10,30));
+            double linearSpeed = GameConfig.TossInt(1,(int)(GameConfig.Lightspeed * 0.5));
+            double Angle = Math.PI / 180 * GameConfig.TossInt(360);
             Vector mult = new Vector((float)Math.Cos(Angle), (float)Math.Sin(Angle));
             Speed = mult * linearSpeed;
-            TossType(random);
-            HasHit = false;
+            Type = type;
+            isAlive = true;
         }
 
         public Astroid()
@@ -71,9 +70,15 @@ namespace GameObjects
             
         }
 
+        internal override bool OwnedBy(Player pl)
+        {
+            //Asteroids aren't owned by any player
+            return false;
+        }
+
         public override void Draw()
         {
-            if (!HasHit)
+            if (isAlive)
             {
                 Body.Draw(Color);
             }
@@ -92,36 +97,34 @@ namespace GameObjects
             }
         }
 
+        public override void HandleCollision(Jet j, PolygonCollisionResult r)
+        {
+            isAlive = false;
+            if (Type == AstType.Ammo)
+            {
+                j.Recharge(Power);
+            }
+            else if (Type == AstType.Health)
+            {
+                j.Heal(Power);
+            }
+            else
+                j.Hit(this);
+        }
 
+        public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)
+        {
+                isAlive = false;
+        }
 
         public override void Move(GameState gameObjects)
         {
-            Offset(Speed);
+            Offset(Speed * GameConfig.GameSpeed * GameTime.DeltaTime);//*GameTime.DeltaTime);
         }
 
         private void Offset(Vector by)
         {
             Body.Offset(by);
-        }
-
-        public override void HandleCollision(Jet j, PolygonCollisionResult r)
-        {
-            HasHit = true;
-            if (Type == AstType.Ammo)
-            {
-                j.Owner.Recharge((int)Size);
-            }
-            else if (Type == AstType.Health)
-            {
-                j.Owner.Heal(1);
-            }
-            else
-                j.Owner.Hit((int)Size);
-        }
-
-        public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)
-        {
-                HasHit = true;
         }
     }
 }

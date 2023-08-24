@@ -1,8 +1,9 @@
-﻿using PolygonCollision;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using GameObjects.Model;
+using PolygonCollision;
 
 namespace GameObjects
 {
@@ -25,7 +26,7 @@ namespace GameObjects
             PlayerName = GetType().Name;
             computer = new Thread(BotLoop)
             { 
-                Name = "BotThread",
+                Name = PlayerName + "_Bot_Thread",
                 IsBackground = true
             };
         }
@@ -44,10 +45,10 @@ namespace GameObjects
             {
                 if (Me != null)
                 {
-                    return Me.Enemies.Aggregate((curMin, x) => curMin == null || (Jet.Dist(x.Jet)) < Jet.Dist(curMin.Jet) ? x : curMin);
+                    return Me.Enemies.Aggregate((curMin, x) =>
+                        curMin == null || (Jet.Dist(x.Jet)) < Jet.Dist(curMin.Jet) ? x : curMin);
                 }
-                else
-                { return null; }
+                return null;
             }
         }
 
@@ -55,7 +56,10 @@ namespace GameObjects
         {
             get
             {
-                return gameObjects.Astroids.Aggregate((curMin, x) => curMin == null ||Jet.Dist(x) < Jet.Dist(curMin) ? x : curMin);
+                if (gameObjects.Astroids.Any())
+                    return gameObjects.Astroids.Aggregate((curMin, x) =>
+                        curMin == null || Jet.Dist(x) < Jet.Dist(curMin) ? x : curMin);
+                return null;
             }
         }
 
@@ -111,28 +115,29 @@ namespace GameObjects
                 TimeSpan tdiff;
                 memory = new Dictionary<string, object>();
                 Prepare();
-                while (Me != null)
+                while (gameObjects.GameOn <= GameStatus.On)
                 {
                     dt = DateTime.UtcNow;
                     //TODO: cancel the call of this function if it takes longer than ReactionInterval 
                     //https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/cancel-async-tasks-after-a-period-of-time
-                    FrameReact();
+                    lock (gameObjects)
+                    {
+                        if (Me.isAlive)
+                        {
+                            //Logger.Log(Me.Name + " reacting to frame " + gameObjects.frameNum, LogLevel.Info);
+                            FrameReact();
+                        }
+                    }
                     tdiff = DateTime.UtcNow - dt;
                     Thread.Sleep(ReactionInterval - tdiff);//this is bad. There should be timer instead
 
                 }
-                Logger.Log("A BOT HAS DIED", LogLevel.Info);
+                Logger.Log(Me.Name + " BOT IS DISENGAGED", LogLevel.Info);
             }
             catch (Exception e)
             {
                 Logger.Log(e, LogLevel.Debug);
             }
-        }
-
-        protected sealed override void Die(string message)
-        {
-            computer.Join();
-            base.Die(message);
         }
 
         protected virtual void Prepare()
@@ -190,18 +195,22 @@ namespace GameObjects
             {
                 //asteroid evasion tactic
                 Astroid astClosest = ClosestAsteroid;
-
-                if (astClosest.Pos.X - astClosest.Size * 10 < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X && astClosest.Type == AstType.Rubble)
+                if (astClosest != null)
                 {
-                    Press(HOTAS.Left);
-                }
-                else if (astClosest.Pos.X < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X + astClosest.Size * 10 && astClosest.Type == AstType.Rubble)
-                {
-                    Press(HOTAS.Right);
-                }
-                else
-                {
-                    Release(HOTAS.Right);
+                    if (astClosest.Pos.X - astClosest.Size * 10 < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X &&
+                        astClosest.Type == AstType.Rubble)
+                    {
+                        Press(HOTAS.Left);
+                    }
+                    else if (astClosest.Pos.X < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X + astClosest.Size * 10 &&
+                             astClosest.Type == AstType.Rubble)
+                    {
+                        Press(HOTAS.Right);
+                    }
+                    else
+                    {
+                        Release(HOTAS.Right);
+                    }
                 }
             }
             catch (Exception e)
@@ -234,32 +243,40 @@ namespace GameObjects
             }
 
             //aiming at opponent tactic
+            try
+            {
+                Player EnemyClosest = ClosestEnemy;
+                if (EnemyClosest != null)
+                {
+                    Aim(EnemyClosest.Jet.Pos);
+                    if (Jet.Pos.Y < EnemyClosest.Jet.Pos.Y - 50)
+                    {
 
-            Player EnemyClosest = ClosestEnemy;
+                        Press(HOTAS.Down);
+                    }
+                    else if (Jet.Pos.Y > EnemyClosest.Jet.Pos.Y + 50)
+                    {
+                        Press(HOTAS.Up);
+                    }
+                    else
+                    {
+                        Release(HOTAS.Up);
+                    }
 
-            Aim(EnemyClosest.Jet.Pos);
-            if (Jet.Pos.Y < EnemyClosest.Jet.Pos.Y - 50)
-            {
-
-                Press(HOTAS.Down);
+                    //shoot at opponent tactic
+                    if ((Jet.Pos - EnemyClosest.Jet.Pos).Magnitude < 300)
+                    {
+                        Press(HOTAS.Shoot);
+                    }
+                    else
+                    {
+                        Release(HOTAS.Shoot);
+                    }
+                }
             }
-            else if (Jet.Pos.Y > EnemyClosest.Jet.Pos.Y + 50)
+            catch (Exception e) 
             {
-                Press(HOTAS.Up);
-            }
-            else
-            {
-                Release(HOTAS.Up);
-            }
-
-            //shoot at opponent tactic
-            if ((Jet.Pos - EnemyClosest.Jet.Pos).Magnitude < 300)
-            {
-                Press(HOTAS.Shoot);
-            }
-            else
-            {
-                Release(HOTAS.Shoot);
+                Logger.Log(e, LogLevel.Debug);
             }
         }
     }
@@ -284,41 +301,49 @@ namespace GameObjects
             try
             {
                 //asteroid evasion tactic
-
-                if (ClosestAsteroid.Pos.X - ClosestAsteroid.Size * 10 < Jet.Pos.X && Jet.Pos.X < ClosestAsteroid.Pos.X && ClosestAsteroid.Type == AstType.Rubble)
+                Astroid astClosest = ClosestAsteroid;
+                if (astClosest != null)
                 {
-                    Press(HOTAS.Left);
-                }
-                else if (ClosestAsteroid.Pos.X < Jet.Pos.X && Jet.Pos.X < ClosestAsteroid.Pos.X + ClosestAsteroid.Size * 10 && ClosestAsteroid.Type == AstType.Rubble)
-                {
-                    Press(HOTAS.Right);
-                }
-                else
-                {
-                    Release(HOTAS.Right);
+                    if (astClosest.Pos.X - astClosest.Size * 10 < Jet.Pos.X &&
+                        Jet.Pos.X < astClosest.Pos.X && astClosest.Type == AstType.Rubble)
+                    {
+                        Press(HOTAS.Left);
+                    }
+                    else if (astClosest.Pos.X < Jet.Pos.X &&
+                             Jet.Pos.X < astClosest.Pos.X + astClosest.Size * 10 &&
+                             astClosest.Type == AstType.Rubble)
+                    {
+                        Press(HOTAS.Right);
+                    }
+                    else
+                    {
+                        Release(HOTAS.Right);
+                    }
                 }
             }
             catch (Exception e)
             {
-                Logger.Log(e, LogLevel.Debug);
+                Logger.Log(e, LogLevel.Warning);
             }
 
             try
             {
                 //bullet evasion tactic (not good yet)
                 Bullet bulClosest = ClosestBullet;
-
-                if (bulClosest.Pos.Y > Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
+                if (bulClosest != null)
                 {
-                    Press(HOTAS.Up);
-                }
-                else if (bulClosest.Pos.Y < Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
-                {
-                    Press(HOTAS.Down);
-                }
-                else
-                {
-                    Release(HOTAS.Up);
+                    if (bulClosest.Pos.Y > Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
+                    {
+                        Press(HOTAS.Up);
+                    }
+                    else if (bulClosest.Pos.Y < Jet.Pos.Y && bulClosest.Pos.X + 50 > Jet.Pos.X)
+                    {
+                        Press(HOTAS.Down);
+                    }
+                    else
+                    {
+                        Release(HOTAS.Up);
+                    }
                 }
             }
             catch (Exception e)
@@ -359,22 +384,16 @@ namespace GameObjects
         public Bot2() : base()
         { }
 
-
+        /// <summary>
+        /// Bot2 is basically sentry. It remains static and fires at any enemy coming into range
+        /// </summary>
         protected override void FrameReact()
         {
+            var inrange = Me.Enemies.Where(e => (e.Jet.Pos - Jet.Pos).Magnitude < 200);
 
-
-            if (Jet.Pos.Y < gameObjects.Players[0].Jet.Pos.Y)
+            if (inrange.Any()) 
             {
-                Yoke.Press(HOTAS.Up);
-            }
-            else
-            {
-                Yoke.Press(HOTAS.Down);
-            }
-
-            if (Jet.Pos.Y - gameObjects.Players[0].Jet.Pos.Y < 50)
-            {
+                Yoke.Aim(inrange.First().Jet.Pos);
                 Yoke.Press(HOTAS.Shoot);
             }
             else
@@ -390,26 +409,13 @@ namespace GameObjects
         { }
 
         /// <summary>
-        /// Constantly accelerates left. every frame aims at closest enemy(if in range) and shoots
+        /// Bot1 is basic bot. Just does nothing.
         /// </summary>
         protected override void FrameReact()
         {
             int count = (int)memory["count"];
             HOTAS direction = (HOTAS)memory["direction"];
             bool amShooting = (bool)memory["amShooting"];
-
-
-            Press(HOTAS.Left);
-            Aim(ClosestEnemy.Jet.Pos);
-
-            if (Me.Jet.Pos.Dist(ClosestEnemy.Jet.Pos) < 200)
-            {
-                Press(HOTAS.Shoot);
-            }
-            else
-            {
-                Release(HOTAS.Shoot);
-            }
 
             memory["count"] = count;
             memory["direction"] = direction;

@@ -1,33 +1,35 @@
-﻿using Newtonsoft.Json;
+﻿using System.Windows.Media;
+using Newtonsoft.Json;
 using PolygonCollision;
-using System.Windows.Media;
 
-namespace GameObjects
+namespace GameObjects.Model
 {
     [JsonObject(IsReference = true)]
     public class Bullet : ICollideable
     {
-        public override Vector Pos { get => Body.Pos; set => Body.Pos = value; }     
-        
-        public static int linearSpeed = GameConfig.bulletSpeed;
+        [JsonIgnore]
+        public override Vector Pos { get => Body.Pos; set => Body.Pos = value; }
 
-        public Vector Speed { get => Body.Tail; }
-        
+        [JsonIgnore]
         public int Size { get => Body.Size; }       
         
-        Ray Body { get; set; }
+        public Ray Body { get; set; }
 
         public Color Color { get; set; }
 
-        public int Power { get; set; } = 1;
+        public override int Power { get; internal set; } = 1;
 
-        public Bullet(Player owner, Vector pos, Vector speed, int size, Color color)
+        public Bullet(Player owner, Vector pos, Vector bearing, int speed, int size, Color color)
         {
-            Owner = owner;            
-            Body = new Ray(pos, speed*0.5, size);
+            Owner = owner;
+            Vector tmp = bearing.GetNormalized();
+            Body = new Ray(pos, tmp * size * 4, size);
+            Speed = tmp * speed;
             Color = color;
-            HasHit = false;
+            isAlive = true;
         }   
+
+        public Bullet() { }
 
         public override PolygonCollisionResult Collides(Astroid a)
         {
@@ -49,13 +51,17 @@ namespace GameObjects
 
         public override void HandleCollision(Jet j, PolygonCollisionResult r)
         {
-            HasHit = true;
-            j.Owner.Hit(Power);
+            isAlive = false;
+            j.Hit(this);
+        }
+        public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)
+        {
+            isAlive = false;
         }
 
         public override void Draw()
         {
-            if (!HasHit)
+            if (isAlive)
             {
                 Body.Draw(Color);
             }
@@ -63,17 +69,12 @@ namespace GameObjects
 
         public override void Move(GameState gameObjects)
         { 
-            Offset(Speed);
+            Offset(Speed * GameConfig.GameSpeed * GameTime.DeltaTime );
         }
 
         public void Offset(Vector by)
         {
            Body.Offset(by);
-        }
-
-        public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)
-        {
-            HasHit = true;
         }
     }
 }

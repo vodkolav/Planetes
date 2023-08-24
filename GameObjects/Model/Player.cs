@@ -1,14 +1,15 @@
-﻿using Newtonsoft.Json;
-using PolygonCollision;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Windows.Media;
+using Newtonsoft.Json;
+using PolygonCollision;
 
-namespace GameObjects
+namespace GameObjects.Model
 {
-    public enum Action { Press, Release, Aim, setViewPort }
-    public enum Notification { DeathNotice, Kicked, Message }
+    public enum Action { Press, Release, Aim, SetViewPort }
 
+    public enum Notification { Joined, JoinFailed, Kicked, Death, Respawn, Won, Lost, Message, GameOver }
+     
     public struct PlayerInfo
     {
         public string PlayerName { get; set; } 
@@ -21,51 +22,63 @@ namespace GameObjects
         public int ID { get; set; }        
         public string ConnectionID { get; set; }
         public string Name { get; set; }
-        public Color Color { get { return Jet.Color; } }
-        public int Health { get; set; }
-        public int MaxHealth { get; set; }
-        public int Ammo { get; set; }
-        public int MaxAmmo { get; set; }        
-
+        public Color Color { get; set; }
+      
         public List<Player> Enemies { get; set; }
         public Jet Jet { get; set; }
 
-        public Vector Acceleration;
-        public bool KeyShoot { get; set; }
+        public event MatchEventHandler OnMatchEvent;
+
+        public float DeathTime { get; set; }
+
+        public bool isAlive { get; set; } = true;
 
         [JsonIgnore]
         public GameState gameState { get; set; }
-        [JsonIgnore]
-        public Dictionary<Action, Action<object>> actionMapping { get; set; }
 
         public ViewPort viewPort { get; set; }
 
-        public bool isAlive { get; private set; } = true;
+        public void MatchEvent(ICollideable killer)
+        {
+            if (OnMatchEvent != null)
+            {
+                OnMatchEvent(this, new MatchEventArgs(killer.Owner, this, " Killed "));
+            }
+        }
 
-        public void Act(Tuple<Action, HOTAS> instruction)
+        public void Act<T>(Tuple<Action, T> instruction)
         {
             if (Name == "WPFplayer")
             {
                 Logger.Log("sent command: " + instruction.ToString(), LogLevel.Info);
                 //Logger.Log("Acceleration: " + Acceleration.ToString(), LogLevel.Info);
             }
-            actionMapping[instruction.Item1](instruction.Item2);
-        }
 
-        public void Act(Tuple<Action, Vector> instruction)
-        {
-            actionMapping[instruction.Item1](instruction.Item2);
-        }
-
-        private void MapActions()
-        {
-            actionMapping = new Dictionary<Action, System.Action<object>>
+            switch (instruction.Item1)
             {
-                { Action.Press, Steer },
-                { Action.Release, Release },
-                { Action.Aim, Aim },
-                { Action.setViewPort,setViewPort } // This Action is not used for now, but will be useful when you want tot change window size in-game
-            };
+
+                case Action.Press:
+                {
+                    Steer(instruction.Item2);
+                    break;
+                }
+
+                case Action.Release:
+                {
+                    Release(instruction.Item2);
+                    break;
+                }
+                case Action.Aim:
+                {
+                    Aim(instruction.Item2);
+                    break;
+                }
+                case Action.SetViewPort:
+                {
+                    setViewPort(instruction.Item2);
+                    break;
+                }
+            }
         }
 
         public Player()
@@ -77,18 +90,13 @@ namespace GameObjects
         {
             ID = id;
             ConnectionID = connectionid;
-            Name = Info.PlayerName;
-            Health = health;
-            MaxHealth = health;
-            Ammo = ammo;
-            MaxAmmo = ammo;
-            Jet = new Jet(this, color);
+            Name = GameConfig.GetColorName(color) + "_" + Info.PlayerName;
+            Color = color;
+            Jet = new Jet(this, health, ammo);
             Enemies = new List<Player>();
             gameState = game;
-            Acceleration = new Vector();
             viewPort = new ViewPort(this);
             setViewPort(Info.VisorSize);
-            MapActions();
         }
 
         public Player(int id, string connectionid, PlayerInfo Info, GameState game) :
@@ -96,11 +104,6 @@ namespace GameObjects
                  GameConfig.StartingAmmo, GameConfig.TossColor, game)
         {
 
-        }
-
-        internal void setViewPort(object argument)
-        {
-            viewPort.Size = (Size)argument;
         }
 
         public override string ToString()
@@ -124,118 +127,33 @@ namespace GameObjects
             }
         }
 
-        public void Recharge(int amount)
-        {
-            Ammo = Math.Min(Ammo + (int)amount, MaxAmmo);
-        }
-
-        public void Heal(int amount)
-        {
-            Health = Math.Min(Health + amount, MaxHealth);
-        }
-
         public virtual void Steer(object argument)
         {
-            switch ((HOTAS)argument)
-            {
-                case (HOTAS.Up):
-                    {
-                        Acceleration.Y = -1;
-                        break;
-                    }
-                case (HOTAS.Down):
-                    {
-                        Acceleration.Y = 1;
-                        break;
-                    }
-                case (HOTAS.Left):
-                    {
-                        Acceleration.X = -1;
-                        break;
-                    }
-                case (HOTAS.Right):
-                    {
-                        Acceleration.X = 1;
-                        break;
-                    }
-                case (HOTAS.Shoot):
-                    {
-                        KeyShoot = true;
-                        break;
-                    }
-                case HOTAS.Brake:
-                    {
-                        Jet.KeyBrake = true;
-                        break;
-                    }
-            }
-            Jet.Acceleration = Acceleration;
+            if (isAlive)
+                Jet.Press((HOTAS)argument);
         }
 
         public virtual void Release(object argument)
         {
-            switch ((HOTAS)argument)
-            {
-                case (HOTAS.Up):
-                    {
-                        Acceleration.Y = 0;
-                        break;
-                    }
-                case (HOTAS.Down):
-                    {
-                        Acceleration.Y = 0;
-                        break;
-                    }
-                case (HOTAS.Left):
-                    {
-                        Acceleration.X = 0;
-                        break;
-                    }
-                case (HOTAS.Right):
-                    {
-                        Acceleration.X = 0;
-                        break;
-                    }
-                case (HOTAS.Shoot):
-                    {
-                        KeyShoot = false;
-                        break;
-                    }
-                case HOTAS.Brake:
-                    {
-                        Jet.KeyBrake = false;
-                        break;
-                    }
-            }
-            Jet.Acceleration = Acceleration;
+            if (isAlive)
+                Jet.Release((HOTAS)argument);
         }
 
         public virtual void Aim(object argument)
         {
-            Jet.Aim = (Vector)argument - (viewPort.Size * .5);
+            if (isAlive)
+                Jet.Aim = (Vector)argument - (viewPort.Size * .5);
         }
 
-        public virtual void Shoot(GameState gameObjects)
+        internal void setViewPort(object argument)
         {
-            if (KeyShoot)
-            {
-                if (Ammo != 0 && gameObjects.frameNum > Jet.LastFired + Jet.Cooldown)
-                {
-                    Jet.LastFired = gameObjects.frameNum;
-                    Bullet bullet = new Bullet(this, Jet.Gun, speed: Jet.Bearing.GetNormalized() * Bullet.linearSpeed /*+ Speed*/, size: 3, color: Color);
-                    gameObjects.Entities.Add(bullet);
-                    Ammo--;
-                }
-            }
+            viewPort.Size = new Size((Vector)argument);
         }
 
-        internal void Hit(int points)
+        public virtual void Shoot(GameState gameObjects) // maybe move this to Jet
         {
-            if (Health > points)
-                Health -= points;
-            else
-                isAlive = false;
-
+            if (isAlive)
+                Jet.Shoot(gameObjects);
         }
     }
 }

@@ -4,6 +4,8 @@ using PolygonCollision;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using GameObjects.Model;
+using Action = GameObjects.Model.Action;
 
 namespace GameObjects
 {
@@ -19,52 +21,66 @@ namespace GameObjects
 
         public void Command(int who, Tuple<Action, HOTAS> command)
         {
-            try
-            {              
-                _gameServer.gameObjects.Players.Single(p => p.ID == who).Act(command);
-            }
-            catch (Exception e)
+            lock (_gameServer.gameObjects)
             {
-                Logger.Log(e, LogLevel.Debug);
-            }            
-        }
-        
-        public void Aim(int who, Tuple<Action, Vector> command)
-        {
-            try
-            {                
-                _gameServer.gameObjects.Players.Single(p => p.ID == who).Act(command);
-            }
-            catch (Exception e)
-            {
-                Logger.Log(e, LogLevel.Debug);
+                try
+                {
+                    _gameServer.gameObjects.Players.Single(p => p.ID == who).Act(command);
+                }
+                catch (Exception e)
+                {
+                    Logger.Log(e, LogLevel.Debug);
+                }
             }
         }
 
-        public void Over()
+        //TODO: get rid of those tuples. just use regular params
+        public void Do(int who, Tuple<Action, Vector> command)
         {
-            _gameServer.Stop();
-        }
-
-        public void JoinLobby(PlayerInfo playerInfo)
-        {
-            try
+            lock (_gameServer.gameObjects)
             {
-                int playerID = _gameServer.Join(Context.ConnectionId, playerInfo);
-                Clients.Client(Context.ConnectionId).JoinedLobby(playerID);
-                Clients.All.UpdateLobby(_gameServer.gameObjects);
-            }
-            catch (Exception e)
-            {
-                Logger.Log(e, LogLevel.Debug);
+                try
+                {
+                    _gameServer.gameObjects.Players.Single(p => p.ID == who).Act(command);
+                }
+                catch (Exception e)
+                {
+                    Logger.Log(e, LogLevel.Debug);
+                }
             }
         }
 
 
-        public void LeaveLobby(int playerID)
+        public void Join(PlayerInfo playerInfo)
         {
-            _gameServer.Leave(playerID);
-            //Clients.All.UpdateModel(_gameServer.gameObjects);
+            lock (_gameServer.gameObjects)
+            {
+                try
+                {
+                    int playerID = _gameServer.Join(Context.ConnectionId, playerInfo);
+                    Clients.Client(Context.ConnectionId).JoinedLobby(playerID);
+                    Clients.All.UpdateLobby(_gameServer.gameObjects);
+                }
+                catch (InvalidOperationException e)
+                {  //TODO: test this JoinFailed scenario
+                    Clients.Client(Context.ConnectionId).Notify(Notification.JoinFailed, e.Message);
+                    Clients.Client(Context.ConnectionId).Leave();
+                }
+                catch (Exception e)
+                {
+                    Logger.Log(e, LogLevel.Debug);
+                    Clients.Client(Context.ConnectionId).Leave();
+                }
+            }
+        }
+
+        public void Leave()
+        {
+            lock (_gameServer.gameObjects)
+            {
+                _gameServer.Leave(Context.ConnectionId);
+                //Clients.All.UpdateModel(_gameServer.gameObjects);
+            }
         }
 
         public void Start()
@@ -83,11 +99,10 @@ namespace GameObjects
         }
 
         public override Task OnDisconnected(bool stopCalled)
-        {
+        {            
             //string name = Context.User.Identity.Name;
-            //_connections.Remove(name, Context.ConnectionId);
-            Logger.Log("disconnected", LogLevel.Info);            
-            return Clients.All.disconnected("diconnected");
+            //_connections.Remove(name, Context.ConnectionId);                    
+            return base.OnDisconnected(stopCalled); 
         }
 
         public override Task OnReconnected()

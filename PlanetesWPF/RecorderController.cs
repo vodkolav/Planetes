@@ -8,28 +8,71 @@ namespace PlanetesWPF
 {
     public class RecorderController
     {
-        byte[] aPixels;
         List<GameRecorder> cassetes = new List<GameRecorder>(10);
         GameRecorder current;
-        WriteableBitmap imageSample;
+        WPFGraphicsContainer graphicsContainer;
+        private WriteableBitmap Source => graphicsContainer.CurrentView;
 
-        public RecorderController(WriteableBitmap imageSample)
+        internal bool isRecording { get {  return current.State == RecordingState.Recording; } }
+
+        public RecorderController(WPFGraphicsContainer gc )
         {
-            aPixels = new byte[imageSample.PixelHeight * imageSample.BackBufferStride];
-            this.imageSample = imageSample;
-            current = new GameRecorder(imageSample);
-            cassetes.Add(current);
+            graphicsContainer = gc;
+            graphicsContainer.PropertyChanged += GraphicsContainer_PropertyChanged;
+            ManageCassette();
+        }
+
+        private void GraphicsContainer_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case "CurrentView":
+                    ManageCassette();
+                    break;
+            }
+        }
+
+        public void ManageCassette()
+        {
+            if (current != null && current.State == RecordingState.Recording)
+                return;
+            try
+            {
+                current = cassetes.First(c => c.State == RecordingState.Ready && c.Fits(Source));
+            }
+            catch
+            {
+                current = new GameRecorder(graphicsContainer.CurrentView);
+                current.OnSaveComplete +=  ClearCassetes;
+                current.FrameRate = 3;
+                cassetes.Add(current);
+            }
+            string tmp = graphicsContainer.CurrentView.Width.ToString() + "x" + graphicsContainer.CurrentView.Height.ToString();
+        }
+
+        public void ClearCassetes(GameRecorder cur)
+        {
+            cur.OnSaveComplete -= ClearCassetes;
+            cassetes.RemoveAll(c => c.State == RecordingState.Complete );        
         }
 
         internal void Start()
         {
-            Logger.Log("Cassettes: "+ cassetes.Count(),LogLevel.Info);
+            Logger.Log("Cassettes: "+ cassetes.Count,LogLevel.Status);
+            ManageCassette();
             current.Start();
         }
 
-        public void AddFrame(WriteableBitmap Source, int frameNum)
+        public void AddFrame(int frameNum)
         {
-            if (current.IsRecording && frameNum % 4 == 0)
+            //TODO: add frame delay, so that gif is smoother
+            if (current.State == RecordingState.Recording)
+            {
+                if (current.LastDrawnFrame >= frameNum) // && frameNum % 4 != 0)
+                {
+                    return;
+                }
+
                 if (Source != null)
                 {
                     //Im gonna need this here : 
@@ -39,8 +82,8 @@ namespace PlanetesWPF
                     //https://stackoverflow.com/questions/9868929/how-to-edit-a-writablebitmap-backbuffer-in-non-ui-thread
                     if (!(Source.Width == 0) && !(Source.Height == 0))
                     {
-                        Source.CopyPixels(aPixels, Source.BackBufferStride, 0);
-                        current.AddFrame(aPixels);
+                        current.AddFrame(Source);
+                        current.LastDrawnFrame = frameNum;
                         //encoder.Frames.Add(BitmapFrame.Create(Source.CloneCurrentValue()));                       
                     }
                     else
@@ -48,22 +91,12 @@ namespace PlanetesWPF
                 }
                 else
                     throw new ArgumentException("Argument Frame cannot be nothing");
+            }
         }
-
 
         internal void End()
         {
             current.End();
-
-            try
-            {
-                current = cassetes.First(c => !c.IsRecording);
-            }
-            catch
-            {
-                current = new GameRecorder(imageSample);
-                cassetes.Add(current);
-            }
         }
     }
 }

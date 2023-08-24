@@ -2,6 +2,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Windows;
+using GameObjects.Model;
 
 namespace PlanetesWPF
 {
@@ -24,11 +25,12 @@ namespace PlanetesWPF
             dgPlayers.ItemsSource = players;
         }
 
-        public bool OpenLobby_WaitForGuestsAndBegin(Window uI)
+        public bool OpenLobby_WaitForGuestsAndBegin(Window owner)
         {
-            Owner = uI;
+            Owner = owner;            
+            Left = owner.Left + 0.25 * owner.Width;
+            Top = owner.Top + 0.25 * owner.Height;
             var res = ShowDialog();
-            Owner = uI;
             return res.HasValue && res.Value;
         }
 
@@ -84,12 +86,16 @@ namespace PlanetesWPF
             ((UI)Owner).KickPlayer(kickedone);
         }
 
-        private async void btnCancel_Click(object sender, RoutedEventArgs e)
+        private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
-            await((UI)Owner).LeaveLobby();
-            Logger.Log("Ну нахер", LogLevel.Info);
+            Logger.Log("Nu Naher", LogLevel.Info);
             DialogResult = false;
             Close();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+           
         }
     }
 }

@@ -7,21 +7,18 @@ namespace PlanetesWPF
     /// </summary>
     public partial class Billboard : Window
     {
-        public Billboard() //TODO: repair
+        public Billboard() 
         {
             InitializeComponent();
+            WindowStartupLocation = WindowStartupLocation.Manual;
         }
 
-        public Billboard(Window owner) : this()
+        public void Show(Window owner, string message)
         {
-            Owner = owner;
-        }      
-
-        public static void Show(string message)
-        {
-            Billboard b = new Billboard();
-            b.Title = message;
-            b.Show();            
+            Title = message;
+            Left = owner.Left + 0.25 * owner.Width;
+            Top = owner.Top + 0.25 * owner.Height;
+            Show();            
         }
     }
 }

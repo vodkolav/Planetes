@@ -9,6 +9,7 @@ Features:
 	make self-learning bots (https://towardsdatascience.com/how-to-teach-an-ai-to-play-games-deep-reinforcement-learning-28f9b920440a)
 
 Architecture:
+	Migrate to .Net 6
 	Ditch using network communication for bots - as it impacts performance significantly when there are a lot of bots
 	make a Class for all the objects conversions? 
 	create iMovable, iCollidable interfaces; create base class for all game objects (asteroids, jets, bullets) so that they can be gathered in a single collection 
