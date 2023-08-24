@@ -25,9 +25,11 @@ namespace PlanetesWPF
             dgPlayers.ItemsSource = players;
         }
 
-        public bool OpenLobby_WaitForGuestsAndBegin(Window uI)
+        public bool OpenLobby_WaitForGuestsAndBegin(Window owner)
         {
-            Owner = uI;
+            Owner = owner;            
+            Left = owner.Left + 0.25 * owner.Width;
+            Top = owner.Top + 0.25 * owner.Height;
             var res = ShowDialog();
             return res.HasValue && res.Value;
         }

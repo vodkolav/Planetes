@@ -145,8 +145,7 @@ namespace GameObjects.Model
             _cockpit_cache.RotateAt(angl, Center);
 
             _hull_cache = (Polygon)_hull.Clone();
-            _hull_cache.RotateAt(angl, Center);          
-
+            _hull_cache.RotateAt(angl, Center);
         }
 
         public override PolygonCollisionResult Collides(Jet j)
@@ -326,6 +325,12 @@ namespace GameObjects.Model
                     KeyBrake = true;
                     break;
                 }
+                case HOTAS.Scuttle:
+                    {
+                        Bullet TheLastAmmunition = new Bullet();
+                        Die(TheLastAmmunition);
+                        break;
+                    }
             }
         }
 

@@ -94,7 +94,7 @@ namespace Planetes
         {
             DrawingContext.GraphicsContainer.UpdateBitmap(pbxWorld.Width, pbxWorld.Height);
             bindHUDS();
-            timerDraw.Interval = (int)GameState.FrameInterval.TotalMilliseconds;// * 0.25);
+            timerDraw.Interval = 8;
             timerDraw.Start();
         }
 

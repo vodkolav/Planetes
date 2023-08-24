@@ -7,13 +7,10 @@ namespace GameObjects
     {
         string Text { get; set; }
 
-        GameClient C { get; set; }
 
         Size VisorSize { get;  }
 
         void DrawGraphics();
-
-        void bindHUDS();
 
         void Notify(Notification type, string message);
 
@@ -21,7 +18,7 @@ namespace GameObjects
 
         void AnnounceRespawn(string message);
 
-        void CloseLobby();
+        void CloseLobby(); //TODO: drop this. UI needs to determine it by itself.
 
         void UpdateLobby(GameState go);
 

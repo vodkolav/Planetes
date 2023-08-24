@@ -124,7 +124,7 @@ namespace GameObjects
                     {
                         if (Me.isAlive)
                         {
-                            Logger.Log(Me.Name + " reacting to frame " + gameObjects.frameNum, LogLevel.Info);
+                            //Logger.Log(Me.Name + " reacting to frame " + gameObjects.frameNum, LogLevel.Info);
                             FrameReact();
                         }
                     }
@@ -243,34 +243,40 @@ namespace GameObjects
             }
 
             //aiming at opponent tactic
-
-            Player EnemyClosest = ClosestEnemy;
-            if (EnemyClosest != null)
+            try
             {
-                Aim(EnemyClosest.Jet.Pos);
-                if (Jet.Pos.Y < EnemyClosest.Jet.Pos.Y - 50)
+                Player EnemyClosest = ClosestEnemy;
+                if (EnemyClosest != null)
                 {
+                    Aim(EnemyClosest.Jet.Pos);
+                    if (Jet.Pos.Y < EnemyClosest.Jet.Pos.Y - 50)
+                    {
 
-                    Press(HOTAS.Down);
-                }
-                else if (Jet.Pos.Y > EnemyClosest.Jet.Pos.Y + 50)
-                {
-                    Press(HOTAS.Up);
-                }
-                else
-                {
-                    Release(HOTAS.Up);
-                }
+                        Press(HOTAS.Down);
+                    }
+                    else if (Jet.Pos.Y > EnemyClosest.Jet.Pos.Y + 50)
+                    {
+                        Press(HOTAS.Up);
+                    }
+                    else
+                    {
+                        Release(HOTAS.Up);
+                    }
 
-                //shoot at opponent tactic
-                if ((Jet.Pos - EnemyClosest.Jet.Pos).Magnitude < 300)
-                {
-                    Press(HOTAS.Shoot);
+                    //shoot at opponent tactic
+                    if ((Jet.Pos - EnemyClosest.Jet.Pos).Magnitude < 300)
+                    {
+                        Press(HOTAS.Shoot);
+                    }
+                    else
+                    {
+                        Release(HOTAS.Shoot);
+                    }
                 }
-                else
-                {
-                    Release(HOTAS.Shoot);
-                }
+            }
+            catch (Exception e) 
+            {
+                Logger.Log(e, LogLevel.Debug);
             }
         }
     }

@@ -11,44 +11,55 @@ namespace PlanetesWPF
         List<GameRecorder> cassetes = new List<GameRecorder>(10);
         GameRecorder current;
         WPFGraphicsContainer graphicsContainer;
-        private WriteableBitmap Source;
+        private WriteableBitmap Source => graphicsContainer.CurrentView;
+
         internal bool isRecording { get {  return current.State == RecordingState.Recording; } }
 
         public RecorderController(WPFGraphicsContainer gc )
         {
             graphicsContainer = gc;
-            Source = graphicsContainer.CurrentView;
-            ManageCassette(graphicsContainer.CurrentView);
+            graphicsContainer.PropertyChanged += GraphicsContainer_PropertyChanged;
+            ManageCassette();
         }
 
-        public void ManageCassette(WriteableBitmap imageSample)
+        private void GraphicsContainer_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case "CurrentView":
+                    ManageCassette();
+                    break;
+            }
+        }
+
+        public void ManageCassette()
         {
             if (current != null && current.State == RecordingState.Recording)
                 return;
             try
             {
-                current = cassetes.First(c => c.State == RecordingState.Ready && c.Fits(imageSample));
+                current = cassetes.First(c => c.State == RecordingState.Ready && c.Fits(Source));
             }
             catch
             {
-                current = new GameRecorder(imageSample);
+                current = new GameRecorder(graphicsContainer.CurrentView);
                 current.OnSaveComplete +=  ClearCassetes;
-                current.FrameRate = 5;
+                current.FrameRate = 3;
                 cassetes.Add(current);
             }
+            string tmp = graphicsContainer.CurrentView.Width.ToString() + "x" + graphicsContainer.CurrentView.Height.ToString();
         }
 
         public void ClearCassetes(GameRecorder cur)
         {
             cur.OnSaveComplete -= ClearCassetes;
-            cassetes.RemoveAll(c => c.State == RecordingState.Complete);
-        
+            cassetes.RemoveAll(c => c.State == RecordingState.Complete );        
         }
 
         internal void Start()
         {
             Logger.Log("Cassettes: "+ cassetes.Count,LogLevel.Status);
-            ManageCassette(graphicsContainer.CurrentView);
+            ManageCassette();
             current.Start();
         }
 

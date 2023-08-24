@@ -34,6 +34,7 @@ namespace PlanetesWPF
         internal void unbind()
         {
             lblName.Content = "";
+            Visibility = Visibility.Hidden;
         }
 
         //TODO: remake this with data binding

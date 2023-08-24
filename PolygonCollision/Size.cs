@@ -13,5 +13,7 @@ namespace PolygonCollision
 
         public int Width { get { return (int)X; } set { X = value; } }
         public int Height { get { return (int)Y; } set { Y = value; } }
+
+        public int Area { get => Width * Height; }
     }
 }

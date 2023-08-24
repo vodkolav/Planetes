@@ -33,11 +33,6 @@ namespace PlanetesWPF
         public UI()
         {
             InitializeComponent();
-            //C = new LocalClient(this)
-            C = new GameClient(this)
-            {
-                PlayerName = PlayerName
-            };
             Logger.LogFile = $"..\\..\\..\\Logs\\{C}_Log_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv";
             BB = new Billboard();
             PolygonCollision.DrawingContext.GraphicsContainer = new WPFGraphicsContainer();
@@ -88,9 +83,9 @@ namespace PlanetesWPF
         /// <param name="URL"></param>
         /// <returns></returns>
         public async Task joinNetworkGame(string URL)
-        {
-            Text += " (Client)";
-
+        {            
+            if (C!= null) C.Dispose();
+             
             //C = new LocalClient(this)
             C = new GameClient(this)
             {
@@ -99,6 +94,8 @@ namespace PlanetesWPF
             Logger.LogFile = $"..\\..\\..\\Logs\\{C}_Log_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv";
 
             C.joinNetworkGame(URL);
+
+            Title = "Planetes WPF: " + C.ToString();
 
             bool GameStarted = OpenLobby(this);
 
@@ -126,6 +123,7 @@ namespace PlanetesWPF
 
             S.AddBot<Bot2>();
             S.AddBot<Bot3>();
+            S.AddBot<Bot4>();
             _ = joinNetworkGame(URL);
         }
 
@@ -227,7 +225,7 @@ namespace PlanetesWPF
         public void Notify(Notification type, string message)
         {
             //should make a separate, non-blocking notification window.
-           MessageBox.Show(message);
+            Dispatcher.Invoke(() => MessageBox.Show(this,message));
         }
 
         public void Start()
@@ -250,6 +248,10 @@ namespace PlanetesWPF
                     CompositionTarget.Rendering -= DrawGraphics;
                     PolygonCollision.DrawingContext.GraphicsContainer.Clear();
                     hudLeft.unbind();
+                    foreach (HUD h in  wpHUDs.Children)
+                    {
+                        h.unbind();
+                    }
                     wpHUDs.Children.Clear();
                 }));
         }
@@ -262,7 +264,7 @@ namespace PlanetesWPF
             RC = new RecorderController((WPFGraphicsContainer)PolygonCollision.DrawingContext.GraphicsContainer);
             bindHUDS();
             CompositionTarget.Rendering += DrawGraphics;        
-                       Closing += (s, e) => RC.End();           
+            Closing += (s, e) => RC.End();            
         }
 
         public void DrawGraphics()
@@ -280,6 +282,7 @@ namespace PlanetesWPF
             {
                 ((WPFGraphicsContainer)PolygonCollision.DrawingContext.GraphicsContainer).Draw(C);
 
+                hudLeft.Draw();
                 foreach (var hud in wpHUDs.Children)
                 {
                     ((HUD)hud).Draw();
@@ -392,9 +395,9 @@ namespace PlanetesWPF
         }
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (C.GameOn)
+            if (C != null && C.GameOn)
             {
-                C.SetViewPort(VisorSize);
+                C.SetViewPort(VisorSize);                
             }
         }
         #endregion

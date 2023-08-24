@@ -19,6 +19,8 @@ namespace GameObjects.Model
 
         public List<Star> Stars { get; set; }
 
+        public Color wallBrush = Colors.Magenta;
+
         [JsonIgnore]
         public Size Size { get { return Space.Size; } }
 
@@ -32,7 +34,7 @@ namespace GameObjects.Model
             Walls = new List<Wall>();
             Stars = new List<Star>();
             LoadDefault2();
-            MakeStars(500);
+            MakeStars((int)(size.Area * GameConfig.starsDensity));
         }
 
         public static Map Load(string MapFile)
@@ -48,7 +50,7 @@ namespace GameObjects.Model
 
         public void MakeStars(int amount)
         {
-            Logger.Log("making stars", LogLevel.Info);
+            Logger.Log("Igniting stars", LogLevel.Info);
 
             Random rand = new Random();
             Stars = Enumerable.Range(0, amount)
@@ -60,16 +62,16 @@ namespace GameObjects.Model
 
         public void LoadDefault2()
         {
-            Logger.Log("loading map", LogLevel.Info);
-            Color wallBrush = Colors.Magenta;
+            Logger.Log("Creating world", LogLevel.Info);
+            
 
             int b = 0; //border width
 
             //create edge of screen walls 
             Vector nw = new Vector(b, b);
-            Vector ne = new Vector(Size.Width-b, b);
-            Vector se = new Vector(Size.Width-b, Size.Height-b);
-            Vector sw = new Vector(b, Size.Height-b);
+            Vector ne = new Vector(Size.Width - b, b);
+            Vector se = new Vector(Size.Width - b, Size.Height - b);
+            Vector sw = new Vector(b, Size.Height - b);
 
 
             Walls.Add(new Wall(nw, ne, wallBrush)); //upper
@@ -96,6 +98,12 @@ namespace GameObjects.Model
             Vector sww = new Vector(0, Size.Height - sh);
             Walls.Add(new Wall(ssw, sww, wallBrush));
 
+            AddBrackets(sh);
+            //AddFreeWalls(sh);
+        }
+
+        public void AddSlashWalls(int sh)
+        { 
             Vector sp1 = new Vector(100, 200);
             Vector sp2 = new Vector(345, 521);
             Walls.Add(new Wall(sp1, sp2, wallBrush));
@@ -106,6 +114,45 @@ namespace GameObjects.Model
                 sp2 = new Vector(i * 200 + 345, Size.Height - 2*sh);
                 Walls.Add(new Wall(sp1, sp2, wallBrush));
             }
+        }
+
+        public void AddBrackets(int sh)
+        {
+            Color wallBrush = Colors.Magenta;
+            int b = 0; //border width
+            int brSideLen = sh;
+
+            // Adds 4 "brackets to the map in the following configuration:
+            //  __        __
+            // |            |
+            //
+            // |__        __|
+            //
+            // the corners of brackets are shifted "sh" amount from map corners
+
+            //create edge of screen walls 
+            Vector nw = new Vector(b, b);
+            Vector ne = new Vector(Size.Width - b, b);
+            Vector se = new Vector(Size.Width - b, Size.Height - b);
+            Vector sw = new Vector(b, Size.Height - b);
+
+            Vector vertSideLen = new Vector(brSideLen, 0);
+            Vector horzSideLen = new Vector(0,brSideLen);
+
+            Vector nwsh = new Vector(sh, sh);
+            Vector nesh = new Vector(-sh, sh);
+
+            Walls.Add(new Wall(nw + nwsh, nw + nwsh + horzSideLen, wallBrush));
+            Walls.Add(new Wall(nw + nwsh, nw + nwsh + vertSideLen, wallBrush));
+
+            Walls.Add(new Wall(ne + nesh, ne + nesh + horzSideLen, wallBrush));
+            Walls.Add(new Wall(ne + nesh, ne + nesh - vertSideLen, wallBrush));
+
+            Walls.Add(new Wall(sw - nesh, sw - nesh - horzSideLen, wallBrush));
+            Walls.Add(new Wall(sw - nesh, sw - nesh + vertSideLen, wallBrush));
+
+            Walls.Add(new Wall(se - nwsh, se - nwsh - horzSideLen, wallBrush));
+            Walls.Add(new Wall(se - nwsh, se - nwsh - vertSideLen, wallBrush));
         }
     }
 }

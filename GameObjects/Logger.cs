@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -75,15 +74,7 @@ namespace GameObjects
             }
         }
 
-        private static List<LogLevel> loglevels { get; set; } = new List<LogLevel>()
-        {
-            LogLevel.Debug,
-            LogLevel.Info,
-            LogLevel.Warning,
-            LogLevel.Status,
-            LogLevel.CSV,
-            LogLevel.Trace
-        };
+        // loglevels moved to config
 
         public Logger()
         {
@@ -144,14 +135,14 @@ namespace GameObjects
 
         public static void Log(Exception exception, LogLevel ll)
         {
-            if (!loglevels.Contains(ll))
+            if (!GameConfig.loglevels.Contains(ll))
                 return;
             AddMessage(new LogMsg { Exception = exception, loglevel = ll });
         }
 
         public static void Log(string message, LogLevel ll)
         {
-            if (!loglevels.Contains(ll))
+            if (!GameConfig.loglevels.Contains(ll))
                 return;
             if (ll is LogLevel.Debug)
             {

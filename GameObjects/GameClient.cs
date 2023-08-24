@@ -42,7 +42,7 @@ namespace GameObjects
     }
 
 
-    public class GameClient
+    public class GameClient : IDisposable
     {
         protected IUI UI { get; set; }
 
@@ -110,6 +110,7 @@ namespace GameObjects
         public void Joined(int pID)
         {
             PlayerId = pID;
+            Yoke = new ControlPanel(Proxy, PlayerId);
         }
 
         public void Disconnect()
@@ -150,7 +151,7 @@ namespace GameObjects
 
         public void Notify(Notification type, string message)
         {
-            Logger.Log(message, LogLevel.Info);
+            //Logger.Log(message, LogLevel.Info);
             switch (type)
             {
                 case Notification.Death:
@@ -194,12 +195,12 @@ namespace GameObjects
 
         public virtual void Start()
         {
-            Yoke = new ControlPanel(Proxy, PlayerId);
+            Logger.Log("C.PlayerId: " + PlayerId, LogLevel.Debug);
+            Logger.Log("ID: " + Me.ID + " |Name: " + Me.Name + " |Coonection: "  + Me.ConnectionID , LogLevel.Debug);
             Yoke.bindWASD();
             Yoke.bindMouse();
             UI.Start();
         }
-
 
         public void Draw()
         {
@@ -265,6 +266,11 @@ namespace GameObjects
             Yoke.Do(Model.Action.SetViewPort, s);
             DrawingContext.GraphicsContainer.UpdateBitmap((int)s.X, (int)s.Y);
             //Logger.Log(s.ToString(), LogLevel.Debug);
+        }
+
+        public void Dispose()
+        {
+            Conn.Dispose();
         }
     }
 }

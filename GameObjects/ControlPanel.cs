@@ -8,7 +8,7 @@ using Action = GameObjects.Model.Action;
 
 namespace GameObjects
 {
-    public enum HOTAS { Up, Down, Left, Right, Shoot, Brake, Nothing };
+    public enum HOTAS { Up, Down, Left, Right, Shoot, Brake, Nothing, Scuttle}
     public class ControlPanel
     {
         private Dictionary<Key, HOTAS> KeyBindings;
@@ -50,6 +50,7 @@ namespace GameObjects
             bindKey(Key.A, HOTAS.Left);
             bindKey(Key.D, HOTAS.Right);
             bindKey(Key.Space, HOTAS.Brake);
+            bindKey(Key.L, HOTAS.Scuttle);
         }
 
         public void bindARROWSto()
@@ -88,10 +89,6 @@ namespace GameObjects
         public void Do(Action instruction, Vector argument)
         {
             //instructions will probably be required later, for example to apply abilities at something/someone
-            if (instruction == Action.SetViewPort)
-            {
-                Logger.Log("bp!", LogLevel.Debug);
-            }
 
             if (isWorking)
                 Proxy.Invoke("Do", new object[] { PlayerID, new Tuple<Action, Vector>(instruction, argument) });

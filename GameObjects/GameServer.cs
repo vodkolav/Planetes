@@ -130,8 +130,8 @@ namespace GameObjects
 
         internal void Leave(Player pl)
         {
-            GameConfig.ReturnColor(pl.Color);
-            gameObjects.Entities.RemoveAll(j => j.Owner.ID == pl.ID);
+            GameConfig.ReturnColor(pl.Color);        
+            gameObjects.Entities.RemoveAll(e => e.OwnedBy(pl));
             gameObjects.Players.RemoveAll(p => p.ID == pl.ID);
             hubContext.Clients.All.UpdateLobby(gameObjects);
             hubContext.Clients.Client(pl.ConnectionID).Leave();

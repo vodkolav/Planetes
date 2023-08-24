@@ -76,5 +76,10 @@ namespace GameObjects.Model
         public abstract void Move(GameState gameObjects);
 
         public abstract void Draw();
+
+        internal virtual bool OwnedBy(Player pl)
+        {
+            return Owner.ID == pl.ID;
+        }
     }
 }

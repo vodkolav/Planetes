@@ -70,6 +70,12 @@ namespace GameObjects.Model
             
         }
 
+        internal override bool OwnedBy(Player pl)
+        {
+            //Asteroids aren't owned by any player
+            return false;
+        }
+
         public override void Draw()
         {
             if (isAlive)

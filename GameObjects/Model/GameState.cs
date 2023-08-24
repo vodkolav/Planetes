@@ -9,9 +9,7 @@ namespace GameObjects.Model
     public enum GameStatus {Ready, Lobby, Cancelled, On, Over }
 
     public class GameState
-    {
-        public static TimeSpan FrameInterval = GameConfig.FrameInterval; // default. If you want to Change it, do it from GameConfig
-
+    {       
         public GameStatus GameOn { get; set; } = GameStatus.Ready;
 
         public bool Paused { get; set; } // TODO: allow players to pause game 
@@ -137,7 +135,7 @@ namespace GameObjects.Model
             {
                 //Spawn asteroid after timeout
 
-                int chance = GameConfig.TossInt((int)GameConfig.AsteroidTimeout);
+                int chance = GameConfig.TossInt(World.Size.Area / (int)GameConfig.AsteroidTimeout);
 
                 if (GameConfig.EnableAstroids && chance<1) //GameTime.TotalElapsedSeconds % GameConfig.AsteroidTimeout < 0.1)
                 {
