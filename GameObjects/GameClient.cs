@@ -152,6 +152,7 @@ namespace GameObjects
         public void Notify(Notification type, string message)
         {
             //Logger.Log(message, LogLevel.Info);
+            //TODO: move this logic to UI and get rid of AnnounceDeath and AnnounceRespawn
             switch (type)
             {
                 case Notification.Death:

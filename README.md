@@ -4,7 +4,7 @@ Spaceships dogfight game
 ![screenshot](game.gif)
 
 Features: 
- - Ships move according to Newtonian mechanics 
+ - Ships move according to Kinematics  
  - Ships bounce from walls and other obstacles
  - Multiplayer through Lan
  - Bots

@@ -61,7 +61,7 @@ namespace GameObjects
         {
             gameObjects = new GameState(GameConfig.WorldSize);
             gameObjects.GameOn = GameStatus.Lobby;
-            Bots = new List<Bot>(); // TODO: remove old bots connections from hub
+            Bots = new List<Bot>(); // TODO: remove old bots connections from hub (I think, that's done already) 
             thrdGameLoop = new Thread(GameLoop)
             {
                 Name = "GameLoop"
@@ -201,7 +201,8 @@ namespace GameObjects
                 //DMYSYS.UpdateMe();
                 Bots.Add(DMYSYS);
                 // TODO: maybe make bots inherit from LocalClient,
-                // so that they don't consume network trafic
+                // so that they don't consume network trafic.
+                //  Actually, make the a sort of UI 
             }
             catch (Exception ex)
             {
@@ -281,7 +282,7 @@ namespace GameObjects
                     }
 
                     //string gobj = JsonConvert.SerializeObject(gameObjects); // only for debugging - to check what got serialized
-                    if (gameObjects.frameNum % 4 == 0) //for performance - send only every 4th frame to the clients
+                    if (gameObjects.frameNum % 2 == 0) //for performance - send only every 4th frame to the clients
                     {
                         await hubContext.Clients.All.UpdateModel(gameObjects);
                     }

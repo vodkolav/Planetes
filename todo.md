@@ -13,6 +13,12 @@ Architecture:
 	Ditch using network communication for bots - as it impacts performance significantly when there are a lot of bots
 	make a Class for all the objects conversions? 
 	create iMovable, iCollidable interfaces; create base class for all game objects (asteroids, jets, bullets) so that they can be gathered in a single collection 
+	don't transfer all the polygons over the network - calculate them on client right before drawing
+    tie drawing to real time as well. currently it draws the frame whenever it's available, and that makes game sluggish
+    (hard) make client-side prediction of the game state 
+    migrate to .NET 6.0
+    make a JavaScript web client
+    Deploy to Azure 
 
 Visual:
 	ensure health 0 when killed

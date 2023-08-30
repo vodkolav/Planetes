@@ -400,6 +400,14 @@ namespace PlanetesWPF
                 C.SetViewPort(VisorSize);                
             }
         }
-        #endregion
+ 
+        private void miQuitGame_Click(object sender, RoutedEventArgs e)
+        {
+            if (S != null  && C.GameOn)
+            {
+                S.Terminate();
+            }
+        }          
+        #endregion    
     }
 }
