@@ -61,10 +61,16 @@ namespace GameObjects.Model
 
         public void Frame()
         {
-            if (Paused) return;
+           // if (Paused) return; //TODO: Note: when game is paused, the time still goes on. need to take it into consideration as well 
             frameNum++;
-            //Logger.Log("Model FPS: " + frameNum / (DateTime.Now - StartTime).TotalSeconds, LogLevel.Status);
-            
+
+            /*   if (frameNum >10) // TODO: understand how to properly calculate FPS
+            {
+               Logger.Log("Model FPS: " + (frameNum / (GameTime.TotalElapsedSeconds)), LogLevel.Status);
+            }*/
+
+
+
             PolygonCollisionResult r;
 
             Players.ForEach(p => p.Shoot(this));
@@ -137,7 +143,7 @@ namespace GameObjects.Model
 
                 int chance = GameConfig.TossInt(World.Size.Area / (int)GameConfig.AsteroidTimeout);
 
-                if (GameConfig.EnableAstroids && chance<1) //GameTime.TotalElapsedSeconds % GameConfig.AsteroidTimeout < 0.1)
+                if (GameConfig.EnableAstroids && chance < 1) //GameTime.TotalElapsedSeconds % GameConfig.AsteroidTimeout < 0.1)
                 {
                     Entities.Add(new Astroid(GameConfig.TossAsteroidType));
                 }

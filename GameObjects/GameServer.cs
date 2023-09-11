@@ -257,11 +257,6 @@ namespace GameObjects
 
                     float dt = (float)(DateTime.UtcNow - gameObjects.StartTime).TotalSeconds;
 
-                    if (dt == GameTime.TotalElapsedSeconds)
-                    {
-                        int a = 0;
-                    }
-
                     GameTime.DeltaTime = (dt - GameTime.TotalElapsedSeconds);
                     GameTime.TotalElapsedSeconds = dt;
 
@@ -282,7 +277,7 @@ namespace GameObjects
                     }
 
                     //string gobj = JsonConvert.SerializeObject(gameObjects); // only for debugging - to check what got serialized
-                    if (gameObjects.frameNum % 2 == 0) //for performance - send only every 4th frame to the clients
+                    if (gameObjects.frameNum % 4 == 0) //for performance - send only every 4th frame to the clients
                     {
                         await hubContext.Clients.All.UpdateModel(gameObjects);
                     }

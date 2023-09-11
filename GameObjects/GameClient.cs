@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using PolygonCollision;
 using Microsoft.AspNet.SignalR.Client.Transports;
-using System.IO;
 using GameObjects.Model;
 
 namespace GameObjects
@@ -39,6 +38,9 @@ namespace GameObjects
             UI.UpdateLobby(go);
         }
 
+        public override void Dispose()
+        {
+        }
     }
 
 
@@ -66,7 +68,6 @@ namespace GameObjects
 
         private int LastDrawnFrame { get; set; } = 1;
 
-        StreamWriter writer;
 
         public GameClient(IUI owner)
         {
@@ -80,10 +81,11 @@ namespace GameObjects
                 Conn = new HubConnection(URL);
 
                 // use this code to investigate problems when signalR ceases to receive model updates from server
+                //TODO: let Logger subscribe to Conn, smth like Logger.Trace(Conn)
                 Conn.TraceLevel = TraceLevels.All;                
                 Conn.TraceWriter = Logger.TraceInterceptor; 
                 Conn.Error += (e) =>  Logger.Log(e, LogLevel.Debug);
-
+                
                 Proxy = Conn.CreateHubProxy("GameHub");
                 Proxy.On<GameState>("UpdateModel", updateGameState);
                 Proxy.On<GameState>("UpdateLobby", UpdateLobby);
@@ -135,7 +137,7 @@ namespace GameObjects
         public virtual void updateGameState(GameState go)
         {
             //Logger.Log("received model for frame " + go.frameNum, LogLevel.Status);
-            lock (gameObjects)
+            lock (this)
             {
                 gameObjects = go;
             }            
@@ -215,24 +217,29 @@ namespace GameObjects
                 return;
             }
 
-            lock (gameObjects)
+            lock (this)
             {
                 try
                 {
                     LastDrawnFrame = gameObjects.frameNum;
-
+                    
                     // This code may be used to track a specific game object over time and then plot the data.
                     // useful when diagnosing fps issues
                     try
                     {
-                        Jet debugged = gameObjects.Players.Single(p => p.Name.Contains("Bot2")).Jet; // WPFplayer
-                        float dt = (float)(DateTime.UtcNow - gameObjects.StartTime).TotalSeconds;
-                        Logger.Log($"{gameObjects.frameNum},{GameTime.DeltaTime:F4}, " +
-                                   $"{dt:F4}, {debugged.LastOffset.Magnitude:F4}, {debugged.Pos.Magnitude}, " +
-                                   $"{debugged.Pos.X}, {debugged.Pos.Y}, Draw", LogLevel.CSV);
+                        if (GameConfig.loglevels.Contains(LogLevel.CSV))
+                        {
+                            Jet debugged = gameObjects.Players.Single(p => p.Name.Contains("Bot2")).Jet; // WPFplayer
+                            float dt = (float)(DateTime.UtcNow - gameObjects.StartTime).TotalSeconds;
+                            Logger.Log($"{gameObjects.frameNum},{GameTime.DeltaTime:F4}, " +
+                                       $"{dt:F4}, {debugged.LastOffset.Magnitude:F4}, {debugged.Pos.Magnitude}, " +
+                                       $"{debugged.Pos.X}, {debugged.Pos.Y}, Draw", LogLevel.CSV);
+                        }
                     }
-                    catch
-                    { }
+                    catch (Exception e)
+                    {
+                        Logger.Log(e, LogLevel.Warning);
+                    }
 
                     DrawingContext.GraphicsContainer.ViewPortOffset = -Me.viewPort.Origin;
 
@@ -269,8 +276,9 @@ namespace GameObjects
             //Logger.Log(s.ToString(), LogLevel.Debug);
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
+            if(Conn != null)
             Conn.Dispose();
         }
     }

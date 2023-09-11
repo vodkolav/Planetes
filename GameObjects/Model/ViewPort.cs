@@ -5,33 +5,27 @@ namespace GameObjects.Model
 {
     [JsonObject(IsReference = true)]
     public class ViewPort
-    {
-        public Rectangle Body { get; set; }
-
+    {     
         [JsonIgnore]
-        public Vector Origin { get { return Body.Origin; } }
-        public Vector velocity { get; set; }
-        [JsonIgnore]
-        public Player P { get; set; }
-
-      
-        public Size Size
+        public Rectangle Body
         {
-            get { return Body.Size; }
-
-            internal set
+            get
             {
-                if (Body != null) {
-                    Vector newOrigin = Body.Center - value/2;
-                    Body  = new Rectangle(newOrigin, value);
-                }
-                else
-                {
-                    Body = new Rectangle(0, 0, value.X, value.Y);
-                }
+                return new Rectangle(Origin, Size);
             }
         }
 
+        [JsonIgnore]
+        public Vector Origin { get { return Pos - Size / 2; } }
+
+        public Vector velocity { get; set; }
+
+        [JsonIgnore]
+        public Player P { get; set; }
+
+        public Vector Pos { get; set; }
+
+        public Size Size { get; set; }                
         public override string ToString()
         {
             return "Origin: " + Origin + "Size: " + Body.Size;
@@ -61,15 +55,13 @@ namespace GameObjects.Model
         {
             velocity = new Vector(0,0);
             P = player;
-            Size = new Size(800, 600);
+            Pos = P.Jet.Pos;                 
+            Size = new Size(800, 600); //? 
         }
 
         internal void Update()
         {
-            Vector target = P.Jet.Pos;
-            Vector source = Body.Center;
-            Vector ofst = target - source;
-            Body.Offset(ofst);
+            Pos = P.Jet.Pos;
         }
     }
 }

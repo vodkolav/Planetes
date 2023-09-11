@@ -14,7 +14,7 @@ namespace GameObjects.Model
         // TODO: implement spawning region for asteroids and players
 
         public Rectangle Space { get; set; }
-
+ 
         public List<Wall> Walls { get; set; }
 
         public List<Star> Stars { get; set; }
@@ -80,7 +80,7 @@ namespace GameObjects.Model
             Walls.Add(new Wall(sw, nw, wallBrush)); //left
 
             //create corner diagonal walls 
-            int sh = 200; //shift from corner
+            int sh = Math.Min(Size.Width, Size.Height) / 10; //shift from corner
 
             Vector nww = new Vector(0, 0 + sh);
             Vector nnw = new Vector(0 + sh, 0);
@@ -99,7 +99,7 @@ namespace GameObjects.Model
             Walls.Add(new Wall(ssw, sww, wallBrush));
 
             AddBrackets(sh);
-            //AddFreeWalls(sh);
+            //AddSlashWalls(sh);
         }
 
         public void AddSlashWalls(int sh)

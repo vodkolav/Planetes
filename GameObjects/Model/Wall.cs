@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Media;
 using Newtonsoft.Json;
 using PolygonCollision;
@@ -10,17 +11,15 @@ namespace GameObjects.Model
     {
        
         public Color Color { get; set; }
-               
-        public Polygon Body { get; set; }
 
-        public Circle BoundingCirc
-        {
-            get 
-            {
-                float r = Body.Vertices.Max(v => (v - Body.Center).Magnitude);                
-                return new Circle(Body.Center, r); 
-            }
-        }
+        [JsonProperty(ItemTypeNameHandling = TypeNameHandling.Auto)]
+        public List<Figure> _body { get; set; }
+
+        [JsonIgnore]
+        public List<Figure> Body { get => _body; }
+        public Vector Pos { get; set; }
+
+        public Circle BoundingCirc {get; set;}
 
         public Wall()
         {
@@ -29,13 +28,19 @@ namespace GameObjects.Model
 
         public Wall(Vector from, Vector to, Color color, int width = 20)
         {
-            Body = Construct(from, to, width);
-
+            _body = new List<Figure>
+            {
+                Construct(from, to, width)
+            };
+            Pos = Body[0].Center;
+            float r = ((Polygon)Body[0]).Vertices.Max(v => (v - Pos).Magnitude);
+            BoundingCirc = new Circle(Pos, r);
             Color = color;
         }
 
         private Polygon Construct(Vector from, Vector to, int w)
         {
+            //TODO: move this to polygon class? No
  
             float alp = (to - from).Angle(new Vector(1, 0));
 
@@ -55,7 +60,7 @@ namespace GameObjects.Model
 
         public void Draw()
         {
-            Body.Draw(Color);
+            Body[0].Draw(Color);
         }
     }
 }

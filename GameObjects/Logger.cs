@@ -87,6 +87,12 @@ namespace GameObjects
             output = Console.Out;
             _trace_interceptor = new LogWriter("wtf.txt");
             T.Start();
+
+            string text = "\n";
+            GameConfig.loglevels.ForEach( ll => text += ll.ToString() + "\n");
+
+            Console.WriteLine("LogLevels enabled:" + text , LogLevel.Info);
+            Console.WriteLine("Log Output :" + output.ToString(), LogLevel.Info);
         }
 
         public static string LogFile { get; set; }
