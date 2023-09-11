@@ -143,6 +143,8 @@ namespace GameObjects.Model
         {
             if (isAlive)
                 Jet.Aim = (Vector)argument - (viewPort.Size * .5);
+            // Print world-relative coordinates of where the mouse now points 
+            Logger.Log(((Vector)argument + viewPort.Origin).ToString(), LogLevel.Status);
         }
 
         internal void setViewPort(object argument)

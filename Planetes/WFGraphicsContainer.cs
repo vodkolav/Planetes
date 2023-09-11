@@ -29,7 +29,7 @@ namespace Planetes
         public void DrawRay(System.Windows.Media.Color c, Ray ray)
         {
             ray = ray.Offseted(ViewPortOffset);
-            G.DrawLine(new Pen(ConvertColor(c), ray.Size ), Vector2Point(ray.Pos), Vector2Point(ray.Pos - ray.Tail));
+            G.DrawLine(new Pen(ConvertColor(c), ray.Size.X ), Vector2Point(ray.Pos), Vector2Point(ray.Pos - ray.Tail));
         }
 
         public void FillEllipse(System.Windows.Media.Color c, Circle circ)

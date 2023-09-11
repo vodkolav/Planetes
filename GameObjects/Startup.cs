@@ -14,7 +14,7 @@ namespace GameObjects
             typeof(GameHub),
             () => new GameHub(GameServer.Instance));
             //seems like this is irrelevant change,  the app still gets disconnected 
-            GlobalHost.Configuration.ConnectionTimeout = TimeSpan.FromSeconds(4000);
+            GlobalHost.Configuration.DisconnectTimeout = TimeSpan.FromSeconds(300); // 5 min 
             app.MapSignalR();
         }
     }

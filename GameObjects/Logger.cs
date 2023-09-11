@@ -17,9 +17,9 @@ namespace GameObjects
             {
                 if (Exception is null)
                 {
-                    return "GameObjects.Logger.message:" + _message;
+                    return $"[{loglevel}]Logger.message: {_message}";
                 }
-                return "GameObjects.Logger.Exception:" + Exception.Message;
+                return $"[{loglevel}]Logger.Exception: {Exception.Message}";
             }
             set { _message = value; }
         }
@@ -80,7 +80,7 @@ namespace GameObjects
         {
             T = new Thread(WriteLoop)
             {
-                IsBackground = true,
+                IsBackground = false,
                 Name = "Logger"
             };
             messages = new BlockingCollection<LogMsg>();

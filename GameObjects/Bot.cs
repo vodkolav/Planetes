@@ -197,12 +197,12 @@ namespace GameObjects
                 Astroid astClosest = ClosestAsteroid;
                 if (astClosest != null)
                 {
-                    if (astClosest.Pos.X - astClosest.Size * 10 < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X &&
+                    if (astClosest.Pos.X - astClosest.Size.X * 10 < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X &&
                         astClosest.Type == AstType.Rubble)
                     {
                         Press(HOTAS.Left);
                     }
-                    else if (astClosest.Pos.X < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X + astClosest.Size * 10 &&
+                    else if (astClosest.Pos.X < Jet.Pos.X && Jet.Pos.X < astClosest.Pos.X + astClosest.Size.X * 10 &&
                              astClosest.Type == AstType.Rubble)
                     {
                         Press(HOTAS.Right);
@@ -304,13 +304,13 @@ namespace GameObjects
                 Astroid astClosest = ClosestAsteroid;
                 if (astClosest != null)
                 {
-                    if (astClosest.Pos.X - astClosest.Size * 10 < Jet.Pos.X &&
+                    if (astClosest.Pos.X - astClosest.Size.X * 10 < Jet.Pos.X &&
                         Jet.Pos.X < astClosest.Pos.X && astClosest.Type == AstType.Rubble)
                     {
                         Press(HOTAS.Left);
                     }
                     else if (astClosest.Pos.X < Jet.Pos.X &&
-                             Jet.Pos.X < astClosest.Pos.X + astClosest.Size * 10 &&
+                             Jet.Pos.X < astClosest.Pos.X + astClosest.Size.X * 10 &&
                              astClosest.Type == AstType.Rubble)
                     {
                         Press(HOTAS.Right);

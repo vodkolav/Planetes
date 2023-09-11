@@ -59,19 +59,19 @@ namespace PlanetesWPF
         {
             ray = ray.Offseted(ViewPortOffset);
             Vector End = ray.Pos - ray.Tail;
-            B.DrawLineAa((int)ray.Pos.X, (int)ray.Pos.Y, (int)End.X, (int)End.Y, c,ray.Size);
+            B.DrawLineAa((int)ray.Pos.X, (int)ray.Pos.Y, (int)End.X, (int)End.Y, c, ray.Width);
         }
 
         public void FillEllipse(Color c, Circle circ)
         {
             circ = circ.Offseted(ViewPortOffset);
-            B.FillEllipseCentered((int)circ.Pos.X, (int)circ.Pos.Y, (int)circ.R / 2, (int)circ.R / 2, c);
+            B.FillEllipseCentered((int)circ.Pos.X, (int)circ.Pos.Y, (int)circ.R / 2, (int)circ.R / 2, c);       
         }
 
         public void FillPolygon(Color c, Polygon poly)
         {
             B.FillPolygon(poly.Offseted(ViewPortOffset).ints, c);
-            B.DrawPolylineAa(poly.Offseted(ViewPortOffset).ints, c);            
+            B.DrawPolylineAa(poly.Offseted(ViewPortOffset).ints, c);                
         }
 
         public void FillRectangle(Color c, Rectangle rect)
