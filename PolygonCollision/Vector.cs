@@ -262,5 +262,11 @@ namespace PolygonCollision
         {
             return (int)(this - other).Magnitude;
         }
+
+        internal void Offset(Vector v)
+        {
+            X += v.X;
+            Y += v.Y;
+        }
     }
 }

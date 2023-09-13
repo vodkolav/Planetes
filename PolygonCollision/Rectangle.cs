@@ -4,7 +4,7 @@ using System.Windows.Media;
 
 namespace PolygonCollision
 {
-    public class Rectangle
+    public class Rectangle : Figure
     {
 
         public Rectangle()
@@ -13,16 +13,17 @@ namespace PolygonCollision
         }
 
         public Rectangle(Vector origin, Size size)
-        {
-            Origin = origin;
+        {            
             Size = size;
+            Pos = origin + Size / 2;
         }
 
         public Rectangle(float ox, float oy, float sx, float sy) : this(new Vector(ox, oy), new Size(sx, sy))
         { }
 
-        public  Vector Origin { get; set; }
-        public  Size Size { get; set; }
+        [JsonIgnore]
+        public  Vector Origin => Pos - Size / 2;
+
         [JsonIgnore]
         public float Left {  get { return Origin.X; }  }
         [JsonIgnore]
@@ -32,7 +33,12 @@ namespace PolygonCollision
         [JsonIgnore]
         public float Bottom { get { return Origin.Y + Size.Y; } }
         [JsonIgnore]
-        public Vector Center { get { return Origin + Size/2; } }
+        public override Vector Center { get { return Pos; } }
+
+        public override PolygonCollisionResult Collides(Circle bcirc, Vector speed )
+        {
+            return Collides(bcirc);
+        }
 
         public PolygonCollisionResult Collides(Circle bcirc)
         {
@@ -42,19 +48,36 @@ namespace PolygonCollision
             else return PolygonCollisionResult.noCollision;
         }
 
+        public override PolygonCollisionResult Collides(Polygon other, Vector speed)
+        {
+            //TODO: implement. For now i'm using the bounding circle approach.
+            return PolygonCollisionResult.noCollision;
+        }
+
         public void Clear()
         {
             DrawingContext.GraphicsContainer.Clear();
         }
 
-        public void Draw(Color color)
+        public override void Draw(Color color)
         {
             DrawingContext.GraphicsContainer.FillRectangle(color, this);
         }
 
-        public void Offset(Vector ofst)
+        public override void Transformed(Figure blueprint, Vector offset, float rotation)
         {
-            Origin += ofst; 
+            // rotation is irrelevant for rectangle. If you need it to rotate, use Polygon instead.
+            Pos = blueprint.Pos = offset;
+        }
+
+        public override void Offset(Vector ofst)
+        {
+            Pos += ofst; 
+        }
+
+        public override object Clone()
+        {
+            return new Rectangle(Origin, Size);
         }
     }
 }

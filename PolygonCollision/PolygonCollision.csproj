@@ -69,6 +69,7 @@
   <ItemGroup>
     <Compile Include="Circle.cs" />
     <Compile Include="DrawingContext.cs" />
+    <Compile Include="Figure.cs" />
     <Compile Include="IGraphicsContainer.cs" />
     <Compile Include="Ray.cs" />
     <Compile Include="MainForm.cs">

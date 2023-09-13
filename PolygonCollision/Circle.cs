@@ -3,17 +3,19 @@
 namespace PolygonCollision
 {
 
-    public class Circle
+    public class Circle : Figure
     {
         public Circle(Vector center, float r)
         {
             Pos = center;
-            R = r;
+            Size = new Size(r, 0);            
         }
-        public Vector Pos { get; set; }
-        public float R { get; set; }
 
-        public void Offset(Vector by)
+        public float R => Size.X;
+
+        public override Vector Center => Pos;
+
+        public override void Offset(Vector by)
         {
             Pos += by;
         }
@@ -28,7 +30,13 @@ namespace PolygonCollision
             return new Circle(Pos + offset, R);            
         }
 
-        public void Draw(Color color)
+        public override void Transformed(Figure blueprint, Vector offset, float rotation)
+        {            
+            //rotation is irrelevant for circle
+            Pos = blueprint.Pos + offset;
+        }
+
+        public override void Draw(Color color)
         {
             DrawingContext.GraphicsContainer.FillEllipse(color,this);
         }
@@ -63,9 +71,14 @@ namespace PolygonCollision
             return false;
         }
 
-        public PolygonCollisionResult Collides(Ray l)
+        public override PolygonCollisionResult Collides(Polygon other, Vector speed)
         {
-            
+            //logic for collision of this pair of figures sits in Polygon, so i'm calling it:
+            return other.Collides(this, speed); 
+        }
+
+        public PolygonCollisionResult Collides(Ray l)
+        {            
             bool t = (l.Pos - Pos).Magnitude < R;
             PolygonCollisionResult result = new PolygonCollisionResult()
             {
@@ -75,5 +88,19 @@ namespace PolygonCollision
 
             return result;
         }
+
+        public override PolygonCollisionResult Collides(Circle other, Vector speed)
+        {
+            if ((Pos - other.Pos).Magnitude <= R + other.R)
+                return PolygonCollisionResult.yesCollision;
+            return PolygonCollisionResult.noCollision;
+        }
+
+        public override object Clone()
+        {
+            return new Circle(Pos , R);
+        }
+
+
     }
 }
