@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Media;
 using Newtonsoft.Json;
 using PolygonCollision;
@@ -7,9 +8,7 @@ namespace GameObjects.Model
 {
     [JsonObject(IsReference = true)]
     public class Jet : ICollideable
-    {
- 
-        public override Vector Pos { get; set; }
+    {         
 
         public Vector LastOffset { get; set; }
 
@@ -18,6 +17,8 @@ namespace GameObjects.Model
         public float Thrust { get; set; }
 
         public Vector Bearing { get; set; } = new Vector(1, 0);
+
+        public Vector Orientation { get; set; }
 
         public Vector Aim { get; set; }
 
@@ -31,37 +32,25 @@ namespace GameObjects.Model
             get => Owner.Color;
         }
 
-        private Polygon _hull;
-        private Polygon _hull_cache;
-
-
-        public Polygon Hull 
+        [JsonIgnore]
+        public Polygon Hull
         {
             get
             {
-                return _hull_cache;
-            }
-            set { _hull = value;
-                  _hull_cache = value;
+                return (Polygon)Body[0];
             }
         }
 
-        private Polygon _cockpit;
-
-        private Polygon _cockpit_cache;
-
-        public Polygon Cockpit
-        {
-            get
-            {
-                return _cockpit_cache;
-            }
-            set { 
-                _cockpit = value;
-                _cockpit_cache = value;
-            }
+        [JsonIgnore]
+        public Polygon Cockpit 
+        { 
+            get 
+            { 
+                return (Polygon)Body[1]; 
+            }  
         }
 
+        [JsonIgnore]
         public Vector Gun { get { return Cockpit.Vertices[2]; } }
 
         public float LastFired { get; set; }
@@ -74,6 +63,7 @@ namespace GameObjects.Model
 
         public float Cooldown { get; set; }
 
+        [JsonIgnore]
         public override Circle BoundingCirc { get { return new Circle(Pos, (Gun - Pos).Magnitude); } }
 
         [JsonIgnore]
@@ -91,21 +81,23 @@ namespace GameObjects.Model
         {
             double l = GameConfig.JetScale;
 
-            Hull = new Polygon(7);
-            Hull.AddVertex(new Vector(-10,  10) * l);
-            Hull.AddVertex(new Vector(-20, -30) * l);
-            Hull.AddVertex(new Vector(-10, -40) * l);
-            Hull.AddVertex(new Vector( 10, -40) * l);
-            Hull.AddVertex(new Vector( 20, -30) * l);
-            Hull.AddVertex(new Vector( 10,  10) * l);
-            Hull.AddVertex(new Vector(-10,  10) * l);
+            Polygon hull = new Polygon(7);
+            hull.AddVertex(new Vector(-10,  10) * l);
+            hull.AddVertex(new Vector(-20, -30) * l);
+            hull.AddVertex(new Vector(-10, -40) * l);
+            hull.AddVertex(new Vector( 10, -40) * l);
+            hull.AddVertex(new Vector( 20, -30) * l);
+            hull.AddVertex(new Vector( 10,  10) * l);
+            hull.AddVertex(new Vector(-10,  10) * l);
+            _body.Add(hull);
 
-            Cockpit = new Polygon(5);
-            Cockpit.AddVertex(new Vector(-10, 10) * l);
-            Cockpit.AddVertex(new Vector( 10, 10) * l);
-            Cockpit.AddVertex(new Vector( 05, 25) * l);
-            Cockpit.AddVertex(new Vector(-05, 25) * l);
-            Cockpit.AddVertex(new Vector(-10, 10) * l);
+            Polygon cockpit = new Polygon(5);
+            cockpit.AddVertex(new Vector(-10, 10) * l);
+            cockpit.AddVertex(new Vector( 10, 10) * l);
+            cockpit.AddVertex(new Vector( 05, 25) * l);
+            cockpit.AddVertex(new Vector(-05, 25) * l);
+            cockpit.AddVertex(new Vector(-10, 10) * l);
+            _body.Add(cockpit);
 
             Orientation = new Vector(0, 1);
         }
@@ -113,31 +105,33 @@ namespace GameObjects.Model
         public void ConstructOld()
         {
             double l = GameConfig.JetScale;
-            Hull = new Polygon(5);
-            Hull.AddVertex(new Vector(0, 0) * l);
-            Hull.AddVertex(new Vector(50, 10) * l);//
-            Hull.AddVertex(new Vector(50, 30) * l);//
-            Hull.AddVertex(new Vector(0, 40) * l);
-            Hull.AddVertex(new Vector(0, 0) * l);
+            Polygon hull = new Polygon(5);
+            hull.AddVertex(new Vector(0, 0) * l);
+            hull.AddVertex(new Vector(50, 10) * l);//
+            hull.AddVertex(new Vector(50, 30) * l);//
+            hull.AddVertex(new Vector(0, 40) * l);
+            hull.AddVertex(new Vector(0, 0) * l);
 
-            Cockpit = new Polygon(5);
-            Cockpit.AddVertex(new Vector(50, 10) * l);//
-            Cockpit.AddVertex(new Vector(80, 20) * l);
-            Cockpit.AddVertex(new Vector(50, 30) * l);//
-            Cockpit.AddVertex(new Vector(50, 10) * l);
+            Polygon cockpit = new Polygon(5);
+            cockpit.AddVertex(new Vector(50, 10) * l);//
+            cockpit.AddVertex(new Vector(80, 20) * l);
+            cockpit.AddVertex(new Vector(50, 30) * l);//
+            cockpit.AddVertex(new Vector(50, 10) * l);
+            Body.Add(cockpit);
 
             Orientation = new Vector(1,0);
             Vector centering = new Vector(-40, -20);
-            Hull.Offset(centering);
-            Cockpit.Offset(centering);
+            hull.Offset(centering);
+            cockpit.Offset(centering);
         }
 
         public Jet(Player owner, int health, int ammo)
         {
+            _body = new List<Figure>();
             Construct();
-            Pos = new Vector(0, 0);
+            Pos = GameConfig.TossPoint;
             Owner = owner;
-            Offset(GameConfig.TossPoint);
+            
             Speed = new Vector(0, 0);
             Acceleration = new Vector(0, 0);
             Aim = new Vector(1, 0);
@@ -158,26 +152,44 @@ namespace GameObjects.Model
 
         public Vector Center { get; } = new Vector(0, 0);
         
-        public Vector Orientation { get; private set; } 
 
         private void Rotate(Vector dir)
         {
             Bearing = dir.GetNormalized();
         }
 
-        private void Transform()
+        public override List<Figure> Body
         {
-            float angl = -Bearing.Angle(Orientation);
+            get
+            {
+                if (_body_cache == null)
+                {
+                    _body_cache = new List<Figure>();
+                    upToDate = false;
+                }
+                if (_body_cache.Count == 0)
+                {
+                    _body.ForEach(f => _body_cache.Add((Figure)f.Clone()));
+                   // upToDate = false;
+                }
+                if (!upToDate)
+                {
+                    float angl = -Bearing.Angle(Orientation);
 
-            _cockpit_cache = (Polygon)_cockpit.Clone();
-            _cockpit_cache.RotateAt(angl, Center);
-            _cockpit_cache.Offset(Pos);
+                    for (int i = 0; i< _body.Count; i++)
+                    {
+                        //TODO: since we're only rotating the _body at 0,0, this may be replaced by Rotate
+                        //f.RotateAt(angl, Center);
+                        //f.Offset(Pos);
+                        _body_cache[i].Transformed((Polygon)_body[i], Pos, angl);
+                    }
+                    upToDate = true;
+                }                
 
-            _hull_cache = (Polygon)_hull.Clone();
-            _hull_cache.RotateAt(angl, Center);
-            _hull_cache.Offset(Pos);
+                return _body_cache;
+            }
         }
-
+        
         public override PolygonCollisionResult Collides(Jet j)
         {
             // Jets don't collide with other Jets. they might later.
@@ -186,16 +198,16 @@ namespace GameObjects.Model
 
         public override PolygonCollisionResult Collides(Wall w)
         {
-            PolygonCollisionResult r = Hull.Collides(w.Body, Speed);
-            if (r.WillIntersect)
+            foreach (Figure f in Body)
             {
-                return r;
-            }
-            else
-            {
-                return Cockpit.Collides(w.Body, Speed);
-            }
-        }
+                PolygonCollisionResult r = ((Polygon)f).Collides((Polygon)w.Body[0], Speed);
+                if (r.Intersect)
+                {
+                    return r;
+                }
+            }        
+            return PolygonCollisionResult.noCollision;
+        }       
 
         public override void HandleCollision(Wall w, PolygonCollisionResult r)
         {
@@ -205,10 +217,16 @@ namespace GameObjects.Model
 
         public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)
         {
-            Offset(-Pos);
-            Offset(GameConfig.TossPoint);
+            Teleport();
             //when I debug, the time continues, so when run continues, objects have 
-            //flied far beyond world edge. return them to random place on map
+            //flied far beyond world edge. return them to center of the world 
+        }
+
+        public void Teleport()
+        {
+            Pos = GameConfig.WorldSize / 2; 
+            Speed.X = 0; 
+            Speed.Y = 0;
         }
 
         public override void Move(GameState gO)
@@ -218,7 +236,7 @@ namespace GameObjects.Model
                 Acceleration = -Speed.GetNormalized() * 0.8;
             }
 
-            if (Speed.X == Single.NaN)
+            if (Speed.X == float.NaN)
             {
                 Logger.Log("speed nan", LogLevel.Debug);
             }
@@ -233,13 +251,13 @@ namespace GameObjects.Model
                 // Probably need to do "* GameConfig.GameSpeed * GameTime.DeltaTime"
                 // Logger.Log(BounceNormal.ToString(), LogLevel.Debug);
 
-                Vector oldspeed = Speed;
+                Vector oldspeed = (Vector)Speed.Clone();
 
                 Speed -= 2 * Speed.Dot(BounceNormal) * BounceNormal;
 
-                if (Speed.Magnitude != oldspeed.Magnitude)
+                if (Speed.Magnitude != oldspeed.Magnitude && Owner.Name.ToLower().Contains("player"))
                 {
-                    Logger.Log("hmmm", LogLevel.Info);
+                    Logger.Log($"Speed.Magnitude: {Speed.Magnitude}| oldspeed.Magnitude: {oldspeed.Magnitude}| GameConfig.Lightspeed: {GameConfig.Lightspeed}", LogLevel.Debug);
                 }
                 BounceNormal = null;
             }
@@ -262,9 +280,9 @@ namespace GameObjects.Model
 
             Rotate(Aim);///  GameTime.DeltaTime/ GameTime.DeltaTime 
 
-            Transform();
+            upToDate = false;
 
-            Owner.viewPort.Update();
+            Owner.viewPort.Update();            
         }
 
         public void Bounce(Vector normal)
@@ -313,7 +331,7 @@ namespace GameObjects.Model
                 if (Ammo != 0 && GameTime.TotalElapsedSeconds > LastFired + Cooldown)
                 {
                     LastFired = GameTime.TotalElapsedSeconds;
-                    Bullet bullet = new Bullet(Owner, Gun, Bearing.GetNormalized(), GameConfig.bulletSpeed /*+ Speed*/, size: 3, color: Color);
+                    Bullet bullet = new Bullet(Owner, Gun, Bearing, GameConfig.bulletSpeed /*+ Speed*/, width: 3, color: Color);
                     gameObjects.Entities.Add(bullet);
                     Ammo--;
                 }

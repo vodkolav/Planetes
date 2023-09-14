@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using PolygonCollision;
+using System.Collections.Generic;
 
 namespace GameObjects.Model
 {
@@ -10,14 +11,25 @@ namespace GameObjects.Model
         {
             
         }
+    
+        public bool upToDate { get; set; }
 
         public virtual Player Owner { get; set; }
 
-        public virtual Vector Pos { get; set; }
+        public Vector Pos { get; set; } 
 
         public virtual Vector Speed { get; set; }//TODO: rename speed to velocity
 
         public virtual bool isAlive { get; set; }
+
+        [JsonIgnore]
+        public List<Figure> _body_cache { get; set; }
+
+        [JsonProperty(ItemTypeNameHandling = TypeNameHandling.Auto)]
+        public virtual List<Figure> _body { get; set; }
+
+        [JsonIgnore]
+        public abstract List<Figure> Body { get;  }    
 
         public virtual Circle BoundingCirc { get { return new Circle(Pos, 10); }}
 
@@ -33,21 +45,16 @@ namespace GameObjects.Model
             return PolygonCollisionResult.noCollision;
         }
 
-        public virtual PolygonCollisionResult Collides(Wall w)
-        {
-            return w.Body.Collides(Pos);
-        }
+        public abstract PolygonCollisionResult Collides(Wall w);
 
-        public virtual PolygonCollisionResult Collides(Jet j)
-        {
-            return PolygonCollisionResult.noCollision;
-        }       
+        public abstract PolygonCollisionResult Collides(Jet j);         
          
         public virtual PolygonCollisionResult Collides(Astroid a)
         {
             // collisions of Jets with Astroids are handled in astroid class
             // Astroids don't collide each other
             return PolygonCollisionResult.noCollision;
+            //TODO: when upgrade to C# 7: make this function abstract with default implementation 
         }
 
         public abstract void HandleCollision(Map WorldEdge, PolygonCollisionResult r);
