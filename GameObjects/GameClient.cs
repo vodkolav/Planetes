@@ -137,7 +137,7 @@ namespace GameObjects
         public virtual void updateGameState(GameState go)
         {
             //Logger.Log("received model for frame " + go.frameNum, LogLevel.Status);
-            lock (this)
+            lock (gameObjects)
             {
                 gameObjects = go;
             }            
@@ -217,7 +217,7 @@ namespace GameObjects
                 return;
             }
 
-            lock (this)
+            lock (gameObjects)
             {
                 try
                 {

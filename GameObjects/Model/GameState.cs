@@ -77,7 +77,8 @@ namespace GameObjects.Model
 
             foreach (ICollideable e in Entities)
             {
-                e.Move(this);
+                e.Move();
+                e.upToDate = false;
             }
 
             //check for collision of all objects with World bounds

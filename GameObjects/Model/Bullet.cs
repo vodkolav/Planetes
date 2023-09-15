@@ -10,33 +10,18 @@ namespace GameObjects.Model
     {
         public int Width { get; set; }
 
-        public override List<Figure> Body
-        {
-            get
-            {
-                if (_body_cache == null)
-                {
-                    _body_cache = new List<Figure>();
-                }
-                if (_body_cache.Count == 0)
-                {
-                    _body.ForEach(f => _body_cache.Add((Figure)f.Clone()));
-                    _body_cache[0].Pos = Pos;
-                }
-                return _body_cache;
-            }
-        }
-
         public Color Color { get; set; }
 
         public override int Power { get; internal set; } = 1;
+
+        public override float Rot => 0f;
 
         public Bullet(Player owner, Vector pos, Vector direction, int speed, int width, Color color)
         {
             Owner = owner;
             Pos = pos;
             direction = direction.GetNormalized();
-            _body = new List<Figure> { new Ray(Pos,direction * width * 4, width) };
+            _body = new List<Figure> { new Ray(new Vector(0,0), direction * width * 4, width) };
             Speed = direction * speed; 
             Width = width;
             Color = color;
@@ -106,7 +91,7 @@ namespace GameObjects.Model
             }
         }
 
-        public override void Move(GameState gameObjects)
+        public override void Move()
         { 
             Offset(Speed * GameConfig.GameSpeed * GameTime.DeltaTime );
         }

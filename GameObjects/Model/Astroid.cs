@@ -43,14 +43,14 @@ namespace GameObjects.Model
                 }
             }
         }
-
-        public override List<Figure> Body => throw new NotImplementedException();
+               
+        public override float Rot => 0f;
 
         public Astroid(AstType type)
         {
             Pos = GameConfig.TossPoint;
             Size = new Size(GameConfig.TossInt(10, 30), 0);
-            _body = new List<Figure> { new Circle(Pos,Size.X) };
+            _body = new List<Figure> { new Circle(new Vector(0,0),Size.X) };
             double linearSpeed = GameConfig.TossInt(1,(int)(GameConfig.Lightspeed * 0.5));
             double Angle = Math.PI / 180 * GameConfig.TossInt(360);
             Vector mult = new Vector((float)Math.Cos(Angle), (float)Math.Sin(Angle));
@@ -119,7 +119,7 @@ namespace GameObjects.Model
                 isAlive = false;
         }
 
-        public override void Move(GameState gameObjects)
+        public override void Move()
         {
             Offset(Speed * GameConfig.GameSpeed * GameTime.DeltaTime);//*GameTime.DeltaTime);
         }

@@ -18,6 +18,8 @@ namespace GameObjects.Model
 
         public Vector Pos { get; set; } 
 
+        public abstract float Rot { get; }
+
         public virtual Vector Speed { get; set; }//TODO: rename speed to velocity
 
         public virtual bool isAlive { get; set; }
@@ -29,7 +31,33 @@ namespace GameObjects.Model
         public virtual List<Figure> _body { get; set; }
 
         [JsonIgnore]
-        public abstract List<Figure> Body { get;  }    
+        public  List<Figure> Body
+        {
+            get
+            {
+                if (_body_cache == null)
+                {
+                    _body_cache = new List<Figure>();
+                    upToDate = false;
+                }
+                if (_body_cache.Count == 0)
+                {
+                    _body.ForEach(f => _body_cache.Add((Figure)f.Clone()));
+                }
+                if (!upToDate)
+                {
+                    for (int i = 0; i < _body.Count; i++)
+                    {
+                        //TODO: since we're only rotating the _body at 0,0, this may be replaced by Rotate
+                        //f.RotateAt(angl, Center);
+                        //f.Offset(Pos);
+                        _body_cache[i].Transformed(_body[i], Pos, Rot);
+                    }
+                    upToDate = true;
+                }
+                return _body_cache;
+            }
+        }
 
         public virtual Circle BoundingCirc { get { return new Circle(Pos, 10); }}
 
@@ -54,7 +82,7 @@ namespace GameObjects.Model
             // collisions of Jets with Astroids are handled in astroid class
             // Astroids don't collide each other
             return PolygonCollisionResult.noCollision;
-            //TODO: when upgrade to C# 7: make this function abstract with default implementation 
+            //TODO: when upgrade to C# 8 : make this function abstract with default implementation 
         }
 
         public abstract void HandleCollision(Map WorldEdge, PolygonCollisionResult r);
@@ -80,7 +108,7 @@ namespace GameObjects.Model
             return Pos.Dist(other.Pos);
         }
 
-        public abstract void Move(GameState gameObjects);
+        public abstract void Move();
 
         public abstract void Draw();
 

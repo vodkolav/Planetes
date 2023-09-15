@@ -67,8 +67,12 @@ namespace GameObjects
         {
             get
             {
-                return gameObjects.Bullets.Where(b => Me.Enemies.Contains(b.Owner)) //TODO:this is wrong - I dont need to evade my own bullets
-                    .Aggregate((curMin, x) => curMin == null || Jet.Dist(x) < Jet.Dist(curMin) ? x : curMin);
+                var enemybullets = gameObjects.Bullets.Where(b => Me.Enemies.Contains(b.Owner));
+                if (enemybullets.Any())
+                {
+                    return enemybullets.Aggregate((curMin, x) => curMin == null || Jet.Dist(x) < Jet.Dist(curMin) ? x : curMin);
+                }
+                return null;
             }
         }
 
@@ -129,8 +133,10 @@ namespace GameObjects
                         }
                     }
                     tdiff = DateTime.UtcNow - dt;
-                    Thread.Sleep(ReactionInterval - tdiff);//this is bad. There should be timer instead
-
+                    if ((ReactionInterval - tdiff) > TimeSpan.Zero)
+                    {
+                        Thread.Sleep(ReactionInterval - tdiff);//this is bad. There should be timer instead
+                    }
                 }
                 Logger.Log(Me.Name + " BOT IS DISENGAGED", LogLevel.Info);
             }
@@ -224,17 +230,20 @@ namespace GameObjects
                 //bullet evasion tactic (not good yet) Where(b=> b.Pos.X + 50 > Jet.Pos.X)
 
                 var bulClosest = ClosestBullet;
-                if (Jet.Pos.Y < bulClosest.Pos.Y && bulClosest.Pos.Y < Jet.Pos.Y + 50)
+                if (bulClosest != null)
                 {
-                    Press(HOTAS.Down);
-                }
-                else if (Jet.Pos.Y - 50 < bulClosest.Pos.Y && bulClosest.Pos.Y <= Jet.Pos.Y)
-                {
-                    Press(HOTAS.Up);
-                }
-                else
-                {
-                    Release(HOTAS.Up);
+                    if (Jet.Pos.Y < bulClosest.Pos.Y && bulClosest.Pos.Y < Jet.Pos.Y + 50)
+                    {
+                        Press(HOTAS.Down);
+                    }
+                    else if (Jet.Pos.Y - 50 < bulClosest.Pos.Y && bulClosest.Pos.Y <= Jet.Pos.Y)
+                    {
+                        Press(HOTAS.Up);
+                    }
+                    else
+                    {
+                        Release(HOTAS.Up);
+                    }
                 }
             }
             catch (Exception e)
@@ -251,7 +260,6 @@ namespace GameObjects
                     Aim(EnemyClosest.Jet.Pos);
                     if (Jet.Pos.Y < EnemyClosest.Jet.Pos.Y - 50)
                     {
-
                         Press(HOTAS.Down);
                     }
                     else if (Jet.Pos.Y > EnemyClosest.Jet.Pos.Y + 50)

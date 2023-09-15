@@ -20,6 +20,8 @@ namespace GameObjects.Model
 
         public Vector Orientation { get; set; }
 
+        public override float Rot { get => -Bearing.Angle(Orientation); }
+
         public Vector Aim { get; set; }
 
         public int Health { get; set; }
@@ -152,42 +154,9 @@ namespace GameObjects.Model
 
         public Vector Center { get; } = new Vector(0, 0);
         
-
         private void Rotate(Vector dir)
         {
             Bearing = dir.GetNormalized();
-        }
-
-        public override List<Figure> Body
-        {
-            get
-            {
-                if (_body_cache == null)
-                {
-                    _body_cache = new List<Figure>();
-                    upToDate = false;
-                }
-                if (_body_cache.Count == 0)
-                {
-                    _body.ForEach(f => _body_cache.Add((Figure)f.Clone()));
-                   // upToDate = false;
-                }
-                if (!upToDate)
-                {
-                    float angl = -Bearing.Angle(Orientation);
-
-                    for (int i = 0; i< _body.Count; i++)
-                    {
-                        //TODO: since we're only rotating the _body at 0,0, this may be replaced by Rotate
-                        //f.RotateAt(angl, Center);
-                        //f.Offset(Pos);
-                        _body_cache[i].Transformed((Polygon)_body[i], Pos, angl);
-                    }
-                    upToDate = true;
-                }                
-
-                return _body_cache;
-            }
         }
         
         public override PolygonCollisionResult Collides(Jet j)
@@ -229,7 +198,7 @@ namespace GameObjects.Model
             Speed.Y = 0;
         }
 
-        public override void Move(GameState gO)
+        public override void Move()
         {
             if (KeyBrake)
             {
@@ -280,8 +249,6 @@ namespace GameObjects.Model
 
             Rotate(Aim);///  GameTime.DeltaTime/ GameTime.DeltaTime 
 
-            upToDate = false;
-
             Owner.viewPort.Update();            
         }
 
@@ -313,10 +280,9 @@ namespace GameObjects.Model
 
         internal void Hit(ICollideable hitter)
         {
-            if (Health > hitter.Power)
-                Health -= hitter.Power;
-            else
-                Die(hitter);
+            if (Health <= hitter.Power)
+                Die(hitter);                
+            Health -= hitter.Power;
         }
 
         private void Die(ICollideable hitter)
