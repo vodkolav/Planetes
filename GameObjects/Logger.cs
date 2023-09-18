@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNet.SignalR.Client;
+using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Text;
@@ -26,7 +27,6 @@ namespace GameObjects
     }
 
     public enum LogLevel {Nothing, Status, Info, Warning, Debug, CSV, Trace, All }
-
 
     public class LogWriter : StreamWriter
     {
@@ -202,6 +202,24 @@ namespace GameObjects
             messages.CompleteAdding();
             output.Dispose();
             _trace_interceptor.Dispose();
+        }
+
+        /// <summary>
+        /// use this code to investigate problems when signalR ceases to receive model updates from server
+        /// </summary>
+        /// <param name="conn"></param>
+        internal static void TraceConnection(Connection conn)
+        {
+            if (GameConfig.loglevels.Contains(LogLevel.Trace))
+            {
+                conn.TraceLevel = TraceLevels.All;
+                conn.TraceWriter = TraceInterceptor;
+                conn.Error += (e) => Log(e, LogLevel.Debug);
+            }
+            else
+            {
+                conn.TraceLevel = TraceLevels.None;
+            }
         }
     }
 }

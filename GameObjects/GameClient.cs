@@ -35,6 +35,8 @@ namespace GameObjects
         {
             //gameObjects = go;
             World = go.World;
+            ModelStore = go.ModelStore;
+            Resources.LoadFrom(ModelStore);
             UI.UpdateLobby(go);
         }
 
@@ -62,6 +64,8 @@ namespace GameObjects
 
         public Map World { get; set; }
 
+        public Resources ModelStore { get; set; }
+
         public Player Me { get { return gameObjects.Players.Single(p => p.ID == PlayerId); } }
 
         public bool GameOn { get { return gameObjects != null && gameObjects.GameOn== GameStatus.On; } }
@@ -80,12 +84,7 @@ namespace GameObjects
             {
                 Conn = new HubConnection(URL);
 
-                // use this code to investigate problems when signalR ceases to receive model updates from server
-                //TODO: let Logger subscribe to Conn, smth like Logger.Trace(Conn)
-                Conn.TraceLevel = TraceLevels.All;                
-                Conn.TraceWriter = Logger.TraceInterceptor; 
-                Conn.Error += (e) =>  Logger.Log(e, LogLevel.Debug);
-                
+                Logger.TraceConnection(Conn);
                 Proxy = Conn.CreateHubProxy("GameHub");
                 Proxy.On<GameState>("UpdateModel", updateGameState);
                 Proxy.On<GameState>("UpdateLobby", UpdateLobby);
@@ -148,6 +147,7 @@ namespace GameObjects
             //TODO: merge this with updateGameState, they essentially do the same 
             gameObjects = go;
             World = gameObjects.World;
+            Resources.LoadFrom(gameObjects.ModelStore);
             UI.UpdateLobby(gameObjects);
         }
 
@@ -229,7 +229,7 @@ namespace GameObjects
                     {
                         if (GameConfig.loglevels.Contains(LogLevel.CSV))
                         {
-                            Jet debugged = gameObjects.Players.Single(p => p.Name.Contains("Bot2")).Jet; // WPFplayer
+                            Jet debugged = gameObjects.Players.Single(p => p.Name.ToLower().Contains("player")).Jet; // WPFplayer
                             float dt = (float)(DateTime.UtcNow - gameObjects.StartTime).TotalSeconds;
                             Logger.Log($"{gameObjects.frameNum},{GameTime.DeltaTime:F4}, " +
                                        $"{dt:F4}, {debugged.LastOffset.Magnitude:F4}, {debugged.Pos.Magnitude}, " +

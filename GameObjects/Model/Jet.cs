@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Windows.Media;
 using Newtonsoft.Json;
 using PolygonCollision;
@@ -32,6 +31,13 @@ namespace GameObjects.Model
         public Color Color
         {
             get => Owner.Color;
+        }
+
+        [JsonIgnore]
+        public override Corpus _body
+        {
+            get => Resources.Get("Jet", Owner);
+            set => Resources.Set("Jet", Owner, value); 
         }
 
         [JsonIgnore]
@@ -82,7 +88,7 @@ namespace GameObjects.Model
         public void Construct()
         {
             double l = GameConfig.JetScale;
-
+            _body = new Corpus();
             Polygon hull = new Polygon(7);
             hull.AddVertex(new Vector(-10,  10) * l);
             hull.AddVertex(new Vector(-20, -30) * l);
@@ -127,13 +133,13 @@ namespace GameObjects.Model
             cockpit.Offset(centering);
         }
 
-        public Jet(Player owner, int health, int ammo)
-        {
-            _body = new List<Figure>();
-            Construct();
+        public Jet(Player owner, int health, int ammo) : base()
+        {            
             Pos = GameConfig.TossPoint;
             Owner = owner;
             
+            Construct();
+
             Speed = new Vector(0, 0);
             Acceleration = new Vector(0, 0);
             Aim = new Vector(1, 0);
@@ -167,7 +173,7 @@ namespace GameObjects.Model
 
         public override PolygonCollisionResult Collides(Wall w)
         {
-            foreach (Figure f in Body)
+            foreach (Figure f in Body.Parts)
             {
                 PolygonCollisionResult r = ((Polygon)f).Collides((Polygon)w.Body[0], Speed);
                 if (r.Intersect)
@@ -234,7 +240,7 @@ namespace GameObjects.Model
             //Physics Police            
 
             if (Speed.Magnitude >= GameConfig.Lightspeed)
-            {            
+            {
                 Speed = Speed.GetNormalized() * GameConfig.Lightspeed;
             }
 
@@ -259,6 +265,7 @@ namespace GameObjects.Model
         
         public override void Draw()
         {
+            Offset(LastOffset * GameConfig.GameSpeed  * GameTime.DeltaTime);
             Hull.Draw(Color);
             Cockpit.Draw(Colors.Gray);
         }

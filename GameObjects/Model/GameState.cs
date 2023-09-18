@@ -41,6 +41,16 @@ namespace GameObjects.Model
             return GameOn!= GameStatus.On ;
         }
 
+        public Resources ModelStore { get; set; }
+
+        public bool ShouldSerializeModelStore()
+        {
+            // don't remove! even though it has 0 references, this function is essential
+            // We need to serialize the World only in lobby phase. 
+            // Since the worlds is static, once the game has started, no need to send World to clients anymore
+            return GameOn != GameStatus.On;
+        }
+
         public GameState()
         {
         }
@@ -50,6 +60,8 @@ namespace GameObjects.Model
             Entities = new List<ICollideable>();
             World = new Map(worldSize);
             Players = new List<Player>();
+            ModelStore = Resources.Instance;
+            Resources.Init();
             frameNum = 0;
         }
 

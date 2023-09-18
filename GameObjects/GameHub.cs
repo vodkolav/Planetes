@@ -36,7 +36,9 @@ namespace GameObjects
 
         //TODO: get rid of those tuples. just use regular params
         public void Do(int who, Tuple<Action, Vector> command)
-        {
+        { 
+            //TODO: put lock only around expression which requires it. Exception handling can be done outside of lock. 
+            //TODO: move all locks to GameServer 
             lock (_gameServer.gameObjects)
             {
                 try

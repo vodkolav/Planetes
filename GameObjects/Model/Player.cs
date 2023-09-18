@@ -22,6 +22,8 @@ namespace GameObjects.Model
         public int ID { get; set; }        
         public string ConnectionID { get; set; }
         public string Name { get; set; }
+
+        //TODO: use hex strings to store color data instead, ex:  "Color": "#FF6B8E23",
         public Color Color { get; set; }
       
         public List<Player> Enemies { get; set; }

@@ -74,10 +74,10 @@ namespace GameObjects.Model
             Vector sw = new Vector(b, Size.Height - b);
 
 
-            Walls.Add(new Wall(nw, ne, wallBrush)); //upper
-            Walls.Add(new Wall(ne, se, wallBrush)); //right
-            Walls.Add(new Wall(se, sw, wallBrush)); //bottom
-            Walls.Add(new Wall(sw, nw, wallBrush)); //left
+            Walls.AddRange(Wall.Segmented(nw, ne, wallBrush)); //upper
+            Walls.AddRange(Wall.Segmented(ne, se, wallBrush)); //right
+            Walls.AddRange(Wall.Segmented(se, sw, wallBrush)); //bottom
+            Walls.AddRange(Wall.Segmented(sw, nw, wallBrush)); //left
 
             //create corner diagonal walls 
             int sh = Math.Min(Size.Width, Size.Height) / 10; //shift from corner

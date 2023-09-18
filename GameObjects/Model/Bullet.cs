@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Windows.Media;
+﻿using System.Windows.Media;
 using Newtonsoft.Json;
 using PolygonCollision;
 
@@ -21,7 +20,8 @@ namespace GameObjects.Model
             Owner = owner;
             Pos = pos;
             direction = direction.GetNormalized();
-            _body = new List<Figure> { new Ray(new Vector(0,0), direction * width * 4, width) };
+            _body = new Corpus();
+            _body.Add(new Ray(new Vector(0,0), direction * width * 4, width));
             Speed = direction * speed; 
             Width = width;
             Color = color;
@@ -58,7 +58,7 @@ namespace GameObjects.Model
         public override PolygonCollisionResult Collides(Jet j)
         {
 
-            foreach (Polygon o in j.Body)
+            foreach (Polygon o in j.Body.Parts)
             {
                 PolygonCollisionResult r = Body[0].Collides(o, Speed);
                 if (r.WillIntersect)

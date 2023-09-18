@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace GameObjects.Model
 {
     [JsonObject(IsReference = true)]
-    public abstract class ICollideable //TODO: make this a gameObject : ICollidable class 
+    public abstract class ICollideable //TODO: make this a gameEntity : ICollidable class 
     {
         public ICollideable()
         {
@@ -25,19 +25,19 @@ namespace GameObjects.Model
         public virtual bool isAlive { get; set; }
 
         [JsonIgnore]
-        public List<Figure> _body_cache { get; set; }
+        public Corpus _body_cache { get; set; }
 
         [JsonProperty(ItemTypeNameHandling = TypeNameHandling.Auto)]
-        public virtual List<Figure> _body { get; set; }
+        public virtual Corpus _body { get; set; }
 
         [JsonIgnore]
-        public  List<Figure> Body
+        public  Corpus Body
         {
             get
             {
                 if (_body_cache == null)
                 {
-                    _body_cache = new List<Figure>();
+                    _body_cache = new Corpus();
                     upToDate = false;
                 }
                 if (_body_cache.Count == 0)

@@ -7,7 +7,7 @@ using System.Windows.Media;
 namespace PolygonCollision
 {
     // Structure that stores the results of the PolygonCollision function
-    public struct PolygonCollisionResult
+    public struct PolygonCollisionResult  //TODO rename it to CollisionResult
     {
         public bool WillIntersect; // Are the polygons going to intersect forward in time?
         public bool Intersect; // Are the polygons currently intersecting

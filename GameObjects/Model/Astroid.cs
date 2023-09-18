@@ -50,7 +50,8 @@ namespace GameObjects.Model
         {
             Pos = GameConfig.TossPoint;
             Size = new Size(GameConfig.TossInt(10, 30), 0);
-            _body = new List<Figure> { new Circle(new Vector(0,0),Size.X) };
+            _body = new Corpus();
+            _body.Add(new Circle(new Vector(0,0),Size.X));
             double linearSpeed = GameConfig.TossInt(1,(int)(GameConfig.Lightspeed * 0.5));
             double Angle = Math.PI / 180 * GameConfig.TossInt(360);
             Vector mult = new Vector((float)Math.Cos(Angle), (float)Math.Sin(Angle));
@@ -86,9 +87,7 @@ namespace GameObjects.Model
 
         public override PolygonCollisionResult Collides(Jet j)
         {
-
-
-            foreach (Polygon o in j.Body)
+            foreach (Polygon o in j.Body.Parts)
             {
                 PolygonCollisionResult r = Body[0].Collides(o, Speed);
                 if (r.WillIntersect)

@@ -255,17 +255,32 @@ namespace GameObjects
                     if (_shutdownEvent.WaitOne(0))
                         break;
 
+                    if (gameObjects.frameNum % 3 == 0) //for performance - send only every 4th frame to the clients
+                    {
+                        await hubContext.Clients.All.UpdateModel(gameObjects);
+                    }
+
                     float dt = (float)(DateTime.UtcNow - gameObjects.StartTime).TotalSeconds;
 
                     GameTime.DeltaTime = (dt - GameTime.TotalElapsedSeconds);
                     GameTime.TotalElapsedSeconds = dt;
 
-                    /*Jet debugged = gameObjects.Players.Single(p => p.Name.Contains("Bot1")).Jet;//WPFplayer
-                    string csvLine = $"{gameObjects.frameNum},{GameTime.DeltaTime:F4}, " +
-                                     $"{dt:F4}, {debugged.LastOffset.Magnitude:F4}, " +
-                                     $"{debugged.Pos.Magnitude}, {debugged.Pos.X}, {debugged.Pos.Y}, GameLoop";
-                    Logger.Log(csvLine, LogLevel.CSV);*/
-                    
+                    try
+                    {
+                        if (GameConfig.loglevels.Contains(LogLevel.CSV))
+                        {
+                            Jet debugged = gameObjects.Players.Single(p => p.Name.ToLower().Contains("player")).Jet;//WPFplayer
+                            string csvLine = $"{gameObjects.frameNum},{GameTime.DeltaTime:F4}, " +
+                                             $"{dt:F4}, {debugged.LastOffset.Magnitude:F4}, " +
+                                             $"{debugged.Pos.Magnitude}, {debugged.Pos.X}, {debugged.Pos.Y}, GameLoop";
+                            Logger.Log(csvLine, LogLevel.CSV);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Log(e, LogLevel.Warning);
+                    }
+
                     lock (gameObjects) 
                     {
                         gameObjects.Frame();
@@ -277,10 +292,6 @@ namespace GameObjects
                     }
 
                     //string gobj = JsonConvert.SerializeObject(gameObjects); // only for debugging - to check what got serialized
-                    if (gameObjects.frameNum % 2 == 0) //for performance - send only every 4th frame to the clients
-                    {
-                        await hubContext.Clients.All.UpdateModel(gameObjects);
-                    }
                     //Logger.Log("frameNum: " + gameObjects.frameNum, LogLevel.Status);// + "| " + tdiff.ToString()
                 }
 
