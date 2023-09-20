@@ -193,6 +193,7 @@ namespace GameObjects
 
         public async Task StartServer()
         {
+            gameObjects.Track("player", "header");
             await Proxy.Invoke("Start");
         }
 
@@ -222,24 +223,7 @@ namespace GameObjects
                 try
                 {
                     LastDrawnFrame = gameObjects.frameNum;
-                    
-                    // This code may be used to track a specific game object over time and then plot the data.
-                    // useful when diagnosing fps issues
-                    try
-                    {
-                        if (GameConfig.loglevels.Contains(LogLevel.CSV))
-                        {
-                            Jet debugged = gameObjects.Players.Single(p => p.Name.ToLower().Contains("player")).Jet; // WPFplayer
-                            float dt = (float)(DateTime.UtcNow - gameObjects.StartTime).TotalSeconds;
-                            Logger.Log($"{gameObjects.frameNum},{GameTime.DeltaTime:F4}, " +
-                                       $"{dt:F4}, {debugged.LastOffset.Magnitude:F4}, {debugged.Pos.Magnitude}, " +
-                                       $"{debugged.Pos.X}, {debugged.Pos.Y}, Draw", LogLevel.CSV);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Log(e, LogLevel.Warning);
-                    }
+                    gameObjects.Track("player", "Draw");
 
                     DrawingContext.GraphicsContainer.ViewPortOffset = -Me.viewPort.Origin;
 
@@ -249,7 +233,6 @@ namespace GameObjects
                     {
                         s.Draw();
                     }
-
 
                     //TODO: Make Wall also collidable
                     foreach (Wall w in World.Walls.Where(w => Me.viewPort.Collides(w).Intersect))

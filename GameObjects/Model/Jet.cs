@@ -17,11 +17,21 @@ namespace GameObjects.Model
 
         public Vector Bearing { get; set; } = new Vector(1, 0);
 
-        public Vector Orientation { get; set; }
+        public Vector Orientation { get; set; } //TODO: move it to Corpus?
 
         public override float Rot { get => -Bearing.Angle(Orientation); }
 
-        public Vector Aim { get; set; }
+        public Vector Aim
+        {
+            get
+            {
+                return Bearing;
+            }
+            set
+            {
+                Bearing = value.GetNormalized();
+            }
+        }
 
         public int Health { get; set; }
         public int MaxHealth { get; set; }
@@ -160,11 +170,6 @@ namespace GameObjects.Model
 
         public Vector Center { get; } = new Vector(0, 0);
         
-        private void Rotate(Vector dir)
-        {
-            Bearing = dir.GetNormalized();
-        }
-        
         public override PolygonCollisionResult Collides(Jet j)
         {
             // Jets don't collide with other Jets. they might later.
@@ -253,19 +258,19 @@ namespace GameObjects.Model
 
             Offset(offset);
 
-            Rotate(Aim);///  GameTime.DeltaTime/ GameTime.DeltaTime 
 
             Owner.viewPort.Update();            
         }
 
         public void Bounce(Vector normal)
         {
-            BounceNormal = normal;
+            BounceNormal = normal.GetNormalized();
         }
         
         public override void Draw()
         {
-            Offset(LastOffset * GameConfig.GameSpeed  * GameTime.DeltaTime);
+            //maybe this line will still be needed for adjusting ofset on client before drawing
+            //Offset(LastOffset * GameConfig.GameSpeed  * GameTime.DeltaTime);
             Hull.Draw(Color);
             Cockpit.Draw(Colors.Gray);
         }
@@ -301,7 +306,7 @@ namespace GameObjects.Model
         {
             if (KeyShoot)
             {
-                if (Ammo != 0 && GameTime.TotalElapsedSeconds > LastFired + Cooldown)
+                if (Ammo != 0 && GameTime.TotalElapsedSeconds > LastFired + Cooldown/GameConfig.GameSpeed)
                 {
                     LastFired = GameTime.TotalElapsedSeconds;
                     Bullet bullet = new Bullet(Owner, Gun, Bearing, GameConfig.bulletSpeed /*+ Speed*/, width: 3, color: Color);

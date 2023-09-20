@@ -143,8 +143,12 @@ namespace GameObjects.Model
 
         public virtual void Aim(object argument)
         {
+            //argument is vector which holds coordinates of crosshair relative to the Visor UI element's Origin
             if (isAlive)
-                Jet.Aim = (Vector)argument - (viewPort.Size * .5);
+                //Jet.Aim is the coordinates of crosshair relative to the Visor UI element's Center
+                //In other words, the vector from the player's jet to crosshair
+                //Or, un-Normalized Bearing
+                Jet.Aim = (Vector)argument - (viewPort.Size/2);
             // Print world-relative coordinates of where the mouse now points 
             Logger.Log(((Vector)argument + viewPort.Origin).ToString(), LogLevel.Status);
         }

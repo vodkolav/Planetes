@@ -96,7 +96,7 @@ namespace GameObjects
 
         public void Aim(Vector argument)
         {
-            if (isWorking)
+            if (isWorking && DateTime.UtcNow.Millisecond%5 == 0)
                 Proxy.Invoke("Do", new object[] { PlayerID, new Tuple<Action, Vector>(Action.Aim, argument) });
             // these exceptions appear after waiting too long on a breakpoint. how to fix : https://stackoverflow.com/a/38161578
 

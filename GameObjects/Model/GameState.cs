@@ -162,5 +162,40 @@ namespace GameObjects.Model
                 }
             }
         }
+
+        internal void Track(string playerName, string source)
+        {
+            // This function may be useful to track a specific game object (usually Jet)
+            // over time and then plot the data. useful when diagnosing fps issues
+            try
+            {
+                if (GameConfig.loglevels.Contains(LogLevel.CSV))
+                {
+                    if (source == "header")
+                    {
+                        //string CSVheader = "frame, UtcNow, DeltaTime, Source, JetSpeed, JetPosMag, JetPosX, JetPosY";
+                        string CSVheader = "frame, UtcNow, DeltaTime, Source, JetSpeed, JetPosMag, JetBearingX, JetBearingY";
+                        Logger.Log(CSVheader, LogLevel.CSV);
+                    }
+
+                    Jet debugged = Players.Single(p => p.Name.ToLower().Contains(playerName)).Jet; // WPFplayer
+                    //float dt = (float)(DateTime.UtcNow - StartTime).TotalSeconds;
+                    
+                    /*                        string CSVline = $"{frameNum}, {dt:F4}, {GameTime.DeltaTime:F4}, {source}, " +
+                                                             $"{debugged.LastOffset.Magnitude:F4}, {debugged.Pos.Magnitude}, " +
+                                                             $"{debugged.Pos.X}, {debugged.Pos.Y}";*/
+
+                    string CSVline = $"{frameNum}, {GameTime.TotalElapsedSeconds:F4}, {GameTime.DeltaTime:F4}, {source}, " +
+                                     $"{debugged.LastOffset.Magnitude:F4}, {debugged.Pos.Magnitude}, " +
+                                     $"{debugged.Bearing.X}, {debugged.Bearing.Y}";
+
+                    Logger.Log(CSVline, LogLevel.CSV);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Log(e, LogLevel.Warning);
+            }
+        }
     }
 }

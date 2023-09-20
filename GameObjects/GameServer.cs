@@ -118,8 +118,11 @@ namespace GameObjects
         {
             try
             {
-                Player quitter = gameObjects.Players.Single(p => p.ConnectionID == connectionID);
-                Leave(quitter);
+                lock (gameObjects)
+                {
+                    Player quitter = gameObjects.Players.Single(p => p.ConnectionID == connectionID);
+                    Leave(quitter);
+                }
             }
             catch (ArgumentNullException ex)
             {
@@ -233,6 +236,23 @@ namespace GameObjects
             Logger.Log("Game resumed", LogLevel.Info);
         }
 
+        internal void Command(int who, Tuple<Model.Action, HOTAS> command)
+        {
+            lock (gameObjects)
+            {
+                gameObjects.Players.Single(p => p.ID == who).Act(command);
+            }
+        }
+
+        public void Do(int who, Tuple<Model.Action, PolygonCollision.Vector> command)
+        {
+            gameObjects.Track("player", "MoveReceived");
+            lock (gameObjects)
+            {
+                gameObjects.Players.Single(p => p.ID == who).Act(command);
+            }
+        }
+
         private async void GameLoop()
         {
             // TODO: implement quad-trees for spacial indexing :
@@ -245,8 +265,6 @@ namespace GameObjects
             {
                 GameTime.TotalElapsedSeconds = (float)(DateTime.UtcNow - gameObjects.StartTime).TotalSeconds;
                 
-                string CSVheader = "frame, DeltaTime, UtcNow, JetSpeed, JetPosMag, JetPosX, JetPosY , Source";
-                Logger.Log(CSVheader, LogLevel.CSV);                
 
                 while (gameObjects.GameOn == GameStatus.On)
                 {
@@ -262,24 +280,10 @@ namespace GameObjects
 
                     float dt = (float)(DateTime.UtcNow - gameObjects.StartTime).TotalSeconds;
 
-                    GameTime.DeltaTime = (dt - GameTime.TotalElapsedSeconds);
+                    GameTime.DeltaTime = dt - GameTime.TotalElapsedSeconds;
                     GameTime.TotalElapsedSeconds = dt;
 
-                    try
-                    {
-                        if (GameConfig.loglevels.Contains(LogLevel.CSV))
-                        {
-                            Jet debugged = gameObjects.Players.Single(p => p.Name.ToLower().Contains("player")).Jet;//WPFplayer
-                            string csvLine = $"{gameObjects.frameNum},{GameTime.DeltaTime:F4}, " +
-                                             $"{dt:F4}, {debugged.LastOffset.Magnitude:F4}, " +
-                                             $"{debugged.Pos.Magnitude}, {debugged.Pos.X}, {debugged.Pos.Y}, GameLoop";
-                            Logger.Log(csvLine, LogLevel.CSV);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Log(e, LogLevel.Warning);
-                    }
+                    gameObjects.Track("player", "GameLoop");                   
 
                     lock (gameObjects) 
                     {
