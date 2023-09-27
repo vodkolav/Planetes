@@ -90,7 +90,7 @@ namespace GameObjects.Model
             foreach (Polygon o in j.Body.Parts)
             {
                 PolygonCollisionResult r = Body[0].Collides(o, Speed);
-                if (r.WillIntersect)
+                if (r.Intersect)
                 {
                     return r;
                 }

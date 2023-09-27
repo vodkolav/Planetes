@@ -246,7 +246,7 @@ namespace GameObjects
 
         public void Do(int who, Tuple<Model.Action, PolygonCollision.Vector> command)
         {
-            gameObjects.Track("player", "MoveReceived");
+            //gameObjects.Track("player", "MoveReceived");
             lock (gameObjects)
             {
                 gameObjects.Players.Single(p => p.ID == who).Act(command);
@@ -283,7 +283,7 @@ namespace GameObjects
                     GameTime.DeltaTime = dt - GameTime.TotalElapsedSeconds;
                     GameTime.TotalElapsedSeconds = dt;
 
-                    gameObjects.Track("player", "GameLoop");                   
+                    //gameObjects.Track("player", "GameLoop");                   
 
                     lock (gameObjects) 
                     {

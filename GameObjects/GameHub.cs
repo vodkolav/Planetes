@@ -49,7 +49,10 @@ namespace GameObjects
             {
                 int playerID = _gameServer.Join(Context.ConnectionId, playerInfo);
                 Clients.Client(Context.ConnectionId).JoinedLobby(playerID);
-                Clients.All.UpdateLobby(_gameServer.gameObjects);
+                lock (_gameServer.gameObjects)
+                {
+                    Clients.All.UpdateLobby(_gameServer.gameObjects);
+                }
             }
             catch (InvalidOperationException e)
             {  //TODO: test this JoinFailed scenario

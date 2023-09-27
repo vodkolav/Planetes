@@ -35,7 +35,7 @@ namespace Planetes
         public void FillEllipse(System.Windows.Media.Color c, Circle circ)
         {
             circ = circ.Offseted(ViewPortOffset);
-            G.FillEllipse(new SolidBrush(ConvertColor(c)), circ.Pos.X, circ.Pos.Y, circ.R, circ.R);
+            G.FillEllipse(new SolidBrush(ConvertColor(c)), circ.Pos.X, circ.Pos.Y, circ.R*2, circ.R*2);
         }
 
         public void FillPolygon(System.Windows.Media.Color c, Polygon poly)

@@ -54,7 +54,7 @@ namespace GameObjects.Model
 
             Random rand = new Random();
             Stars = Enumerable.Range(0, amount)
-                                         .Select(i => new Tuple<int, Star>(rand.Next(amount), new Star(new Vector(rand.Next(Size.Width), rand.Next(Size.Height)), 2, Colors.Aquamarine)))
+                                         .Select(i => new Tuple<int, Star>(rand.Next(amount), new Star(new Vector(rand.Next(Size.Width), rand.Next(Size.Height)), 1, Colors.Aquamarine)))
                                          .OrderBy(i => i.Item1)
                                          .Select(i => i.Item2)
                                          .ToList();
@@ -73,14 +73,25 @@ namespace GameObjects.Model
             Vector se = new Vector(Size.Width - b, Size.Height - b);
             Vector sw = new Vector(b, Size.Height - b);
 
-
             Walls.AddRange(Wall.Segmented(nw, ne, wallBrush)); //upper
             Walls.AddRange(Wall.Segmented(ne, se, wallBrush)); //right
             Walls.AddRange(Wall.Segmented(se, sw, wallBrush)); //bottom
             Walls.AddRange(Wall.Segmented(sw, nw, wallBrush)); //left
 
+            int sh = Math.Min(Size.Width, Size.Height) / 10; //shift from corner is 1/10th of map size
+
+            AddDiagonals(sh);
+
+            AddBrackets(sh);
+
+            AddBox(Size / 2, new Size(2*sh, 3*sh));
+
+            //AddSlashWalls(sh);
+        }
+
+        public void AddDiagonals(int sh)
+        {
             //create corner diagonal walls 
-            int sh = Math.Min(Size.Width, Size.Height) / 10; //shift from corner
 
             Vector nww = new Vector(0, 0 + sh);
             Vector nnw = new Vector(0 + sh, 0);
@@ -97,9 +108,6 @@ namespace GameObjects.Model
             Vector ssw = new Vector(0 + sh, Size.Height);
             Vector sww = new Vector(0, Size.Height - sh);
             Walls.Add(new Wall(ssw, sww, wallBrush));
-
-            AddBrackets(sh);
-            //AddSlashWalls(sh);
         }
 
         public void AddSlashWalls(int sh)
@@ -116,7 +124,7 @@ namespace GameObjects.Model
             }
         }
 
-        public void AddBrackets(int sh)
+        public void AddBrackets(int sh, int wallWidth = 20)
         {
             Color wallBrush = Colors.Magenta;
             int b = 0; //border width
@@ -129,30 +137,67 @@ namespace GameObjects.Model
             // |__        __|
             //
             // the corners of brackets are shifted "sh" amount from map corners
+            // and have length brSideLen
 
-            //create edge of screen walls 
             Vector nw = new Vector(b, b);
             Vector ne = new Vector(Size.Width - b, b);
             Vector se = new Vector(Size.Width - b, Size.Height - b);
             Vector sw = new Vector(b, Size.Height - b);
 
-            Vector vertSideLen = new Vector(brSideLen, 0);
-            Vector horzSideLen = new Vector(0,brSideLen);
+            Vector horzSideLen = new Vector(brSideLen,0);
+            Vector vertSideLen = new Vector(0,brSideLen);
+
+            int wwsh = wallWidth / 2;
+            Vector hsh = new Vector(wwsh, 0);
+
+            Vector vsh = new Vector(0, wwsh);
 
             Vector nwsh = new Vector(sh, sh);
             Vector nesh = new Vector(-sh, sh);
 
-            Walls.Add(new Wall(nw + nwsh, nw + nwsh + horzSideLen, wallBrush));
-            Walls.Add(new Wall(nw + nwsh, nw + nwsh + vertSideLen, wallBrush));
+            Walls.Add(new Wall(nw + nwsh - vsh, nw + nwsh + vertSideLen, wallBrush));
+            Walls.Add(new Wall(nw + nwsh - hsh, nw + nwsh + horzSideLen, wallBrush));
 
-            Walls.Add(new Wall(ne + nesh, ne + nesh + horzSideLen, wallBrush));
-            Walls.Add(new Wall(ne + nesh, ne + nesh - vertSideLen, wallBrush));
+            Walls.Add(new Wall(ne + nesh - vsh, ne + nesh + vertSideLen, wallBrush));
+            Walls.Add(new Wall(ne + nesh + hsh, ne + nesh - horzSideLen, wallBrush));
 
-            Walls.Add(new Wall(sw - nesh, sw - nesh - horzSideLen, wallBrush));
-            Walls.Add(new Wall(sw - nesh, sw - nesh + vertSideLen, wallBrush));
+            Walls.Add(new Wall(sw - nesh + vsh, sw - nesh - vertSideLen, wallBrush));
+            Walls.Add(new Wall(sw - nesh - hsh, sw - nesh + horzSideLen, wallBrush));
 
-            Walls.Add(new Wall(se - nwsh, se - nwsh - horzSideLen, wallBrush));
-            Walls.Add(new Wall(se - nwsh, se - nwsh - vertSideLen, wallBrush));
+            Walls.Add(new Wall(se - nwsh + vsh, se - nwsh - vertSideLen, wallBrush));
+            Walls.Add(new Wall(se - nwsh + hsh, se - nwsh - horzSideLen, wallBrush));
+        }
+
+
+        public void AddBox(Vector center, Size size, int wallWidth = 20)
+        {
+            Color wallBrush = Colors.Magenta;
+            int b = 0; //border width
+            int sh = wallWidth/2;
+            Vector hsh = new Vector(sh, 0); 
+            //  =>
+
+            Vector vsh = new Vector(0, sh);
+            //  ||
+            //  \/
+
+            Vector origin = center - size / 2;
+            // Adds a rectangle made of walls to the map 
+            //  _______
+            // |   .   |
+            // |_______|
+            //
+
+            Vector nw = origin;
+            Vector ne = origin + new Vector(size.Width - b, b);
+            Vector se = origin + size;
+            Vector sw = origin + new Vector( b, size.Height - b);
+
+            Walls.Add(new Wall(nw - hsh, ne + hsh, wallBrush, wallWidth)); //north
+            Walls.Add(new Wall(ne - vsh, se + vsh, wallBrush, wallWidth)); //east
+
+            Walls.Add(new Wall(se - hsh, sw - hsh, wallBrush, wallWidth)); //south
+            Walls.Add(new Wall(sw - vsh, nw + vsh, wallBrush, wallWidth)); //west          
         }
     }
 }

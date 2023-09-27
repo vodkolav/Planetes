@@ -191,7 +191,7 @@ namespace GameObjects.Model
 
         public override void HandleCollision(Wall w, PolygonCollisionResult r)
         {
-            Offset(r.MinimumTranslationVector);
+            Offset(r.MinimumTranslationVector * GameConfig.GameSpeed * GameTime.DeltaTime);
             Bounce(r.translationAxis);
         }
 
@@ -211,6 +211,8 @@ namespace GameObjects.Model
 
         public override void Move()
         {
+            GameServer.Instance.gameObjects.Track("player", "Speed0");
+
             if (KeyBrake)
             {
                 Acceleration = -Speed.GetNormalized() * 0.8;
@@ -224,6 +226,8 @@ namespace GameObjects.Model
             Vector deltaV = Acceleration * GameConfig.GameSpeed * Thrust * GameTime.DeltaTime; 
      
             Speed += deltaV * 0.5;
+
+            GameServer.Instance.gameObjects.Track("player", "Speed1");
 
             if (!(BounceNormal is null))
             {
@@ -242,12 +246,16 @@ namespace GameObjects.Model
                 BounceNormal = null;
             }
 
+            GameServer.Instance.gameObjects.Track("player", "Speed3Bounced");
+
             //Physics Police            
 
             if (Speed.Magnitude >= GameConfig.Lightspeed)
             {
                 Speed = Speed.GetNormalized() * GameConfig.Lightspeed;
             }
+
+            GameServer.Instance.gameObjects.Track("player", "Speed4Light");
 
             Vector offset = Speed * GameConfig.GameSpeed * GameTime.DeltaTime;
 

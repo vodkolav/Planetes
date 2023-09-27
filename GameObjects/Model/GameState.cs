@@ -165,6 +165,7 @@ namespace GameObjects.Model
 
         internal void Track(string playerName, string source)
         {
+#if DEBUG
             // This function may be useful to track a specific game object (usually Jet)
             // over time and then plot the data. useful when diagnosing fps issues
             try
@@ -173,21 +174,17 @@ namespace GameObjects.Model
                 {
                     if (source == "header")
                     {
-                        //string CSVheader = "frame, UtcNow, DeltaTime, Source, JetSpeed, JetPosMag, JetPosX, JetPosY";
-                        string CSVheader = "frame, UtcNow, DeltaTime, Source, JetSpeed, JetPosMag, JetBearingX, JetBearingY";
+                        string CSVheader = "frame, UtcNow, DeltaTime, Source, JetSpeedMag, JetSpeedX, JetSpeedY, JetPosMag, JetPosX, JetPosY";
+                        //string CSVheader = "frame, UtcNow, DeltaTime, Source, JetSpeed, JetPosMag, JetBearingX, JetBearingY";
                         Logger.Log(CSVheader, LogLevel.CSV);
                     }
 
                     Jet debugged = Players.Single(p => p.Name.ToLower().Contains(playerName)).Jet; // WPFplayer
-                    //float dt = (float)(DateTime.UtcNow - StartTime).TotalSeconds;
-                    
-                    /*                        string CSVline = $"{frameNum}, {dt:F4}, {GameTime.DeltaTime:F4}, {source}, " +
-                                                             $"{debugged.LastOffset.Magnitude:F4}, {debugged.Pos.Magnitude}, " +
-                                                             $"{debugged.Pos.X}, {debugged.Pos.Y}";*/
 
                     string CSVline = $"{frameNum}, {GameTime.TotalElapsedSeconds:F4}, {GameTime.DeltaTime:F4}, {source}, " +
-                                     $"{debugged.LastOffset.Magnitude:F4}, {debugged.Pos.Magnitude}, " +
-                                     $"{debugged.Bearing.X}, {debugged.Bearing.Y}";
+                                     $"{debugged.Speed.Magnitude:F4}, {debugged.Speed.X:F4},{debugged.Speed.Y:F4}, " +
+                                     $"{debugged.Pos.Magnitude}, {debugged.Pos.X}, {debugged.Pos.Y}";
+                                    // $"{debugged.Bearing.X}, {debugged.Bearing.Y}";
 
                     Logger.Log(CSVline, LogLevel.CSV);
                 }
@@ -196,6 +193,7 @@ namespace GameObjects.Model
             {
                 Logger.Log(e, LogLevel.Warning);
             }
+#endif
         }
     }
 }

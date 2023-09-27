@@ -384,11 +384,12 @@ namespace PlanetesWPF
             { 
                 PolygonCollision.Vector at = FromPoint(e.GetPosition(Visor));
 
+/* debug code : was need to time delay between mouse move and rotation of the jet
                 PolygonCollision.Vector tmp = (at - VisorSize / 2).GetNormalized();
                 string CSVline = $"null , {GameTime.TotalElapsedSeconds:F4}, {GameTime.DeltaTime:F4}, MouseMove, " +
                                  $"null, null, " +
                                  $"{tmp.X}, {tmp.Y}";
-                Logger.Log(CSVline, LogLevel.CSV);
+                Logger.Log(CSVline, LogLevel.CSV);*/
 
                 C.Yoke.Aim(at); 
             }

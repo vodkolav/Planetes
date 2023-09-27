@@ -65,13 +65,13 @@ namespace PlanetesWPF
         public void FillEllipse(Color c, Circle circ)
         {
             circ = circ.Offseted(ViewPortOffset);
-            B.FillEllipseCentered((int)circ.Pos.X, (int)circ.Pos.Y, (int)circ.R / 2, (int)circ.R / 2, c);       
+            B.FillEllipseCentered((int)circ.Pos.X, (int)circ.Pos.Y, (int)circ.R, (int)circ.R, c);
         }
 
         public void FillPolygon(Color c, Polygon poly)
         {
             B.FillPolygon(poly.Offseted(ViewPortOffset).ints, c);
-            B.DrawPolylineAa(poly.Offseted(ViewPortOffset).ints, c);                
+            DrawPolylineAa(B,poly.Offseted(ViewPortOffset).ints, c);                
         }
 
         public void FillRectangle(Color c, Rectangle rect)
@@ -96,7 +96,7 @@ namespace PlanetesWPF
             {
                 int num = points[i];
                 int num2 = points[i + 1];
-                WriteableBitmapExtensions.DrawLineAa(bmp, x, y, num, num2, icol, 2);                
+                WriteableBitmapExtensions.DrawLineAa(bmp, x, y, num, num2, icol, 1);                
                 x = num;
                 y = num2;
             }

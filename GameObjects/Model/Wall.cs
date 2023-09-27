@@ -47,14 +47,14 @@ namespace GameObjects.Model
             {
                 Vector middle = (to + from) / 2;
                 res.AddRange(Segmented(from, middle, color, w));
-                color.R -= 50;
+                color.R -= (byte)GameConfig.TossInt(100); //make segments of slightly different colors 
                 res.AddRange(Segmented(middle, to, color, w));
             }
             else
             {
-                 res.Add(new Wall(from, to, color, w));
+                Vector ovlp = (to - from) * 0.05;
+                 res.Add(new Wall(from - ovlp, to + ovlp, color, w));
             }
-
             return res;
         }
  
