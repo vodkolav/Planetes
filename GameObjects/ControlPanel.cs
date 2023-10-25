@@ -8,7 +8,7 @@ using Action = GameObjects.Model.Action;
 
 namespace GameObjects
 {
-    public enum HOTAS { Up, Down, Left, Right, Shoot, Brake, Nothing, Scuttle}
+    public enum HOTAS { Up, Down, Left, Right, Shoot, Brake, Nothing, Scuttle, GameSpeedUp, GameSpeedDown }
     public class ControlPanel
     {
         private Dictionary<Key, HOTAS> KeyBindings;
@@ -51,6 +51,8 @@ namespace GameObjects
             bindKey(Key.D, HOTAS.Right);
             bindKey(Key.Space, HOTAS.Brake);
             bindKey(Key.L, HOTAS.Scuttle);
+            bindKey(Key.Add, HOTAS.GameSpeedUp);
+            bindKey(Key.Subtract, HOTAS.GameSpeedDown);
         }
 
         public void bindARROWSto()
@@ -96,7 +98,9 @@ namespace GameObjects
 
         public void Aim(Vector argument)
         {
-            if (isWorking && DateTime.UtcNow.Millisecond%5 == 0)
+            //TODO: maybe instead of modulo, measure time since last command sent
+            // should improve crispiness of movement I think
+            if (isWorking && DateTime.UtcNow.Millisecond%7 == 0)
                 Proxy.Invoke("Do", new object[] { PlayerID, new Tuple<Action, Vector>(Action.Aim, argument) });
             // these exceptions appear after waiting too long on a breakpoint. how to fix : https://stackoverflow.com/a/38161578
 

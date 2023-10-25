@@ -21,5 +21,10 @@ namespace PolygonCollision
 
         [JsonIgnore]
         public int Area { get => Width * Height; }
+
+        public override object Clone()
+        {
+            return new Size(X, Y);
+        }
     }
 }

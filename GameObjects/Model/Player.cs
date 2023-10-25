@@ -131,8 +131,30 @@ namespace GameObjects.Model
 
         public virtual void Steer(object argument)
         {
+            if ((HOTAS)argument == HOTAS.GameSpeedUp || (HOTAS)argument == HOTAS.GameSpeedDown)
+                ChangeGameSpeed((HOTAS)argument);
+            else
             if (isAlive)
                 Jet.Press((HOTAS)argument);
+        }
+
+        private void ChangeGameSpeed(HOTAS argument)
+        {
+            switch (argument)
+            {
+                case HOTAS.GameSpeedUp:
+                    {
+                        if (GameConfig.GameSpeed < 10)
+                        GameConfig.GameSpeed += 1;
+                        break;
+                    }
+                case HOTAS.GameSpeedDown:
+                    {
+                        if (GameConfig.GameSpeed > 1)
+                            GameConfig.GameSpeed -= 1;
+                        break;
+                    }
+            }
         }
 
         public virtual void Release(object argument)

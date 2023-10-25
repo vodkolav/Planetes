@@ -174,14 +174,14 @@ namespace GameObjects.Model
                 {
                     if (source == "header")
                     {
-                        string CSVheader = "frame, UtcNow, DeltaTime, Source, JetSpeedMag, JetSpeedX, JetSpeedY, JetPosMag, JetPosX, JetPosY";
+                        string CSVheader = ",frame, UtcNow, DeltaTime, Source, JetSpeedMag, JetSpeedX, JetSpeedY, JetPosMag, JetPosX, JetPosY";
                         //string CSVheader = "frame, UtcNow, DeltaTime, Source, JetSpeed, JetPosMag, JetBearingX, JetBearingY";
                         Logger.Log(CSVheader, LogLevel.CSV);
                     }
 
                     Jet debugged = Players.Single(p => p.Name.ToLower().Contains(playerName)).Jet; // WPFplayer
 
-                    string CSVline = $"{frameNum}, {GameTime.TotalElapsedSeconds:F4}, {GameTime.DeltaTime:F4}, {source}, " +
+                    string CSVline = $",{frameNum}, {GameTime.TotalElapsedSeconds:F4}, {GameTime.DeltaTime:F4}, {source}, " +
                                      $"{debugged.Speed.Magnitude:F4}, {debugged.Speed.X:F4},{debugged.Speed.Y:F4}, " +
                                      $"{debugged.Pos.Magnitude}, {debugged.Pos.X}, {debugged.Pos.Y}";
                                     // $"{debugged.Bearing.X}, {debugged.Bearing.Y}";

@@ -328,36 +328,36 @@ namespace GameObjects.Model
         {
             switch (argument)
             {
-                case (HOTAS.Up):
-                {
-                    Acceleration.Y = -1;
-                    break;
-                }
-                case (HOTAS.Down):
-                {
-                    Acceleration.Y = 1;
-                    break;
-                }
-                case (HOTAS.Left):
-                {
-                    Acceleration.X = -1;
-                    break;
-                }
-                case (HOTAS.Right):
-                {
-                    Acceleration.X = 1;
-                    break;
-                }
-                case (HOTAS.Shoot):
-                {
-                    KeyShoot = true;
-                    break;
-                }
+                case HOTAS.Up:
+                    {
+                        Acceleration.Y = -1;
+                        break;
+                    }
+                case HOTAS.Down:
+                    {
+                        Acceleration.Y = 1;
+                        break;
+                    }
+                case HOTAS.Left:
+                    {
+                        Acceleration.X = -1;
+                        break;
+                    }
+                case HOTAS.Right:
+                    {
+                        Acceleration.X = 1;
+                        break;
+                    }
+                case HOTAS.Shoot:
+                    {
+                        KeyShoot = true;
+                        break;
+                    }
                 case HOTAS.Brake:
-                {
-                    KeyBrake = true;
-                    break;
-                }
+                    {
+                        KeyBrake = true;
+                        break;
+                    }
                 case HOTAS.Scuttle:
                     {
                         Bullet TheLastAmmunition = new Bullet();

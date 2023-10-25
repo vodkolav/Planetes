@@ -9,6 +9,12 @@ namespace PolygonCollision
 
         public float Y { get; set; }
 
+        public Vector(double x, double y)
+        {
+            X = (float)x;
+            Y = (float)y;
+        }
+
         public Vector(float x, float y)
         {
             X = x;
@@ -253,7 +259,7 @@ namespace PolygonCollision
             return false;
         }
 
-        public object Clone()
+        public virtual object Clone()
         {
             return new Vector(X, Y);
         }
@@ -267,6 +273,17 @@ namespace PolygonCollision
         {
             X += v.X;
             Y += v.Y;
+        }
+
+        /// <summary>
+        /// Create a new vector from polar coordinates R, Theta
+        /// </summary>
+        /// <param name="r"></param>
+        /// <param name="th"></param>
+        /// <returns></returns>
+        public static Vector FromPolar(float r, float th)
+        {
+            return new Vector(r * Math.Cos(th), r * Math.Sin(th));
         }
     }
 }
