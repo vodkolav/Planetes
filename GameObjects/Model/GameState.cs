@@ -105,17 +105,20 @@ namespace GameObjects.Model
             }
 
             //check for collision of Bullets Astroids and Jets with Walls
-            foreach (Wall w in World.Walls)
+            foreach (ICollideable e in Entities)
             {
-                foreach (ICollideable e in Entities)
+                List<PolygonCollisionResult> collisions = new List<PolygonCollisionResult>();
+                foreach (Wall w in World.Walls)
                 {
                     r = e.Collides(w);
                     if (r.Intersect)
                     {
+                        collisions.Add(r);
                         e.HandleCollision(w, r);
                         break;
                     }
                 }
+                e.Collisions = collisions;
             }
 
             //check for collision of Bullets and Astroids with Jets

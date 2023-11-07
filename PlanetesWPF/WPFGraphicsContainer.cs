@@ -70,8 +70,9 @@ namespace PlanetesWPF
 
         public void FillPolygon(Color c, Polygon poly)
         {
+            
+            DrawPolylineAa(B,poly.Offseted(ViewPortOffset).ints, c);
             B.FillPolygon(poly.Offseted(ViewPortOffset).ints, c);
-            DrawPolylineAa(B,poly.Offseted(ViewPortOffset).ints, c);                
         }
 
         public void FillRectangle(Color c, Rectangle rect)
@@ -96,7 +97,7 @@ namespace PlanetesWPF
             {
                 int num = points[i];
                 int num2 = points[i + 1];
-                WriteableBitmapExtensions.DrawLineAa(bmp, x, y, num, num2, icol, 1);                
+                WriteableBitmapExtensions.DrawLineAa(bmp, x, y, num, num2, icol, 2);                
                 x = num;
                 y = num2;
             }

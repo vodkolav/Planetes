@@ -77,7 +77,7 @@ namespace GameObjects.Model
 
         public bool KeyBrake { get; set; }
 
-        public Vector BounceNormal { get; set; }
+        public PolygonCollisionResult? BounceNormal { get; set; }
 
         public float Cooldown { get; set; }
 
@@ -99,22 +99,22 @@ namespace GameObjects.Model
         {
             double l = GameConfig.JetScale;
             _body = new Corpus();
-            Polygon hull = new Polygon(7);
+            Polygon hull = new Polygon(6);
             hull.AddVertex(new Vector(-10,  10) * l);
             hull.AddVertex(new Vector(-20, -30) * l);
             hull.AddVertex(new Vector(-10, -40) * l);
             hull.AddVertex(new Vector( 10, -40) * l);
             hull.AddVertex(new Vector( 20, -30) * l);
             hull.AddVertex(new Vector( 10,  10) * l);
-            hull.AddVertex(new Vector(-10,  10) * l);
+            hull.Offset(new Vector(0, 10) * l);
             _body.Add(hull);
 
-            Polygon cockpit = new Polygon(5);
+            Polygon cockpit = new Polygon(4);
             cockpit.AddVertex(new Vector(-10, 10) * l);
             cockpit.AddVertex(new Vector( 10, 10) * l);
-            cockpit.AddVertex(new Vector( 05, 25) * l);
-            cockpit.AddVertex(new Vector(-05, 25) * l);
-            cockpit.AddVertex(new Vector(-10, 10) * l);
+            cockpit.AddVertex(new Vector( 05, 20) * l);
+            cockpit.AddVertex(new Vector(-05, 20) * l);
+            cockpit.Offset(new Vector(0, 10) * l);
             _body.Add(cockpit);
 
             Orientation = new Vector(0, 1);
@@ -123,18 +123,16 @@ namespace GameObjects.Model
         public void ConstructOld()
         {
             double l = GameConfig.JetScale;
-            Polygon hull = new Polygon(5);
+            Polygon hull = new Polygon(4);
             hull.AddVertex(new Vector(0, 0) * l);
             hull.AddVertex(new Vector(50, 10) * l);//
             hull.AddVertex(new Vector(50, 30) * l);//
             hull.AddVertex(new Vector(0, 40) * l);
-            hull.AddVertex(new Vector(0, 0) * l);
 
-            Polygon cockpit = new Polygon(5);
+            Polygon cockpit = new Polygon(4);
             cockpit.AddVertex(new Vector(50, 10) * l);//
             cockpit.AddVertex(new Vector(80, 20) * l);
             cockpit.AddVertex(new Vector(50, 30) * l);//
-            cockpit.AddVertex(new Vector(50, 10) * l);
             Body.Add(cockpit);
 
             Orientation = new Vector(1,0);
@@ -192,7 +190,7 @@ namespace GameObjects.Model
         public override void HandleCollision(Wall w, PolygonCollisionResult r)
         {
             Offset(r.MinimumTranslationVector * GameConfig.GameSpeed * GameTime.DeltaTime);
-            Bounce(r.translationAxis);
+            Bounce(r);
         }
 
         public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)
@@ -229,7 +227,7 @@ namespace GameObjects.Model
 
             GameServer.Instance.gameObjects.Track("player", "Speed1");
 
-            if (!(BounceNormal is null))
+            if (BounceNormal.HasValue)
             {
                 // TODO find out why it bounces strangely (too far)
                 // Probably need to do "* GameConfig.GameSpeed * GameTime.DeltaTime"
@@ -237,11 +235,11 @@ namespace GameObjects.Model
 
                 Vector oldspeed = (Vector)Speed.Clone();
 
-                Speed -= 2 * Speed.Dot(BounceNormal) * BounceNormal;
+                Speed -= 2 * Speed.Dot(BounceNormal.Value.translationAxis) * BounceNormal.Value.translationAxis;
 
                 if (Speed.Magnitude != oldspeed.Magnitude && Owner.Name.ToLower().Contains("player"))
                 {
-                    Logger.Log($"Speed.Magnitude: {Speed.Magnitude}| oldspeed.Magnitude: {oldspeed.Magnitude}| GameConfig.Lightspeed: {GameConfig.Lightspeed}", LogLevel.Debug);
+                    Logger.Log($"Speed.Magnitude: {Speed.Magnitude}| oldspeed.Magnitude: {oldspeed.Magnitude}| GameConfig.Lightspeed: {GameConfig.Lightspeed}", LogLevel.Warning);
                 }
                 BounceNormal = null;
             }
@@ -270,17 +268,42 @@ namespace GameObjects.Model
             Owner.viewPort.Update();            
         }
 
-        public void Bounce(Vector normal)
+        public void Bounce(PolygonCollisionResult normal)
         {
-            BounceNormal = normal.GetNormalized();
+            BounceNormal = normal;
         }
-        
+
         public override void Draw()
         {
             //maybe this line will still be needed for adjusting ofset on client before drawing
             //Offset(LastOffset * GameConfig.GameSpeed  * GameTime.DeltaTime);
             Hull.Draw(Color);
             Cockpit.Draw(Colors.Gray);
+#if DEBUG
+            DebugDraw();
+#endif
+        }
+
+        /// <summary>
+        /// Draw additional figures on canvas, which help debugging at runtime
+        /// </summary>
+        public void DebugDraw()        
+        { 
+            new Circle(Pos,1).Draw(Colors.Black);
+            new Ray(Pos, - Speed * 5, 1).Draw(Colors.Yellow);
+            /*if (!(BounceNormal is null))
+            {*/
+            if (Collisions.Count > 1 && Owner.Name.ToLower().Contains("player"))
+            {
+                Logger.Log($"{Owner.Name} collided {Collisions.Count} walls",LogLevel.Debug);
+            }
+                foreach (PolygonCollisionResult result in Collisions)
+                {
+
+                    new Ray(Pos, result.translationAxis * 10, 1).Draw(Colors.Black);
+                    result.collider.Draw(Colors.Yellow);
+                }
+                //BounceNormal.Value.collider.Draw(Colors.Yellow);            
         }
 
         public override string ToString()
@@ -303,6 +326,8 @@ namespace GameObjects.Model
             if (Health <= hitter.Power)
                 Die(hitter);                
             Health -= hitter.Power;
+            // TODO: implement collision influence on collidees speeds:
+            // Speed += hitter.Speed * 0.1;
         }
 
         private void Die(ICollideable hitter)

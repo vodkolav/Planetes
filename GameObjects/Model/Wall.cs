@@ -36,13 +36,12 @@ namespace GameObjects.Model
             Vector DN = new Vector(0, wallWidth / 2).Rotated(-alp);
 
             //Vector shift = width / 2 * new Vector((float)(Math.Cos(Math.PI / 2.0 - alp)), (float)(-Math.Sin(Math.PI / 2.0 - alp)));
-            Polygon p = new Polygon(5);
+            Polygon p = new Polygon(4);
 
             p.AddVertex(from + UP);
             p.AddVertex(to + UP);
             p.AddVertex(to + DN);
             p.AddVertex(from + DN);
-            p.AddVertex(from + UP);           
 
             return new Wall(p, color);              
 
@@ -67,12 +66,11 @@ namespace GameObjects.Model
             Size halfSizeDn = (Size)halfSize.Clone();
             halfSizeDn.Height = -halfSizeDn.Height;
 
-            Polygon P = new Polygon(5);
+            Polygon P = new Polygon(4);
             P.AddVertex(origin - halfSize);
             P.AddVertex(origin + halfSizeDn);
             P.AddVertex(origin + halfSize);
             P.AddVertex(origin - halfSizeDn);
-            P.AddVertex(origin - halfSize);
             return new Wall(P, color);
         }
 
@@ -91,7 +89,7 @@ namespace GameObjects.Model
             //  /  \
             // /____\
 
-            Polygon res = new Polygon(4);
+            Polygon res = new Polygon(3);
             float r = size.X;
 
             for (int i = 0; i <= 2; i++)
@@ -101,7 +99,6 @@ namespace GameObjects.Model
                 res.AddVertex(vtx);
                 //Walls.Add(new Wall(f, t, wallBrush, (int)w.Magnitude));
             }
-            res.AddVertex((Vector)res.Vertices[0].Clone()); // TODO: this is horrendous. I dont have to need to close these polygons manually every time
 
             return new Wall(res,color);
         }

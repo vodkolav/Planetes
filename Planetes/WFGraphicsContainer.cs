@@ -2,6 +2,7 @@
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Planetes
@@ -41,7 +42,7 @@ namespace Planetes
         public void FillPolygon(System.Windows.Media.Color c, Polygon poly)
         {
             PointF[] PointFs = poly.Offseted(ViewPortOffset).Vertices.ConvertAll(new Converter<Vector, PointF>(Vector2PointF)).ToArray();
-            G.FillPolygon(new SolidBrush(ConvertColor(c)), PointFs);
+            G.FillPolygon(new SolidBrush(ConvertColor(c)), PointFs.Append(PointFs[0]).ToArray()); //append first vertex of the polygon to close it.
         }
 
         public void FillRectangle(System.Windows.Media.Color c, PolygonCollision.Rectangle rect)

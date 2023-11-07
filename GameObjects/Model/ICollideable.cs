@@ -63,6 +63,11 @@ namespace GameObjects.Model
 
         public virtual int Power { get; internal set; } = 0;
 
+        /// <summary>
+        /// Not yet sure what these are for, but might be useful going further
+        /// </summary>
+        public List<PolygonCollisionResult> Collisions { get; set; } = new List<PolygonCollisionResult>();
+
         public PolygonCollisionResult Collides(Map WorldEdge)
         {
             //Object is out of world bounds
