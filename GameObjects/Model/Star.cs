@@ -7,6 +7,9 @@ namespace GameObjects.Model
     [JsonObject(IsReference = true)]
     public class Star 
     {
+        //TODO: Make stars with different colors:
+        // http://www.vendian.org/mncharity/dir3/starcolor/
+
         public Circle Body { get; set; }    
         public Color Color { get; set; }
 

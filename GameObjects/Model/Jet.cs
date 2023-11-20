@@ -207,7 +207,7 @@ namespace GameObjects.Model
             Speed.Y = 0;
         }
 
-        public override void Move()
+        public override void Move(float DeltaTime)
         {
             GameServer.Instance.gameObjects.Track("player", "Speed0");
 
@@ -221,7 +221,7 @@ namespace GameObjects.Model
                 Logger.Log("speed nan", LogLevel.Debug);
             }
 
-            Vector deltaV = Acceleration * GameConfig.GameSpeed * Thrust * GameTime.DeltaTime; 
+            Vector deltaV = Acceleration * GameConfig.GameSpeed * Thrust * DeltaTime; 
      
             Speed += deltaV * 0.5;
 
@@ -255,7 +255,7 @@ namespace GameObjects.Model
 
             GameServer.Instance.gameObjects.Track("player", "Speed4Light");
 
-            Vector offset = Speed * GameConfig.GameSpeed * GameTime.DeltaTime;
+            Vector offset = Speed * GameConfig.GameSpeed * DeltaTime;
 
             /*if (GameTime.DeltaTime == 0.000000f) // TODO: find WTF this happens
             {
@@ -265,7 +265,6 @@ namespace GameObjects.Model
             Offset(offset);
 
 
-            Owner.viewPort.Update();            
         }
 
         public void Bounce(PolygonCollisionResult normal)

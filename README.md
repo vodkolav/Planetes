@@ -4,11 +4,12 @@ Spaceships dogfight game
 ![screenshot](game.gif)
 
 Features: 
- - Ships move according to Kinematics  
+ - Kinematic movement  
  - Ships bounce from walls and other obstacles
  - Multiplayer through Lan
  - Bots
  - World beyond screen and viewport
+ - Matches (only FFA for now)
 
 Goals: 
  - Kill all enemies
@@ -20,11 +21,13 @@ Goals:
 Controls:
  - Steer with WASD
  - Aim and shoot with mouse  
- - Hold R key to record game as GIF
+ - Hold R key to record a short fragment of a game as GIF  
+ - L to scuttle ship (when you're hopelessly stuck)  
+ - Num+ and Num- to increase/decrease game speed  
 
 Planned:
- - Actual matches with rules ( kills, deaths, respawns, winners etc)
  - trajectory prediction 
  - harpoon 
+ - missiles  
  - ship-to-ship collisions	
  - gravity field

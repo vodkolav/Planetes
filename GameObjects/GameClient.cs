@@ -200,10 +200,11 @@ namespace GameObjects
         public virtual void Start()
         {
             Logger.Log("C.PlayerId: " + PlayerId, LogLevel.Debug);
-            Logger.Log("ID: " + Me.ID + " |Name: " + Me.Name + " |Coonection: "  + Me.ConnectionID , LogLevel.Debug);
+            Logger.Log("ID: " + Me.ID + " |Name: " + Me.Name + " |Connection: "  + Me.ConnectionID , LogLevel.Debug);
             Yoke.bindWASD();
             Yoke.bindMouse();
             UI.Start();
+            ClientTime.StartTime = gameObjects.StartTime;
         }
 
         public void Draw()
@@ -212,6 +213,7 @@ namespace GameObjects
             //Logger.Log("Me.Pos " + Me.Jet.Pos + " |VP: " + Me.viewPort, LogLevel.Status);
             //Logger.Log("drawing frame " + gameObjects.frameNum, LogLevel.Status);
 
+            ClientTime.Tick();
 
             if (LastDrawnFrame >= gameObjects.frameNum)
             {
@@ -224,6 +226,10 @@ namespace GameObjects
                 {
                     LastDrawnFrame = gameObjects.frameNum;
                     gameObjects.Track("player", "Draw");
+
+                    //TODO: test if this improves smoothness of rendering
+                    //Me.Jet.Move(ClientTime.DeltaTime*0.7f);//*0.5f
+                    //Me.Jet.upToDate = false;
 
                     DrawingContext.GraphicsContainer.ViewPortOffset = -Me.viewPort.Origin;
 
@@ -242,6 +248,8 @@ namespace GameObjects
 
                     foreach (ICollideable j in gameObjects.Entities.Where(e => Me.viewPort.Collides(e).Intersect))
                     {
+                       // j.Move(ClientTime.DeltaTime);
+                       // j.upToDate = false;
                         j.Draw();
                     }
                 }

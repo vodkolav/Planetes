@@ -20,10 +20,10 @@ namespace GameObjects.Model
 
         public Vector velocity { get; set; }
 
-        [JsonIgnore]
         public Player P { get; set; }
 
-        public Vector Pos { get; set; }
+        [JsonIgnore]
+        public Vector Pos { get { return P.Jet.Pos; } }
 
         public Size Size { get; set; }                
         public override string ToString()
@@ -55,13 +55,7 @@ namespace GameObjects.Model
         {
             velocity = new Vector(0,0);
             P = player;
-            Pos = P.Jet.Pos;                 
             Size = new Size(800, 600); //? 
-        }
-
-        internal void Update()
-        {
-            Pos = P.Jet.Pos;
         }
     }
 }

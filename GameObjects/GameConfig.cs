@@ -17,21 +17,21 @@ namespace GameObjects
 
         public static float starsDensity { get => 1.0f/1500;}
 
-        public static int KillsGoal { get { return 1; } }
+        public static int KillsGoal { get { return 10; } }
 
-        public static float GameSpeed => 7.0f;
+        public static float GameSpeed { get; set; } = 5.0f;
         
-        public static double JetScale => 0.6;
+        public static double JetScale => 0.8;
 
         public static float Lightspeed { get { return 30 ; } }
 
-        public static int bulletSpeed { get { return 80; } }
+        public static int bulletSpeed { get { return 100; } }
 
-        public static float Cooldown { get { return 0.1f; } }
-
+        public static float Cooldown { get { return 0.6f; } }
+        
         public static bool EnableAstroids { get { return true; } }
 
-        public static float AsteroidTimeout { get { return 100; } }
+        public static float AsteroidTimeout { get { return 1000; } }
 
         public static float  Thrust { get { return 5f; } }
 

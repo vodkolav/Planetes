@@ -118,9 +118,9 @@ namespace GameObjects.Model
                 isAlive = false;
         }
 
-        public override void Move()
+        public override void Move(float DeltaTime)
         {
-            Offset(Speed * GameConfig.GameSpeed * GameTime.DeltaTime);//*GameTime.DeltaTime);
+            Offset(Speed * GameConfig.GameSpeed * DeltaTime);//*GameTime.DeltaTime);
         }
 
         private void Offset(Vector by)

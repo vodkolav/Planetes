@@ -15,6 +15,7 @@ namespace GameObjects.Model
         public bool Paused { get; set; } // TODO: allow players to pause game 
 
         public DateTime StartTime { get; set; }
+
         public int frameNum { get; set; }
 
         public List<Player> Players { get; set; }
@@ -68,7 +69,8 @@ namespace GameObjects.Model
         public void Start()
         {
             GameOn = GameStatus.On;
-            StartTime = DateTime.UtcNow;
+            GameTime.StartTime = DateTime.UtcNow;
+            StartTime = GameTime.StartTime;
         }
 
         public void Frame()
@@ -89,7 +91,7 @@ namespace GameObjects.Model
 
             foreach (ICollideable e in Entities)
             {
-                e.Move();
+                e.Move(GameTime.DeltaTime);
                 e.upToDate = false;
             }
 

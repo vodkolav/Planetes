@@ -113,7 +113,7 @@ namespace GameObjects.Model
             return Pos.Dist(other.Pos);
         }
 
-        public abstract void Move();
+        public abstract void Move(float DeltaTime);
 
         public abstract void Draw();
 

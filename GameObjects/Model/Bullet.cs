@@ -91,9 +91,9 @@ namespace GameObjects.Model
             }
         }
 
-        public override void Move()
+        public override void Move(float DeltaTime)
         { 
-            Offset(Speed * GameConfig.GameSpeed * GameTime.DeltaTime );
+            Offset(Speed * GameConfig.GameSpeed * DeltaTime );
         }
 
         public void Offset(Vector by)

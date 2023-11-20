@@ -19,7 +19,7 @@ namespace GameObjects
         protected List<HOTAS> directions = new List<HOTAS> { HOTAS.Up, HOTAS.Down };
         protected Jet Jet { get { return Me.Jet; } }
 
-        public TimeSpan ReactionInterval { get; private set; } = TimeSpan.FromSeconds(1);
+        public TimeSpan ReactionInterval { get; private set; } = TimeSpan.FromSeconds(0.01);
 
         public Bot() : base(new DummyPlug())
         {
@@ -106,9 +106,9 @@ namespace GameObjects
             Yoke.Release(h);
         }
 
-        public void Aim(Vector at)
+        public void Aim(Vector WorldCoordinate)
         {
-            Yoke.Aim(at);
+            Yoke.Aim(WorldCoordinate - Me.viewPort.Origin);
         }
 
         private void BotLoop()
@@ -116,6 +116,7 @@ namespace GameObjects
             try
             {
                 DateTime dt;// maybe replace this with stopwatch
+                DateTime dt2;
                 TimeSpan tdiff;
                 memory = new Dictionary<string, object>();
                 Prepare();
@@ -132,10 +133,12 @@ namespace GameObjects
                             FrameReact();
                         }
                     }
-                    tdiff = DateTime.UtcNow - dt;
-                    if ((ReactionInterval - tdiff) > TimeSpan.Zero)
+                    dt2 = DateTime.UtcNow;
+                    tdiff = dt2 - dt;
+                    if ((ReactionInterval - tdiff).Duration() > TimeSpan.Zero)
                     {
-                        Thread.Sleep(ReactionInterval - tdiff);//this is bad. There should be timer instead
+                        TimeSpan toSleep = (ReactionInterval - tdiff).Duration();
+                        Thread.Sleep(toSleep);//this is bad. There should be timer instead
                     }
                 }
                 Logger.Log(Me.Name + " BOT IS DISENGAGED", LogLevel.Info);
@@ -257,6 +260,7 @@ namespace GameObjects
                 Player EnemyClosest = ClosestEnemy;
                 if (EnemyClosest != null)
                 {
+                    Logger.Log($"aiming at {EnemyClosest.Name} at Pos : ${EnemyClosest.Jet.Pos} ", LogLevel.Status);
                     Aim(EnemyClosest.Jet.Pos);
                     if (Jet.Pos.Y < EnemyClosest.Jet.Pos.Y - 50)
                     {

@@ -17,6 +17,8 @@ namespace GameObjects
 
         private HOTAS LastPress { get; set; } = HOTAS.Nothing;
 
+        private float LastAimed { get; set; } = 0f;
+
         private int PlayerID { get; set; }
 
         private IHubProxy Proxy { get; set; }
@@ -96,14 +98,13 @@ namespace GameObjects
                 Proxy.Invoke("Do", new object[] { PlayerID, new Tuple<Action, Vector>(instruction, argument) });
         }
 
-        public void Aim(Vector argument)
+        public void Aim(Vector ScreenCoordinate)
         {
-            //TODO: maybe instead of modulo, measure time since last command sent
-            // should improve crispiness of movement I think
-            if (isWorking && DateTime.UtcNow.Millisecond%7 == 0)
-                Proxy.Invoke("Do", new object[] { PlayerID, new Tuple<Action, Vector>(Action.Aim, argument) });
-            // these exceptions appear after waiting too long on a breakpoint. how to fix : https://stackoverflow.com/a/38161578
-
+            if (LastAimed + 0.05 < GameTime.TotalElapsedSeconds)
+            {
+                Do(Action.Aim, ScreenCoordinate);               
+                LastAimed = GameTime.TotalElapsedSeconds;
+            }
         }
 
         public void Press(int key)

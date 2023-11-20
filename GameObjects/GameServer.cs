@@ -253,7 +253,7 @@ namespace GameObjects
             }
         }
 
-        private async void GameLoop()
+        private void GameLoop()
         {
             // TODO: implement quad-trees for spacial indexing :
             // https://badecho.com/index.php/2023/01/14/fast-simple-quadtree/
@@ -261,10 +261,14 @@ namespace GameObjects
             // TODO: tweak SignalR performance:
             //https://learn.microsoft.com/en-us/aspnet/signalr/overview/performance/signalr-performance
             //https://learn.microsoft.com/en-us/aspnet/signalr/overview/getting-started/tutorial-high-frequency-realtime-with-signalr
+
+            //TODO: read up on how to improve game loop and rendering stability: 
+            // https://gafferongames.com/post/fix_your_timestep/
+
             try
             {
-                GameTime.TotalElapsedSeconds = (float)(DateTime.UtcNow - gameObjects.StartTime).TotalSeconds;
-                
+                GameTime.Tick();
+                float lastUpdate = 0f;
 
                 while (gameObjects.GameOn == GameStatus.On)
                 {
@@ -272,18 +276,22 @@ namespace GameObjects
 
                     if (_shutdownEvent.WaitOne(0))
                         break;
+                    GameTime.Tick();
 
-                    if (gameObjects.frameNum % 3 == 0) //for performance - send only every 4th frame to the clients
+                    // We shouldn't send clients each an every frame, as it clogs the network.
+                    // instead - we only send model updates every 16 microseconds.
+                    float updateRate = 0.016f;  
+                    
+                    if (lastUpdate + updateRate < GameTime.TotalElapsedSeconds)
                     {
-                        await hubContext.Clients.All.UpdateModel(gameObjects);
+                        lock (gameObjects)
+                        {
+                            hubContext.Clients.All.UpdateModel(gameObjects);
+                            lastUpdate = GameTime.TotalElapsedSeconds;
+                        }
                     }
 
-                    float dt = (float)(DateTime.UtcNow - gameObjects.StartTime).TotalSeconds;
-
-                    GameTime.DeltaTime = dt - GameTime.TotalElapsedSeconds;
-                    GameTime.TotalElapsedSeconds = dt;
-
-                    //gameObjects.Track("player", "GameLoop");                   
+                    //gameObjects.Track("player", "GameLoop");
 
                     lock (gameObjects) 
                     {
