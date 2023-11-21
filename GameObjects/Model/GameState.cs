@@ -8,7 +8,7 @@ namespace GameObjects.Model
 {
     public enum GameStatus {Ready, Lobby, Cancelled, On, Over }
 
-    public class GameState
+    public class GameState : ITrackable
     {       
         public GameStatus GameOn { get; set; } = GameStatus.Ready;
 

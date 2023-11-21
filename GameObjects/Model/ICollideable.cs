@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace GameObjects.Model
 {
     [JsonObject(IsReference = true)]
-    public abstract class ICollideable //TODO: make this a gameEntity : ICollidable class 
+    public abstract class ICollideable : ITrackable //TODO: make this a gameEntity : ICollidable class 
     {
         public ICollideable()
         {
