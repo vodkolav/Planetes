@@ -52,6 +52,7 @@ namespace GameObjects
 
     public class Logger
     {
+        Tracker tracker;
 
         private BlockingCollection<LogMsg> messages;
         private Thread T;
@@ -74,7 +75,13 @@ namespace GameObjects
             }
         }
 
-        // loglevels moved to config
+        public static Tracker Tracker
+        {
+            get
+            {
+                return Instance.tracker;
+            }
+        }
 
         public Logger()
         {
@@ -87,6 +94,9 @@ namespace GameObjects
             output = Console.Out;
             _trace_interceptor = new LogWriter("wtf.txt");
             T.Start();
+
+            tracker = new Tracker();
+            tracker.Configure();
 
             string text = "\n";
             GameConfig.loglevels.ForEach( ll => text += ll.ToString() + "\n");

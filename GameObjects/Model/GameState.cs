@@ -6,10 +6,10 @@ using PolygonCollision;
 
 namespace GameObjects.Model
 {
-    public enum GameStatus {Ready, Lobby, Cancelled, On, Over }
+    public enum GameStatus { Ready, Lobby, Cancelled, On, Over }
 
     public class GameState : ITrackable
-    {       
+    {
         public GameStatus GameOn { get; set; } = GameStatus.Ready;
 
         public bool Paused { get; set; } // TODO: allow players to pause game 
@@ -39,7 +39,7 @@ namespace GameObjects.Model
             // don't remove! even though it has 0 references, this function is essential
             // We need to serialize the World only in lobby phase. 
             // Since the worlds is static, once the game has started, no need to send World to clients anymore
-            return GameOn!= GameStatus.On ;
+            return GameOn != GameStatus.On;
         }
 
         public Resources ModelStore { get; set; }
@@ -75,7 +75,7 @@ namespace GameObjects.Model
 
         public void Frame()
         {
-           // if (Paused) return; //TODO: Note: when game is paused, the time still goes on. need to take it into consideration as well 
+            // if (Paused) return; //TODO: Note: when game is paused, the time still goes on. need to take it into consideration as well 
             frameNum++;
 
             /*   if (frameNum >10) // TODO: understand how to properly calculate FPS
@@ -138,7 +138,7 @@ namespace GameObjects.Model
                     }
                 }
             }
-            
+
             //check for collision of Bullets with Astroids
             foreach (Astroid a in Entities.OfType<Astroid>())
             {
@@ -170,35 +170,7 @@ namespace GameObjects.Model
 
         internal void Track(string playerName, string source)
         {
-#if DEBUG
-            // This function may be useful to track a specific game object (usually Jet)
-            // over time and then plot the data. useful when diagnosing fps issues
-            try
-            {
-                if (GameConfig.loglevels.Contains(LogLevel.CSV))
-                {
-                    if (source == "header")
-                    {
-                        string CSVheader = ",frame, UtcNow, DeltaTime, Source, JetSpeedMag, JetSpeedX, JetSpeedY, JetPosMag, JetPosX, JetPosY";
-                        //string CSVheader = "frame, UtcNow, DeltaTime, Source, JetSpeed, JetPosMag, JetBearingX, JetBearingY";
-                        Logger.Log(CSVheader, LogLevel.CSV);
-                    }
-
-                    Jet debugged = Players.Single(p => p.Name.ToLower().Contains(playerName)).Jet; // WPFplayer
-
-                    string CSVline = $",{frameNum}, {GameTime.TotalElapsedSeconds:F4}, {GameTime.DeltaTime:F4}, {source}, " +
-                                     $"{debugged.Speed.Magnitude:F4}, {debugged.Speed.X:F4},{debugged.Speed.Y:F4}, " +
-                                     $"{debugged.Pos.Magnitude}, {debugged.Pos.X}, {debugged.Pos.Y}";
-                                    // $"{debugged.Bearing.X}, {debugged.Bearing.Y}";
-
-                    Logger.Log(CSVline, LogLevel.CSV);
-                }
-            }
-            catch (Exception e)
-            {
-                Logger.Log(e, LogLevel.Warning);
-            }
-#endif
+            Logger.Tracker.Track(this, playerName, source);
         }
     }
 }
