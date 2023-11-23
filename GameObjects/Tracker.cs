@@ -89,14 +89,14 @@ namespace GameObjects
 
                 new ColSpec("source", () => $"{Tag}"),
 
-                new ColSpec("player", () => $"{P.Name}"),
+             //   new ColSpec("player", () => $"{P.Name}"),
 
 
-                new ColSpec("JetSpeedMag", () => $"{J.Speed.Magnitude:F4}"),
+             //   new ColSpec("JetSpeedMag", () => $"{J.Speed.Magnitude:F4}"),
 
-                new ColSpec("JetSpeedX", () => $"{J.Speed.X:F4}"),
+             //   new ColSpec("JetSpeedX", () => $"{J.Speed.X:F4}"),
 
-                new ColSpec("JetSpeedY", () => $"{J.Speed.Y:F4}"),
+             //   new ColSpec("JetSpeedY", () => $"{J.Speed.Y:F4}"),
 
                 new ColSpec("JetPosMag", () => $"{J.Pos.Magnitude}"),
 

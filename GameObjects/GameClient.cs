@@ -213,7 +213,6 @@ namespace GameObjects
             //Logger.Log("Me.Pos " + Me.Jet.Pos + " |VP: " + Me.viewPort, LogLevel.Status);
             //Logger.Log("drawing frame " + gameObjects.frameNum, LogLevel.Status);
 
-            ClientTime.Tick();
 
             if (LastDrawnFrame >= gameObjects.frameNum)
             {
@@ -224,14 +223,22 @@ namespace GameObjects
             {
                 try
                 {
+                    ClientTime.Tick();
                     LastDrawnFrame = gameObjects.frameNum;
                     gameObjects.Track("player", "Draw");
+           
+                    //TODO: thoroughly test whether this Client-side prediction improves smoothness of movement.
+                    // currently it seems that it makes movement jerky.
+                    // on the other hand, judjing from the tracking data, the predicted position of jet is more 
+                    // faithful to the actual position the jet is supposed to be at a given moment.
+                    // More research required.
 
-                    //TODO: test if this improves smoothness of rendering
-                    //Me.Jet.Move(ClientTime.DeltaTime*0.7f);//*0.5f
+                    //Me.Jet.Move(ClientTime.DeltaTime);//*0.5f
                     //Me.Jet.upToDate = false;
 
                     DrawingContext.GraphicsContainer.ViewPortOffset = -Me.viewPort.Origin;
+                    gameObjects.Track("player", "CSP");
+
 
                     World.Draw();
 

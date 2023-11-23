@@ -209,7 +209,7 @@ namespace GameObjects.Model
 
         public override void Move(float DeltaTime)
         {
-            GameServer.Instance.gameObjects.Track("player", "Speed0");
+            //GameServer.Instance.gameObjects.Track("player", "Speed0");
 
             if (KeyBrake)
             {
@@ -225,12 +225,10 @@ namespace GameObjects.Model
      
             Speed += deltaV * 0.5;
 
-            GameServer.Instance.gameObjects.Track("player", "Speed1");
+            //GameServer.Instance.gameObjects.Track("player", "Speed1");
 
             if (BounceNormal.HasValue)
             {
-                // TODO find out why it bounces strangely (too far)
-                // Probably need to do "* GameConfig.GameSpeed * GameTime.DeltaTime"
                 // Logger.Log(BounceNormal.ToString(), LogLevel.Debug);
 
                 Vector oldspeed = (Vector)Speed.Clone();
@@ -244,7 +242,7 @@ namespace GameObjects.Model
                 BounceNormal = null;
             }
 
-            GameServer.Instance.gameObjects.Track("player", "Speed3Bounced");
+            //GameServer.Instance.gameObjects.Track("player", "Speed3Bounced");
 
             //Physics Police            
 
@@ -253,17 +251,11 @@ namespace GameObjects.Model
                 Speed = Speed.GetNormalized() * GameConfig.Lightspeed;
             }
 
-            GameServer.Instance.gameObjects.Track("player", "Speed4Light");
+            //GameServer.Instance.gameObjects.Track("player", "Speed4Light");
 
             Vector offset = Speed * GameConfig.GameSpeed * DeltaTime;
 
-            /*if (GameTime.DeltaTime == 0.000000f) // TODO: find WTF this happens
-            {
-                Logger.Log("DeltaTime zero", LogLevel.Debug);
-            }*/
-
             Offset(offset);
-
 
         }
 

@@ -24,6 +24,18 @@ namespace GameObjects
             }
             set { _message = value; }
         }
+
+        public string LightMessage
+        {
+            get
+            {
+                if (Exception is null)
+                {
+                    return _message;
+                }
+                return Exception.Message;
+            }
+        }
     }
 
     public enum LogLevel {Nothing, Status, Info, Warning, Debug, CSV, Trace, All }
@@ -197,7 +209,7 @@ namespace GameObjects
                     Instance.output.WriteLine(msg.Exception.StackTrace);
                     break;
                 case LogLevel.CSV:
-                    Instance.output.WriteLine(msg.Message);
+                    Instance.output.WriteLine(msg.LightMessage);
                     break;
                 case LogLevel.Trace:
                     Instance.output.WriteLine(msg.Message);

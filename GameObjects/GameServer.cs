@@ -221,6 +221,7 @@ namespace GameObjects
             Match.InitFeudingParties();
             Logger.Log("Fight!", LogLevel.Info);
             thrdGameLoop.Start();
+            hubContext.Clients.All.UpdateModel(gameObjects);
             hubContext.Clients.All.Start();
         }
 
@@ -286,6 +287,7 @@ namespace GameObjects
                     {
                         lock (gameObjects)
                         {
+                            Instance.gameObjects.Track("player", "Update");
                             hubContext.Clients.All.UpdateModel(gameObjects);
                             lastUpdate = GameTime.TotalElapsedSeconds;
                         }
@@ -296,6 +298,7 @@ namespace GameObjects
                     lock (gameObjects) 
                     {
                         gameObjects.Frame();
+                        Instance.gameObjects.Track("player", "Frame");
                     }
 
                     lock (gameObjects)
