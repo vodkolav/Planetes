@@ -7,15 +7,7 @@ namespace GameObjects.Model
 {
     [JsonObject(IsReference = true)]
     public class Jet : ICollideable
-    {
-        [JsonIgnore]
-        public override Vector Pos
-        {
-            get
-            {
-                return Center;
-            }
-        }
+    {         
 
         public Vector LastOffset { get; set; }
 
@@ -25,7 +17,21 @@ namespace GameObjects.Model
 
         public Vector Bearing { get; set; } = new Vector(1, 0);
 
-        public Vector Aim { get; set; }
+        public Vector Orientation { get; set; } //TODO: move it to Corpus?
+
+        public override float Rot { get => -Bearing.Angle(Orientation); }
+
+        public Vector Aim
+        {
+            get
+            {
+                return Bearing;
+            }
+            set
+            {
+                Bearing = value.GetNormalized();
+            }
+        }
 
         public int Health { get; set; }
         public int MaxHealth { get; set; }
@@ -37,38 +43,33 @@ namespace GameObjects.Model
             get => Owner.Color;
         }
 
-        private Polygon _hull;
-        private Polygon _hull_cache;
+        [JsonIgnore]
+        public override Corpus _body
+        {
+            get => Resources.Get("Jet", Owner);
+            set => Resources.Set("Jet", Owner, value); 
+        }
 
-
-        public Polygon Hull 
+        [JsonIgnore]
+        public Polygon Hull
         {
             get
             {
-                return _hull_cache;
-            }
-            set { _hull = value;
-                  _hull_cache = value;
+                return (Polygon)Body[0];
             }
         }
 
-        private Polygon _cockpit;
-
-        private Polygon _cockpit_cache;
-
-        public Polygon Cockpit
-        {
-            get
-            {
-                return _cockpit_cache;
-            }
-            set { 
-                _cockpit = value;
-                _cockpit_cache = value;
-            }
+        [JsonIgnore]
+        public Polygon Cockpit 
+        { 
+            get 
+            { 
+                return (Polygon)Body[1]; 
+            }  
         }
 
-        public Vector Gun { get { return Cockpit.Vertices[1]; } }
+        [JsonIgnore]
+        public Vector Gun { get { return Cockpit.Vertices[2]; } }
 
         public float LastFired { get; set; }
 
@@ -76,10 +77,11 @@ namespace GameObjects.Model
 
         public bool KeyBrake { get; set; }
 
-        public Vector BounceNormal { get; set; }
+        public PolygonCollisionResult? BounceNormal { get; set; }
 
         public float Cooldown { get; set; }
 
+        [JsonIgnore]
         public override Circle BoundingCirc { get { return new Circle(Pos, (Gun - Pos).Magnitude); } }
 
         [JsonIgnore]
@@ -93,24 +95,59 @@ namespace GameObjects.Model
             
         }
 
-        public Jet(Player owner, int health, int ammo)
+        public void Construct()
         {
-            double l = GameConfig.JetScale; 
-            Hull = new Polygon(5);
-            Hull.AddVertex(new Vector(0, 0)*l);
-            Hull.AddVertex(new Vector(50, 10) * l);//
-            Hull.AddVertex(new Vector(50, 30) * l);//
-            Hull.AddVertex(new Vector(0, 40) * l);
-            Hull.AddVertex(new Vector(0, 0) * l);
+            double l = GameConfig.JetScale;
+            _body = new Corpus();
+            Polygon hull = new Polygon(6);
+            hull.AddVertex(new Vector(-10,  10) * l);
+            hull.AddVertex(new Vector(-20, -30) * l);
+            hull.AddVertex(new Vector(-10, -40) * l);
+            hull.AddVertex(new Vector( 10, -40) * l);
+            hull.AddVertex(new Vector( 20, -30) * l);
+            hull.AddVertex(new Vector( 10,  10) * l);
+            hull.Offset(new Vector(0, 10) * l);
+            _body.Add(hull);
 
-            Cockpit = new Polygon(5);
-            Cockpit.AddVertex(new Vector(50, 10) * l);//
-            Cockpit.AddVertex(new Vector(80, 20) * l);
-            Cockpit.AddVertex(new Vector(50, 30) * l);//
-            Cockpit.AddVertex(new Vector(50, 10) * l);
+            Polygon cockpit = new Polygon(4);
+            cockpit.AddVertex(new Vector(-10, 10) * l);
+            cockpit.AddVertex(new Vector( 10, 10) * l);
+            cockpit.AddVertex(new Vector( 05, 20) * l);
+            cockpit.AddVertex(new Vector(-05, 20) * l);
+            cockpit.Offset(new Vector(0, 10) * l);
+            _body.Add(cockpit);
 
+            Orientation = new Vector(0, 1);
+        }
+
+        public void ConstructOld()
+        {
+            double l = GameConfig.JetScale;
+            Polygon hull = new Polygon(4);
+            hull.AddVertex(new Vector(0, 0) * l);
+            hull.AddVertex(new Vector(50, 10) * l);//
+            hull.AddVertex(new Vector(50, 30) * l);//
+            hull.AddVertex(new Vector(0, 40) * l);
+
+            Polygon cockpit = new Polygon(4);
+            cockpit.AddVertex(new Vector(50, 10) * l);//
+            cockpit.AddVertex(new Vector(80, 20) * l);
+            cockpit.AddVertex(new Vector(50, 30) * l);//
+            Body.Add(cockpit);
+
+            Orientation = new Vector(1,0);
+            Vector centering = new Vector(-40, -20);
+            hull.Offset(centering);
+            cockpit.Offset(centering);
+        }
+
+        public Jet(Player owner, int health, int ammo) : base()
+        {            
+            Pos = GameConfig.TossPoint;
             Owner = owner;
-            Offset(GameConfig.TossPoint);
+            
+            Construct();
+
             Speed = new Vector(0, 0);
             Acceleration = new Vector(0, 0);
             Aim = new Vector(1, 0);
@@ -126,28 +163,11 @@ namespace GameObjects.Model
         public void Offset(Vector by)
         {
             LastOffset = by;
-            _hull.Offset(by);
-            _cockpit.Offset(by);
+            Pos += by;
         }
 
-        public Vector Center
-        {
-            get { return (_cockpit.Center + _hull.Center) / 2; }
-        }
-
-        private void Rotate(Vector dir)
-        {
-            dir.Normalize();
-            Bearing = dir;
-            float angl = -Bearing.Angle(new Vector(1,0));
-
-            _cockpit_cache = (Polygon)_cockpit.Clone();
-            _cockpit_cache.RotateAt(angl, Center);
-
-            _hull_cache = (Polygon)_hull.Clone();
-            _hull_cache.RotateAt(angl, Center);
-        }
-
+        public Vector Center { get; } = new Vector(0, 0);
+        
         public override PolygonCollisionResult Collides(Jet j)
         {
             // Jets don't collide with other Jets. they might later.
@@ -156,97 +176,125 @@ namespace GameObjects.Model
 
         public override PolygonCollisionResult Collides(Wall w)
         {
-            PolygonCollisionResult r = Hull.Collides(w.Body, Speed);
-            if (r.WillIntersect)
+            foreach (Figure f in Body.Parts)
             {
-                return r;
-            }
-            else
-            {
-                return Cockpit.Collides(w.Body, Speed);
-            }
-        }
+                PolygonCollisionResult r = ((Polygon)f).Collides((Polygon)w.Body[0], Speed);
+                if (r.Intersect)
+                {
+                    return r;
+                }
+            }        
+            return PolygonCollisionResult.noCollision;
+        }       
 
         public override void HandleCollision(Wall w, PolygonCollisionResult r)
         {
-            Offset(r.MinimumTranslationVector);
-            Bounce(r.translationAxis);
+            Offset(r.MinimumTranslationVector * GameConfig.GameSpeed * GameTime.DeltaTime);
+            Bounce(r);
         }
 
         public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)
         {
-            Offset(-Pos);
-            Offset(GameConfig.TossPoint);
+            Teleport();
             //when I debug, the time continues, so when run continues, objects have 
-            //flied far beyond world edge. return them to random place on map
+            //flied far beyond world edge. return them to center of the world 
         }
 
-        public override void Move(GameState gO)
+        public void Teleport()
         {
+            Pos = GameConfig.WorldSize / 2; 
+            Speed.X = 0; 
+            Speed.Y = 0;
+        }
+
+        public override void Move(float DeltaTime)
+        {
+            //GameServer.Instance.gameObjects.Track("player", "Speed0");
+
             if (KeyBrake)
             {
                 Acceleration = -Speed.GetNormalized() * 0.8;
             }
 
-            if (Speed.X == Single.NaN)
+            if (Speed.X == float.NaN)
             {
                 Logger.Log("speed nan", LogLevel.Debug);
             }
 
-            Vector deltaV = Acceleration * GameConfig.GameSpeed * Thrust * GameTime.DeltaTime; 
+            Vector deltaV = Acceleration * GameConfig.GameSpeed * Thrust * DeltaTime; 
      
-            Vector newSpeed = Speed + deltaV * 0.5;
+            Speed += deltaV * 0.5;
 
-            Vector offset = (Speed + deltaV * 0.5) * GameConfig.GameSpeed  * GameTime.DeltaTime ;
-            
-            //Physics Police            
+            //GameServer.Instance.gameObjects.Track("player", "Speed1");
 
-            if (newSpeed.Magnitude <= GameConfig.Lightspeed)
+            if (BounceNormal.HasValue)
             {
-                Speed = newSpeed;
-            }
-            else
-            {
-                Speed = newSpeed.GetNormalized() * GameConfig.Lightspeed;
-            }
+                // Logger.Log(BounceNormal.ToString(), LogLevel.Debug);
 
+                Vector oldspeed = (Vector)Speed.Clone();
 
-            if (!(BounceNormal is null)) 
-            {
-                // TODO find out why it bounces strangely (too far)
-                // Probably need to do "* GameConfig.GameSpeed * GameTime.DeltaTime"
-                Vector oldspeed = Speed;
+                Speed -= 2 * Speed.Dot(BounceNormal.Value.translationAxis) * BounceNormal.Value.translationAxis;
 
-                Speed -= 2 * Speed.Dot(BounceNormal) * BounceNormal ;
-
-                if (Speed.Magnitude != oldspeed.Magnitude)
+                if (Speed.Magnitude != oldspeed.Magnitude && Owner.Name.ToLower().Contains("player"))
                 {
-                    Logger.Log("hmmm", LogLevel.Info);
+                    Logger.Log($"Speed.Magnitude: {Speed.Magnitude}| oldspeed.Magnitude: {oldspeed.Magnitude}| GameConfig.Lightspeed: {GameConfig.Lightspeed}", LogLevel.Warning);
                 }
                 BounceNormal = null;
             }
 
-            /*if (GameTime.DeltaTime == 0.000000f) // TODO: find WTF this happens
+            //GameServer.Instance.gameObjects.Track("player", "Speed3Bounced");
+
+            //Physics Police            
+
+            if (Speed.Magnitude >= GameConfig.Lightspeed)
             {
-                Logger.Log("DeltaTime zero", LogLevel.Debug);
-            }*/
+                Speed = Speed.GetNormalized() * GameConfig.Lightspeed;
+            }
+
+            //GameServer.Instance.gameObjects.Track("player", "Speed4Light");
+
+            Vector offset = Speed * GameConfig.GameSpeed * DeltaTime;
 
             Offset(offset);
 
-            Rotate(Aim );///  GameTime.DeltaTime/ GameTime.DeltaTime 
-            
-            Owner.viewPort.Update();
         }
 
-        public void Bounce(Vector normal)
+        public void Bounce(PolygonCollisionResult normal)
         {
             BounceNormal = normal;
         }
-        
+
         public override void Draw()
         {
+            //maybe this line will still be needed for adjusting ofset on client before drawing
+            //Offset(LastOffset * GameConfig.GameSpeed  * GameTime.DeltaTime);
             Hull.Draw(Color);
             Cockpit.Draw(Colors.Gray);
+#if DEBUG
+            DebugDraw();
+#endif
+        }
+
+        /// <summary>
+        /// Draw additional figures on canvas, which help debugging at runtime
+        /// </summary>
+        public void DebugDraw()        
+        { 
+            new Circle(Pos,1).Draw(Colors.Black);
+            new Ray(Pos, - Speed * 5, 1).Draw(Colors.Yellow);
+            /*if (!(BounceNormal is null))
+            {*/
+            if (Collisions.Count > 1 && Owner.Name.ToLower().Contains("player"))
+            {
+                Logger.Log($"{Owner.Name} collided {Collisions.Count} walls",LogLevel.Debug);
+            }
+                foreach (PolygonCollisionResult result in Collisions)
+                {
+
+                    new Ray(Pos, result.translationAxis * 10, 1).Draw(Colors.Black);
+                    result.collider.Draw(Colors.Yellow);
+                }
+                //BounceNormal.Value.collider.Draw(Colors.Yellow);            
         }
 
         public override string ToString()
@@ -266,10 +314,11 @@ namespace GameObjects.Model
 
         internal void Hit(ICollideable hitter)
         {
-            if (Health > hitter.Power)
-                Health -= hitter.Power;
-            else
-                Die(hitter);
+            if (Health <= hitter.Power)
+                Die(hitter);                
+            Health -= hitter.Power;
+            // TODO: implement collision influence on collidees speeds:
+            // Speed += hitter.Speed * 0.1;
         }
 
         private void Die(ICollideable hitter)
@@ -281,10 +330,10 @@ namespace GameObjects.Model
         {
             if (KeyShoot)
             {
-                if (Ammo != 0 && GameTime.TotalElapsedSeconds > LastFired + Cooldown)
+                if (Ammo != 0 && GameTime.TotalElapsedSeconds > LastFired + Cooldown/GameConfig.GameSpeed)
                 {
                     LastFired = GameTime.TotalElapsedSeconds;
-                    Bullet bullet = new Bullet(Owner, Gun, Bearing.GetNormalized(), GameConfig.bulletSpeed /*+ Speed*/, size: 3, color: Color);
+                    Bullet bullet = new Bullet(Owner, Gun, Bearing, GameConfig.bulletSpeed /*+ Speed*/, width: 3, color: Color);
                     gameObjects.Entities.Add(bullet);
                     Ammo--;
                 }
@@ -295,36 +344,36 @@ namespace GameObjects.Model
         {
             switch (argument)
             {
-                case (HOTAS.Up):
-                {
-                    Acceleration.Y = -1;
-                    break;
-                }
-                case (HOTAS.Down):
-                {
-                    Acceleration.Y = 1;
-                    break;
-                }
-                case (HOTAS.Left):
-                {
-                    Acceleration.X = -1;
-                    break;
-                }
-                case (HOTAS.Right):
-                {
-                    Acceleration.X = 1;
-                    break;
-                }
-                case (HOTAS.Shoot):
-                {
-                    KeyShoot = true;
-                    break;
-                }
+                case HOTAS.Up:
+                    {
+                        Acceleration.Y = -1;
+                        break;
+                    }
+                case HOTAS.Down:
+                    {
+                        Acceleration.Y = 1;
+                        break;
+                    }
+                case HOTAS.Left:
+                    {
+                        Acceleration.X = -1;
+                        break;
+                    }
+                case HOTAS.Right:
+                    {
+                        Acceleration.X = 1;
+                        break;
+                    }
+                case HOTAS.Shoot:
+                    {
+                        KeyShoot = true;
+                        break;
+                    }
                 case HOTAS.Brake:
-                {
-                    KeyBrake = true;
-                    break;
-                }
+                    {
+                        KeyBrake = true;
+                        break;
+                    }
                 case HOTAS.Scuttle:
                     {
                         Bullet TheLastAmmunition = new Bullet();

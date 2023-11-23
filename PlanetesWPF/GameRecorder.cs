@@ -93,6 +93,7 @@ namespace PlanetesWPF
 
         private void Save()
         {
+            //TODO: use this library to encode gifs instead:  https://github.com/mrousavy/AnimatedGif
             string filename = string.Format("game {0}_{1}.gif", DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss"),GameConfig.TossInt(999));
             using (FileStream stream = new FileStream(filename, FileMode.Create))
             {

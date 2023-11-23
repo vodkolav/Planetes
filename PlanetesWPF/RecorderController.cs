@@ -44,7 +44,7 @@ namespace PlanetesWPF
             {
                 current = new GameRecorder(graphicsContainer.CurrentView);
                 current.OnSaveComplete +=  ClearCassetes;
-                current.FrameRate = 3;
+                current.FrameRate = 2;
                 cassetes.Add(current);
             }
             string tmp = graphicsContainer.CurrentView.Width.ToString() + "x" + graphicsContainer.CurrentView.Height.ToString();

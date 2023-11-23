@@ -6,15 +6,16 @@ using PolygonCollision;
 
 namespace GameObjects.Model
 {
-    public enum GameStatus {Ready, Lobby, Cancelled, On, Over }
+    public enum GameStatus { Ready, Lobby, Cancelled, On, Over }
 
-    public class GameState
-    {       
+    public class GameState : ITrackable
+    {
         public GameStatus GameOn { get; set; } = GameStatus.Ready;
 
         public bool Paused { get; set; } // TODO: allow players to pause game 
 
         public DateTime StartTime { get; set; }
+
         public int frameNum { get; set; }
 
         public List<Player> Players { get; set; }
@@ -38,7 +39,17 @@ namespace GameObjects.Model
             // don't remove! even though it has 0 references, this function is essential
             // We need to serialize the World only in lobby phase. 
             // Since the worlds is static, once the game has started, no need to send World to clients anymore
-            return GameOn!= GameStatus.On ;
+            return GameOn != GameStatus.On;
+        }
+
+        public Resources ModelStore { get; set; }
+
+        public bool ShouldSerializeModelStore()
+        {
+            // don't remove! even though it has 0 references, this function is essential
+            // We need to serialize the World only in lobby phase. 
+            // Since the worlds is static, once the game has started, no need to send World to clients anymore
+            return GameOn != GameStatus.On;
         }
 
         public GameState()
@@ -50,28 +61,38 @@ namespace GameObjects.Model
             Entities = new List<ICollideable>();
             World = new Map(worldSize);
             Players = new List<Player>();
+            ModelStore = Resources.Instance;
+            Resources.Init();
             frameNum = 0;
         }
 
         public void Start()
         {
             GameOn = GameStatus.On;
-            StartTime = DateTime.UtcNow;
+            GameTime.StartTime = DateTime.UtcNow;
+            StartTime = GameTime.StartTime;
         }
 
         public void Frame()
         {
-            if (Paused) return;
+            // if (Paused) return; //TODO: Note: when game is paused, the time still goes on. need to take it into consideration as well 
             frameNum++;
-            //Logger.Log("Model FPS: " + frameNum / (DateTime.Now - StartTime).TotalSeconds, LogLevel.Status);
-            
+
+            /*   if (frameNum >10) // TODO: understand how to properly calculate FPS
+            {
+               Logger.Log("Model FPS: " + (frameNum / (GameTime.TotalElapsedSeconds)), LogLevel.Status);
+            }*/
+
+
+
             PolygonCollisionResult r;
 
             Players.ForEach(p => p.Shoot(this));
 
             foreach (ICollideable e in Entities)
             {
-                e.Move(this);
+                e.Move(GameTime.DeltaTime);
+                e.upToDate = false;
             }
 
             //check for collision of all objects with World bounds
@@ -86,17 +107,20 @@ namespace GameObjects.Model
             }
 
             //check for collision of Bullets Astroids and Jets with Walls
-            foreach (Wall w in World.Walls)
+            foreach (ICollideable e in Entities)
             {
-                foreach (ICollideable e in Entities)
+                List<PolygonCollisionResult> collisions = new List<PolygonCollisionResult>();
+                foreach (Wall w in World.Walls)
                 {
                     r = e.Collides(w);
                     if (r.Intersect)
                     {
+                        collisions.Add(r);
                         e.HandleCollision(w, r);
                         break;
                     }
                 }
+                e.Collisions = collisions;
             }
 
             //check for collision of Bullets and Astroids with Jets
@@ -114,7 +138,7 @@ namespace GameObjects.Model
                     }
                 }
             }
-            
+
             //check for collision of Bullets with Astroids
             foreach (Astroid a in Entities.OfType<Astroid>())
             {
@@ -137,11 +161,16 @@ namespace GameObjects.Model
 
                 int chance = GameConfig.TossInt(World.Size.Area / (int)GameConfig.AsteroidTimeout);
 
-                if (GameConfig.EnableAstroids && chance<1) //GameTime.TotalElapsedSeconds % GameConfig.AsteroidTimeout < 0.1)
+                if (GameConfig.EnableAstroids && chance < 1) //GameTime.TotalElapsedSeconds % GameConfig.AsteroidTimeout < 0.1)
                 {
                     Entities.Add(new Astroid(GameConfig.TossAsteroidType));
                 }
             }
+        }
+
+        internal void Track(string playerName, string source)
+        {
+            Logger.Tracker.Track(this, playerName, source);
         }
     }
 }

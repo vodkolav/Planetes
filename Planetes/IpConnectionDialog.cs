@@ -8,7 +8,7 @@ namespace Planetes
         public IpConnectionDialog(string ip = "127.0.0.1", string port = "2861")
         {
             InitializeComponent();
-            ipAddressControl1.Text = ip;
+            ipAddressControl1.Text = ip; //TODO: replace this with https://github.com/m66n/ipaddresscontrollib
             tbxport.Text = port;
         }
 

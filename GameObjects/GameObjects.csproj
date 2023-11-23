@@ -38,6 +38,24 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -50,6 +68,7 @@
   <ItemGroup>
     <Compile Include="DummyPlug.cs" />
     <Compile Include="GameTime.cs" />
+    <Compile Include="ITrackable.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Model\Astroid.cs" />
     <Compile Include="Bot.cs" />
@@ -60,6 +79,7 @@
     <Compile Include="GameConfig.cs" />
     <Compile Include="IUI.cs" />
     <Compile Include="GameHub.cs" />
+    <Compile Include="Model\Corpus.cs" />
     <Compile Include="Model\ICollideable.cs" />
     <Compile Include="Model\GameState.cs" />
     <Compile Include="GameServer.cs" />
@@ -68,11 +88,13 @@
     <Compile Include="Model\Map.cs" />
     <Compile Include="Model\Match.cs" />
     <Compile Include="Model\Player.cs" />
+    <Compile Include="Model\Resources.cs" />
     <Compile Include="Model\Star.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="Model\Wall.cs" />
     <Compile Include="Model\ViewPort.cs" />
+    <Compile Include="Tracker.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.Cors">

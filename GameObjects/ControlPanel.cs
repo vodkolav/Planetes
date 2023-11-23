@@ -8,7 +8,7 @@ using Action = GameObjects.Model.Action;
 
 namespace GameObjects
 {
-    public enum HOTAS { Up, Down, Left, Right, Shoot, Brake, Nothing, Scuttle}
+    public enum HOTAS { Up, Down, Left, Right, Shoot, Brake, Nothing, Scuttle, GameSpeedUp, GameSpeedDown }
     public class ControlPanel
     {
         private Dictionary<Key, HOTAS> KeyBindings;
@@ -16,6 +16,8 @@ namespace GameObjects
         private Dictionary<MouseButton, HOTAS> MouseBindings;
 
         private HOTAS LastPress { get; set; } = HOTAS.Nothing;
+
+        private float LastAimed { get; set; } = 0f;
 
         private int PlayerID { get; set; }
 
@@ -51,6 +53,8 @@ namespace GameObjects
             bindKey(Key.D, HOTAS.Right);
             bindKey(Key.Space, HOTAS.Brake);
             bindKey(Key.L, HOTAS.Scuttle);
+            bindKey(Key.Add, HOTAS.GameSpeedUp);
+            bindKey(Key.Subtract, HOTAS.GameSpeedDown);
         }
 
         public void bindARROWSto()
@@ -94,12 +98,13 @@ namespace GameObjects
                 Proxy.Invoke("Do", new object[] { PlayerID, new Tuple<Action, Vector>(instruction, argument) });
         }
 
-        public void Aim(Vector argument)
+        public void Aim(Vector ScreenCoordinate)
         {
-            if (isWorking)
-                Proxy.Invoke("Do", new object[] { PlayerID, new Tuple<Action, Vector>(Action.Aim, argument) });
-            // these exceptions appear after waiting too long on a breakpoint. how to fix : https://stackoverflow.com/a/38161578
-
+            if (LastAimed + 0.05 < GameTime.TotalElapsedSeconds)
+            {
+                Do(Action.Aim, ScreenCoordinate);               
+                LastAimed = GameTime.TotalElapsedSeconds;
+            }
         }
 
         public void Press(int key)

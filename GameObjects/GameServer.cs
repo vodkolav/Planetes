@@ -61,7 +61,7 @@ namespace GameObjects
         {
             gameObjects = new GameState(GameConfig.WorldSize);
             gameObjects.GameOn = GameStatus.Lobby;
-            Bots = new List<Bot>(); // TODO: remove old bots connections from hub
+            Bots = new List<Bot>(); // TODO: remove old bots connections from hub (I think, that's done already) 
             thrdGameLoop = new Thread(GameLoop)
             {
                 Name = "GameLoop"
@@ -118,8 +118,11 @@ namespace GameObjects
         {
             try
             {
-                Player quitter = gameObjects.Players.Single(p => p.ConnectionID == connectionID);
-                Leave(quitter);
+                lock (gameObjects)
+                {
+                    Player quitter = gameObjects.Players.Single(p => p.ConnectionID == connectionID);
+                    Leave(quitter);
+                }
             }
             catch (ArgumentNullException ex)
             {
@@ -201,7 +204,8 @@ namespace GameObjects
                 //DMYSYS.UpdateMe();
                 Bots.Add(DMYSYS);
                 // TODO: maybe make bots inherit from LocalClient,
-                // so that they don't consume network trafic
+                // so that they don't consume network trafic.
+                //  Actually, make the a sort of UI 
             }
             catch (Exception ex)
             {
@@ -217,6 +221,7 @@ namespace GameObjects
             Match.InitFeudingParties();
             Logger.Log("Fight!", LogLevel.Info);
             thrdGameLoop.Start();
+            hubContext.Clients.All.UpdateModel(gameObjects);
             hubContext.Clients.All.Start();
         }
 
@@ -232,7 +237,24 @@ namespace GameObjects
             Logger.Log("Game resumed", LogLevel.Info);
         }
 
-        private async void GameLoop()
+        internal void Command(int who, Tuple<Model.Action, HOTAS> command)
+        {
+            lock (gameObjects)
+            {
+                gameObjects.Players.Single(p => p.ID == who).Act(command);
+            }
+        }
+
+        public void Do(int who, Tuple<Model.Action, PolygonCollision.Vector> command)
+        {
+            //gameObjects.Track("player", "MoveReceived");
+            lock (gameObjects)
+            {
+                gameObjects.Players.Single(p => p.ID == who).Act(command);
+            }
+        }
+
+        private void GameLoop()
         {
             // TODO: implement quad-trees for spacial indexing :
             // https://badecho.com/index.php/2023/01/14/fast-simple-quadtree/
@@ -240,12 +262,14 @@ namespace GameObjects
             // TODO: tweak SignalR performance:
             //https://learn.microsoft.com/en-us/aspnet/signalr/overview/performance/signalr-performance
             //https://learn.microsoft.com/en-us/aspnet/signalr/overview/getting-started/tutorial-high-frequency-realtime-with-signalr
+
+            //TODO: read up on how to improve game loop and rendering stability: 
+            // https://gafferongames.com/post/fix_your_timestep/
+
             try
             {
-                GameTime.TotalElapsedSeconds = (float)(DateTime.UtcNow - gameObjects.StartTime).TotalSeconds;
-                
-                string CSVheader = "frame, DeltaTime, UtcNow, JetSpeed, JetPosMag, JetPosX, JetPosY , Source";
-                Logger.Log(CSVheader, LogLevel.CSV);                
+                GameTime.Tick();
+                float lastUpdate = 0f;
 
                 while (gameObjects.GameOn == GameStatus.On)
                 {
@@ -253,26 +277,28 @@ namespace GameObjects
 
                     if (_shutdownEvent.WaitOne(0))
                         break;
+                    GameTime.Tick();
 
-                    float dt = (float)(DateTime.UtcNow - gameObjects.StartTime).TotalSeconds;
-
-                    if (dt == GameTime.TotalElapsedSeconds)
+                    // We shouldn't send clients each an every frame, as it clogs the network.
+                    // instead - we only send model updates every 16 microseconds.
+                    float updateRate = 0.016f;  
+                    
+                    if (lastUpdate + updateRate < GameTime.TotalElapsedSeconds)
                     {
-                        int a = 0;
+                        lock (gameObjects)
+                        {
+                            Instance.gameObjects.Track("player", "Update");
+                            hubContext.Clients.All.UpdateModel(gameObjects);
+                            lastUpdate = GameTime.TotalElapsedSeconds;
+                        }
                     }
 
-                    GameTime.DeltaTime = (dt - GameTime.TotalElapsedSeconds);
-                    GameTime.TotalElapsedSeconds = dt;
+                    //gameObjects.Track("player", "GameLoop");
 
-                    /*Jet debugged = gameObjects.Players.Single(p => p.Name.Contains("Bot1")).Jet;//WPFplayer
-                    string csvLine = $"{gameObjects.frameNum},{GameTime.DeltaTime:F4}, " +
-                                     $"{dt:F4}, {debugged.LastOffset.Magnitude:F4}, " +
-                                     $"{debugged.Pos.Magnitude}, {debugged.Pos.X}, {debugged.Pos.Y}, GameLoop";
-                    Logger.Log(csvLine, LogLevel.CSV);*/
-                    
                     lock (gameObjects) 
                     {
                         gameObjects.Frame();
+                        Instance.gameObjects.Track("player", "Frame");
                     }
 
                     lock (gameObjects)
@@ -281,10 +307,6 @@ namespace GameObjects
                     }
 
                     //string gobj = JsonConvert.SerializeObject(gameObjects); // only for debugging - to check what got serialized
-                    if (gameObjects.frameNum % 4 == 0) //for performance - send only every 4th frame to the clients
-                    {
-                        await hubContext.Clients.All.UpdateModel(gameObjects);
-                    }
                     //Logger.Log("frameNum: " + gameObjects.frameNum, LogLevel.Status);// + "| " + tdiff.ToString()
                 }
 

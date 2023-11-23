@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using PolygonCollision;
 using Microsoft.AspNet.SignalR.Client.Transports;
-using System.IO;
 using GameObjects.Model;
 
 namespace GameObjects
@@ -36,9 +35,14 @@ namespace GameObjects
         {
             //gameObjects = go;
             World = go.World;
+            ModelStore = go.ModelStore;
+            Resources.LoadFrom(ModelStore);
             UI.UpdateLobby(go);
         }
 
+        public override void Dispose()
+        {
+        }
     }
 
 
@@ -60,13 +64,14 @@ namespace GameObjects
 
         public Map World { get; set; }
 
+        public Resources ModelStore { get; set; }
+
         public Player Me { get { return gameObjects.Players.Single(p => p.ID == PlayerId); } }
 
         public bool GameOn { get { return gameObjects != null && gameObjects.GameOn== GameStatus.On; } }
 
         private int LastDrawnFrame { get; set; } = 1;
 
-        StreamWriter writer;
 
         public GameClient(IUI owner)
         {
@@ -79,11 +84,7 @@ namespace GameObjects
             {
                 Conn = new HubConnection(URL);
 
-                // use this code to investigate problems when signalR ceases to receive model updates from server
-                Conn.TraceLevel = TraceLevels.All;                
-                Conn.TraceWriter = Logger.TraceInterceptor; 
-                Conn.Error += (e) =>  Logger.Log(e, LogLevel.Debug);
-
+                Logger.TraceConnection(Conn);
                 Proxy = Conn.CreateHubProxy("GameHub");
                 Proxy.On<GameState>("UpdateModel", updateGameState);
                 Proxy.On<GameState>("UpdateLobby", UpdateLobby);
@@ -146,12 +147,14 @@ namespace GameObjects
             //TODO: merge this with updateGameState, they essentially do the same 
             gameObjects = go;
             World = gameObjects.World;
+            Resources.LoadFrom(gameObjects.ModelStore);
             UI.UpdateLobby(gameObjects);
         }
 
         public void Notify(Notification type, string message)
         {
             //Logger.Log(message, LogLevel.Info);
+            //TODO: move this logic to UI and get rid of AnnounceDeath and AnnounceRespawn
             switch (type)
             {
                 case Notification.Death:
@@ -190,16 +193,18 @@ namespace GameObjects
 
         public async Task StartServer()
         {
+            gameObjects.Track("player", "header");
             await Proxy.Invoke("Start");
         }
 
         public virtual void Start()
         {
             Logger.Log("C.PlayerId: " + PlayerId, LogLevel.Debug);
-            Logger.Log("ID: " + Me.ID + " |Name: " + Me.Name + " |Coonection: "  + Me.ConnectionID , LogLevel.Debug);
+            Logger.Log("ID: " + Me.ID + " |Name: " + Me.Name + " |Connection: "  + Me.ConnectionID , LogLevel.Debug);
             Yoke.bindWASD();
             Yoke.bindMouse();
             UI.Start();
+            ClientTime.StartTime = gameObjects.StartTime;
         }
 
         public void Draw()
@@ -218,22 +223,22 @@ namespace GameObjects
             {
                 try
                 {
+                    ClientTime.Tick();
                     LastDrawnFrame = gameObjects.frameNum;
+                    gameObjects.Track("player", "Draw");
+           
+                    //TODO: thoroughly test whether this Client-side prediction improves smoothness of movement.
+                    // currently it seems that it makes movement jerky.
+                    // on the other hand, judjing from the tracking data, the predicted position of jet is more 
+                    // faithful to the actual position the jet is supposed to be at a given moment.
+                    // More research required.
 
-                    // This code may be used to track a specific game object over time and then plot the data.
-                    // useful when diagnosing fps issues
-                    try
-                    {
-                        Jet debugged = gameObjects.Players.Single(p => p.Name.Contains("Bot2")).Jet; // WPFplayer
-                        float dt = (float)(DateTime.UtcNow - gameObjects.StartTime).TotalSeconds;
-                        Logger.Log($"{gameObjects.frameNum},{GameTime.DeltaTime:F4}, " +
-                                   $"{dt:F4}, {debugged.LastOffset.Magnitude:F4}, {debugged.Pos.Magnitude}, " +
-                                   $"{debugged.Pos.X}, {debugged.Pos.Y}, Draw", LogLevel.CSV);
-                    }
-                    catch
-                    { }
+                    //Me.Jet.Move(ClientTime.DeltaTime);//*0.5f
+                    //Me.Jet.upToDate = false;
 
                     DrawingContext.GraphicsContainer.ViewPortOffset = -Me.viewPort.Origin;
+                    gameObjects.Track("player", "CSP");
+
 
                     World.Draw();
 
@@ -241,7 +246,6 @@ namespace GameObjects
                     {
                         s.Draw();
                     }
-
 
                     //TODO: Make Wall also collidable
                     foreach (Wall w in World.Walls.Where(w => Me.viewPort.Collides(w).Intersect))
@@ -251,6 +255,8 @@ namespace GameObjects
 
                     foreach (ICollideable j in gameObjects.Entities.Where(e => Me.viewPort.Collides(e).Intersect))
                     {
+                       // j.Move(ClientTime.DeltaTime);
+                       // j.upToDate = false;
                         j.Draw();
                     }
                 }
@@ -268,8 +274,9 @@ namespace GameObjects
             //Logger.Log(s.ToString(), LogLevel.Debug);
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
+            if(Conn != null)
             Conn.Dispose();
         }
     }

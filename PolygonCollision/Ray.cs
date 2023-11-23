@@ -1,32 +1,59 @@
-﻿using System.Windows.Media;
+﻿using Newtonsoft.Json;
+using System.Windows.Media;
 
 namespace PolygonCollision
 {
-    public class Ray
+    public class Ray : Figure
     {
         //A kind of hybrid between a point and a line: 
         //In terms of collision, only it's pointy head (Pos) is relevant, 
         //In terms of drawing, it is represented by a short line, like a blaster shot from star wars
-        //Also, has line Thickness (Size property)
+        //Also, has line Thickness (Width property)
 
-        public Ray(Vector pos, Vector tail, int size)
+       
+        public Vector Tail { get; set; }
+
+        [JsonIgnore]
+        public override Vector Center => Pos;
+
+        [JsonIgnore]
+        public int Width => Size.Width;
+
+        public Ray(Vector pos, Vector tail, int width)
         {
             Pos = pos;
             Tail = tail;
-            Size = size;
+            Size = new Size(width, 0);            
         }
 
-        public Vector Pos { get; set; }
-
-        public Vector Tail { get; set; }
-
-        public int Size { get; set; }
-
-        public void Offset(Vector by)
-        {            
-            Pos = new Vector(Pos.X + by.X, Pos.Y + by.Y);
+        public override PolygonCollisionResult Collides(Polygon other, Vector speed)
+        {
+            return other.Collides(Pos);
         }
-        public void Draw(Color c)
+
+        public override PolygonCollisionResult Collides(Circle other, Vector speed)
+        {
+            if ((other.Pos - Pos).Magnitude <= other.R)
+                return PolygonCollisionResult.yesCollision; 
+            else 
+                return PolygonCollisionResult.noCollision;
+        }
+
+        public override void Transformed(Figure blueprint, Vector offset, float rotation = 0f)
+        {
+            Pos = blueprint.Pos + offset;
+            if (rotation != 0f)
+            {
+                Tail.RotateAt(rotation, Pos);
+            }
+        }
+
+        public override void Offset(Vector by)
+        {
+            Pos += by;
+        }
+
+        public override void Draw(Color c)
         {
             DrawingContext.GraphicsContainer.DrawRay(c, this);
         }
@@ -38,7 +65,12 @@ namespace PolygonCollision
         /// <returns></returns>
         public Ray Offseted(Vector offset)
         {
-            return new Ray(Pos + offset, Tail, Size);          
+            return new Ray(Pos + offset, Tail, Width);          
+        }
+
+        public override object Clone()
+        {
+            return Offseted(new Vector(0, 0)); 
         }
     }
 }

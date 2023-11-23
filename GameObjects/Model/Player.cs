@@ -22,6 +22,8 @@ namespace GameObjects.Model
         public int ID { get; set; }        
         public string ConnectionID { get; set; }
         public string Name { get; set; }
+
+        //TODO: use hex strings to store color data instead, ex:  "Color": "#FF6B8E23",
         public Color Color { get; set; }
       
         public List<Player> Enemies { get; set; }
@@ -129,8 +131,30 @@ namespace GameObjects.Model
 
         public virtual void Steer(object argument)
         {
+            if ((HOTAS)argument == HOTAS.GameSpeedUp || (HOTAS)argument == HOTAS.GameSpeedDown)
+                ChangeGameSpeed((HOTAS)argument);
+            else
             if (isAlive)
                 Jet.Press((HOTAS)argument);
+        }
+
+        private void ChangeGameSpeed(HOTAS argument)
+        {
+            switch (argument)
+            {
+                case HOTAS.GameSpeedUp:
+                    {
+                        if (GameConfig.GameSpeed < 10)
+                        GameConfig.GameSpeed += 1;
+                        break;
+                    }
+                case HOTAS.GameSpeedDown:
+                    {
+                        if (GameConfig.GameSpeed > 1)
+                            GameConfig.GameSpeed -= 1;
+                        break;
+                    }
+            }
         }
 
         public virtual void Release(object argument)
@@ -141,8 +165,14 @@ namespace GameObjects.Model
 
         public virtual void Aim(object argument)
         {
+            //argument is vector which holds coordinates of crosshair relative to the Visor UI element's Origin
             if (isAlive)
-                Jet.Aim = (Vector)argument - (viewPort.Size * .5);
+                //Jet.Aim is the coordinates of crosshair relative to the Visor UI element's Center
+                //In other words, the vector from the player's jet to crosshair
+                //Or, un-Normalized Bearing
+                Jet.Aim = (Vector)argument - (viewPort.Size/2);
+            // Print world-relative coordinates of where the mouse now points 
+            Logger.Log(((Vector)argument + viewPort.Origin).ToString(), LogLevel.Status);
         }
 
         internal void setViewPort(object argument)

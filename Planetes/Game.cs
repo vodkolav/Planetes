@@ -35,8 +35,6 @@ namespace Planetes
                      ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.UserPaint, true);
             C = new GameClient(this);
-            C.PlayerName = PlayerName;
-            L = new Lobby(this);
             Billboard = new BillBoard(this);
             DrawingContext.GraphicsContainer = new WFGraphicsContainer(pbxWorld);
         }
@@ -261,14 +259,31 @@ namespace Planetes
             S = GameServer.Instance;
             S.Listen(2861);
             return S.URL;
-        }   
+        }
+
+        private bool OpenLobby()
+        {
+            L = new Lobby(this);
+            return L.OpenLobby_WaitForGuestsAndBegin();
+        }
 
         public async Task joinNetworkGame(string URL)
         {
-            Text += " (Client)";
-            C.joinNetworkGame(URL);
+            if (C != null) 
+                C.Dispose();
 
-            bool GameStarted = L.OpenLobby_WaitForGuestsAndBegin();
+            C = new GameClient(this)
+            //C = new GameClient(this)
+            {
+                PlayerName = PlayerName
+            };
+           
+            C.joinNetworkGame(URL);
+            
+            Text += " (Client)";
+            
+            bool GameStarted = OpenLobby();
+               
 
             if (GameStarted)
             {

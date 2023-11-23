@@ -33,7 +33,7 @@ namespace PlanetesWPF
         public UI()
         {
             InitializeComponent();
-            Logger.LogFile = $"..\\..\\..\\Logs\\{C}_Log_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv";
+            Logger.LogFile = $"..\\..\\..\\Logs\\{C}_Log_{DateTime.Now:yyyy.MM.dd[]HH-mm-ss}.csv";
             BB = new Billboard();
             PolygonCollision.DrawingContext.GraphicsContainer = new WPFGraphicsContainer();
             DataContext = (WPFGraphicsContainer)PolygonCollision.DrawingContext.GraphicsContainer;
@@ -91,8 +91,6 @@ namespace PlanetesWPF
             {
                 PlayerName = PlayerName
             };
-            Logger.LogFile = $"..\\..\\..\\Logs\\{C}_Log_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv";
-
             C.joinNetworkGame(URL);
 
             Title = "Planetes WPF: " + C.ToString();
@@ -383,8 +381,17 @@ namespace PlanetesWPF
         private void World_MouseMove(object sender, MouseEventArgs e)
         {
             if (C.GameOn)
-            {
-                C.Yoke.Aim(FromPoint(e.GetPosition(Visor))); 
+            { 
+                PolygonCollision.Vector at = FromPoint(e.GetPosition(Visor));
+
+/* debug code : was need to time delay between mouse move and rotation of the jet
+                PolygonCollision.Vector tmp = (at - VisorSize / 2).GetNormalized();
+                string CSVline = $"null , {GameTime.TotalElapsedSeconds:F4}, {GameTime.DeltaTime:F4}, MouseMove, " +
+                                 $"null, null, " +
+                                 $"{tmp.X}, {tmp.Y}";
+                Logger.Log(CSVline, LogLevel.CSV);*/
+
+                C.Yoke.Aim(at); 
             }
         }
         #endregion
@@ -400,6 +407,14 @@ namespace PlanetesWPF
                 C.SetViewPort(VisorSize);                
             }
         }
-        #endregion
+ 
+        private void miQuitGame_Click(object sender, RoutedEventArgs e)
+        {
+            if (S != null  && C.GameOn)
+            {
+                S.Terminate();
+            }
+        }          
+        #endregion    
     }
 }

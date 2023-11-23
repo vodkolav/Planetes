@@ -1,17 +1,21 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Media;
 
 namespace PolygonCollision
 {
     // Structure that stores the results of the PolygonCollision function
-    public struct PolygonCollisionResult
+    [JsonObject(IsReference = true)]
+    public struct PolygonCollisionResult  //TODO rename it to CollisionResult
     {
         public bool WillIntersect; // Are the polygons going to intersect forward in time?
         public bool Intersect; // Are the polygons currently intersecting
         public Vector MinimumTranslationVector; // The translation to apply to polygon A to push the polygons appart.
         public Vector translationAxis;
+        public Polygon collider;
+
         public static  PolygonCollisionResult noCollision { get; } = new PolygonCollisionResult()
         {
             WillIntersect = false,
@@ -25,7 +29,7 @@ namespace PolygonCollision
         };
     }
 
-    public class Polygon :ICloneable
+    public class Polygon : Figure 
     {
 
         public Polygon() { }
@@ -91,12 +95,17 @@ namespace PolygonCollision
         {
             get
             {
-                int[] p = new int[Vertices.Count * 2];
+                int[] p = new int[(Vertices.Count + 1) * 2];
                 for (int i = 0; i <= Vertices.Count - 1; i++)
                 {
                     p[i * 2] = (int)Vertices[i].X;
                     p[i * 2 + 1] = (int)Vertices[i].Y;
                 };
+
+                //close the polygon by adding forst point
+                p[Vertices.Count*2] = p[0];
+                p[Vertices.Count*2 + 1] = p[1];
+
                 return p;
             }
         }
@@ -117,17 +126,17 @@ namespace PolygonCollision
         }
 
         [JsonIgnore]
-        public Vector Center
+        public override Vector Center
         {
             get
-            {
+            {          
                 float vc = Vertices.Count - 1;
                 Vector total = new Vector(0, 0);
                 for (int i = 0; i < vc; i++)
                 {
                     total += Vertices[i];
-                }
-                return total / vc;
+                }                
+                return total / vc;               
             }
         }
 
@@ -135,19 +144,18 @@ namespace PolygonCollision
         /// Offset (move) this polygon
         /// </summary>
         /// <param name="v"></param>
-        public void Offset(Vector v)
+        public override void Offset(Vector v)
         {
-            Offset(v.X, v.Y);
+            foreach (Vector vx in Vertices)
+            {
+                vx.Offset(v);
+            }
         }
 
 
         public void Offset(float x, float y)
         {
-            for (int i = 0; i < Vertices.Count; i++)
-            {
-                Vector p = Vertices[i];
-                Vertices[i] = new Vector(p.X + x, p.Y + y);
-            }
+            Offset(new Vector(x, y));
         }
 
         /// <summary>
@@ -165,7 +173,7 @@ namespace PolygonCollision
             return np;
         }
 
-        public object Clone()
+        public override object Clone()
         {
             return Offseted(new Vector(0, 0));
         }
@@ -185,6 +193,37 @@ namespace PolygonCollision
             }
         }
 
+        /// <summary>
+        /// turns this polygon into a transformation of other ("blueprint") polygon.
+        /// Transformation is defined by offset and rotation (no scaling yet:))
+        /// </summary>
+        /// <param name="blueprint">the "blueprint" polygon</param>
+        /// <param name="offset">offset</param>
+        /// <param name="rotation">rotation</param>
+        /// <exception cref="ArgumentException"></exception>
+        public override void Transformed(Figure blueprint,  Vector offset, float rotation)
+        {
+            /*  if (blueprint.GetType() != GetType())
+            {
+                throw new ArgumentException("blueprint parameter must be of same type as this object");
+            }*/
+
+            Polygon other  = (Polygon)blueprint;
+
+            if (Vertices.Count != other.Vertices.Count)
+            {
+                throw new ArgumentException("the two polygons must have equal amount of vertices");
+            }
+            double theta = rotation * (Math.PI / 180); // Convert degrees to radians. TODO: get rid of degrees, we can operate with just radians
+            double c = Math.Cos(theta);
+            double s = Math.Sin(theta);
+
+            for (int i= 0; i<Vertices.Count; i++)
+            {   
+                Vertices[i].X = (float)(c * other.Vertices[i].X - s * other.Vertices[i].Y + offset.X);
+                Vertices[i].Y = (float)(s * other.Vertices[i].X + c * other.Vertices[i].Y + offset.Y);
+            }
+        }
 
         public override string ToString()
         {
@@ -198,10 +237,6 @@ namespace PolygonCollision
             return result;
         }
 
-        public PolygonCollisionResult Collides(Ray r)
-        {
-            return Collides(r.Pos);
-        }
 
         // POLYGON/POINT
         // only needed if you're going to check if the circle
@@ -247,7 +282,7 @@ namespace PolygonCollision
         /// </summary>
         /// <param name="c"></param>
         /// <returns></returns>
-        public PolygonCollisionResult Collides(Circle c)
+        public override PolygonCollisionResult Collides(Circle c, Vector speed)
         {
             PolygonCollisionResult collision = new PolygonCollisionResult
             {
@@ -291,7 +326,7 @@ namespace PolygonCollision
         }
 
         // Check if polygon A is going to collide with polygon B for the given velocity
-        public PolygonCollisionResult Collides(Polygon Other, Vector velocity)
+        public override PolygonCollisionResult Collides(Polygon Other, Vector velocity)
         {
             PolygonCollisionResult result = new PolygonCollisionResult
             {
@@ -304,6 +339,15 @@ namespace PolygonCollision
             float minIntervalDistance = float.PositiveInfinity;
             Vector translationAxis = new Vector();
             Vector edge;
+
+
+           // This piece of code may be used if you want to validate collision with some specific polygon.
+           // Just put coords of one of its edges in v.X, v.Y below: 
+            var b = Other.Vertices.Any(v => v.X == 100 & v.Y == 90);
+            if ( b)
+            {
+                int g = 0;
+            }
 
             // Loop through all the edges of both polygons
             for (int edgeIndex = 0; edgeIndex < edgeCountA + edgeCountB; edgeIndex++)
@@ -329,9 +373,26 @@ namespace PolygonCollision
                 ProjectPolygon(axis, Other, ref minB, ref maxB);
 
                 // Check if the polygon projections are currentlty intersecting
-                if (IntervalDistance(minA, maxA, minB, maxB) > 0) result.Intersect = false;
+                float intervalDistance = IntervalDistance(minA, maxA, minB, maxB);
+                if (intervalDistance > 0) result.Intersect = false;
+
+                // Check if the current interval distance is the minimum one. If so store
+                // the interval distance and the current distance.
+                // This will be used to calculate the minimum translation vector
+                intervalDistance = Math.Abs(intervalDistance);
+                if (intervalDistance < minIntervalDistance)
+                {
+                    minIntervalDistance = intervalDistance;
+                    translationAxis = axis;
+
+                    Vector d = Center - Other.Center;
+                    if (d.Dot(translationAxis) < 0) translationAxis = -translationAxis; 
+                    result.translationAxis = translationAxis;
+                    result.collider = Other;
+                }
 
                 // ===== 2. Now find if the polygons *will* intersect =====
+                // Not too sure if this is needed at all in my game
 
                 // Project the velocity on the current axis
                 float velocityProjection = axis.Dot(velocity);
@@ -347,36 +408,23 @@ namespace PolygonCollision
                 }
 
                 // Do the same test as above for the new projection
-                float intervalDistance = IntervalDistance(minA, maxA, minB, maxB);
+                intervalDistance = IntervalDistance(minA, maxA, minB, maxB);
                 if (intervalDistance > 0) result.WillIntersect = false;
 
                 // If the polygons are not intersecting and won't intersect, exit the loop
                 if (!result.Intersect && !result.WillIntersect) break;
 
-                // Check if the current interval distance is the minimum one. If so store
-                // the interval distance and the current distance.
-                // This will be used to calculate the minimum translation vector
-                intervalDistance = Math.Abs(intervalDistance);
-                if (intervalDistance < minIntervalDistance)
-                {
-                    minIntervalDistance = intervalDistance;
-                    translationAxis = axis;
-
-                    Vector d = Center - Other.Center;
-                    if (d.Dot(translationAxis) < 0) translationAxis = -translationAxis; 
-                    result.translationAxis = translationAxis;
-                }
             }
 
             // The minimum translation vector can be used to push the polygons appart.
             // First moves the polygons by their velocity
             // then move polygonA by MinimumTranslationVector.
-            if (result.WillIntersect) result.MinimumTranslationVector = translationAxis * minIntervalDistance;
+            if (result.Intersect) result.MinimumTranslationVector = translationAxis * minIntervalDistance;
 
             return result;
         }
 
-        public void Draw(Color color)
+        public override void Draw(Color color)
         {
             DrawingContext.GraphicsContainer.FillPolygon(color, this);
         }

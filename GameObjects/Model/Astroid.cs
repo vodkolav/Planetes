@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Media;
 using Newtonsoft.Json;
 using PolygonCollision;
@@ -9,32 +10,22 @@ namespace GameObjects.Model
 
     public class Astroid : ICollideable
     {
-        [JsonIgnore]
-        public float Size
+        public Vector Size
         {
-            get { return Body.R * 2; }
+            get; set;
         }
-
-        public Circle Body { get; set; }
 
         [JsonIgnore]
         public override Circle BoundingCirc
         {
-            get { return Body; }
-        }
-
-        [JsonIgnore]
-        public override Vector Pos
-        {
-            get { return Body.Pos; }
-            set { Body.Pos = value; }
-        }
+            get { return (Circle)Body[0]; }
+        }    
 
         public AstType Type { get; set; }
 
         public override Player Owner { get; set; }
 
-        public override int Power {  get {return (int)Size; } }
+        public override int Power {  get {return (int)Size.X; } }
         
         [JsonIgnore]
         public Color Color
@@ -52,11 +43,15 @@ namespace GameObjects.Model
                 }
             }
         }
-
+               
+        public override float Rot => 0f;
 
         public Astroid(AstType type)
         {
-            Body = new Circle(GameConfig.TossPoint, GameConfig.TossInt(10,30));
+            Pos = GameConfig.TossPoint;
+            Size = new Size(GameConfig.TossInt(10, 30), 0);
+            _body = new Corpus();
+            _body.Add(new Circle(new Vector(0,0),Size.X));
             double linearSpeed = GameConfig.TossInt(1,(int)(GameConfig.Lightspeed * 0.5));
             double Angle = Math.PI / 180 * GameConfig.TossInt(360);
             Vector mult = new Vector((float)Math.Cos(Angle), (float)Math.Sin(Angle));
@@ -80,21 +75,27 @@ namespace GameObjects.Model
         {
             if (isAlive)
             {
-                Body.Draw(Color);
+                Body[0].Draw(Color);
             }
-        } 
+        }
+
+        public override PolygonCollisionResult Collides(Wall w)
+        {
+            //can also be with foreach loop 
+           return Body[0].Collides((Polygon)w.Body[0],Speed);
+        }
 
         public override PolygonCollisionResult Collides(Jet j)
         {
-            PolygonCollisionResult r = j.Hull.Collides(Body);
-            if (r.WillIntersect)
+            foreach (Polygon o in j.Body.Parts)
             {
-                return r;
-            }
-            else
-            {
-                return j.Cockpit.Collides(Body);
-            }
+                PolygonCollisionResult r = Body[0].Collides(o, Speed);
+                if (r.Intersect)
+                {
+                    return r;
+                }
+            }            
+            return PolygonCollisionResult.noCollision;
         }
 
         public override void HandleCollision(Jet j, PolygonCollisionResult r)
@@ -117,14 +118,14 @@ namespace GameObjects.Model
                 isAlive = false;
         }
 
-        public override void Move(GameState gameObjects)
+        public override void Move(float DeltaTime)
         {
-            Offset(Speed * GameConfig.GameSpeed * GameTime.DeltaTime);//*GameTime.DeltaTime);
+            Offset(Speed * GameConfig.GameSpeed * DeltaTime);//*GameTime.DeltaTime);
         }
 
         private void Offset(Vector by)
         {
-            Body.Offset(by);
+            Pos += by;
         }
     }
 }

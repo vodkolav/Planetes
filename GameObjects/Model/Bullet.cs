@@ -7,52 +7,76 @@ namespace GameObjects.Model
     [JsonObject(IsReference = true)]
     public class Bullet : ICollideable
     {
-        [JsonIgnore]
-        public override Vector Pos { get => Body.Pos; set => Body.Pos = value; }
-
-        [JsonIgnore]
-        public int Size { get => Body.Size; }       
-        
-        public Ray Body { get; set; }
+        public int Width { get; set; }
 
         public Color Color { get; set; }
 
         public override int Power { get; internal set; } = 1;
 
-        public Bullet(Player owner, Vector pos, Vector bearing, int speed, int size, Color color)
+        public override float Rot => 0f;
+
+        public Bullet(Player owner, Vector pos, Vector direction, int speed, int width, Color color)
         {
             Owner = owner;
-            Vector tmp = bearing.GetNormalized();
-            Body = new Ray(pos, tmp * size * 4, size);
-            Speed = tmp * speed;
+            Pos = pos;
+            direction = direction.GetNormalized();
+            _body = new Corpus();
+            _body.Add(new Ray(new Vector(0,0), direction * width * 4, width));
+            Speed = direction * speed; 
+            Width = width;
             Color = color;
             isAlive = true;
         }   
 
         public Bullet() { }
 
+        public override PolygonCollisionResult Collides(Wall w)
+        {
+            return Body[0].Collides((Polygon)w.Body[0], Speed);
+        }
+
         public override PolygonCollisionResult Collides(Astroid a)
         {
-            return a.Body.Collides(Body);
+            return Body[0].Collides((Circle)a.Body[0],null);
+
+            /* //this implementation might be needed if astroids or bullets become more 
+               //complex objects in the future. for now the simpler solution is sufficient 
+                        foreach (Figure f in Body)
+                        {
+                            foreach (Circle o in a.Body)
+                            {
+                                PolygonCollisionResult r = f.Collides(o, Speed);
+                                if (r.WillIntersect)
+                                {
+                                    return r;
+                                }
+                            }
+                        }
+                        return PolygonCollisionResult.noCollision;     */
         }
 
         public override PolygonCollisionResult Collides(Jet j)
         {
-            PolygonCollisionResult r = j.Hull.Collides(Body);
-            if (r.WillIntersect)
+
+            foreach (Polygon o in j.Body.Parts)
             {
-                return r;
+                PolygonCollisionResult r = Body[0].Collides(o, Speed);
+                if (r.Intersect)
+                {
+                    return r;
+                }
             }
-            else
-            {
-                return j.Cockpit.Collides(Body);
-            }
+            return PolygonCollisionResult.noCollision;
         }
 
         public override void HandleCollision(Jet j, PolygonCollisionResult r)
         {
-            isAlive = false;
-            j.Hit(this);
+            //disables friendly and self fire. TODO: add to gameconfig
+            if (Owner.Enemies.Contains(j.Owner))
+            {
+                isAlive = false;
+                j.Hit(this);
+            }
         }
         public override void HandleCollision(Map WorldEdge, PolygonCollisionResult r)
         {
@@ -63,18 +87,18 @@ namespace GameObjects.Model
         {
             if (isAlive)
             {
-                Body.Draw(Color);
+                Body[0].Draw(Color);
             }
         }
 
-        public override void Move(GameState gameObjects)
+        public override void Move(float DeltaTime)
         { 
-            Offset(Speed * GameConfig.GameSpeed * GameTime.DeltaTime );
+            Offset(Speed * GameConfig.GameSpeed * DeltaTime );
         }
 
         public void Offset(Vector by)
         {
-           Body.Offset(by);
+           Pos += by;
         }
     }
 }

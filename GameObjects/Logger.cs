@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNet.SignalR.Client;
+using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Text;
@@ -17,16 +18,27 @@ namespace GameObjects
             {
                 if (Exception is null)
                 {
-                    return "GameObjects.Logger.message:" + _message;
+                    return $"[{loglevel}]Logger.message: {_message}";
                 }
-                return "GameObjects.Logger.Exception:" + Exception.Message;
+                return $"[{loglevel}]Logger.Exception: {Exception.Message}";
             }
             set { _message = value; }
+        }
+
+        public string LightMessage
+        {
+            get
+            {
+                if (Exception is null)
+                {
+                    return _message;
+                }
+                return Exception.Message;
+            }
         }
     }
 
     public enum LogLevel {Nothing, Status, Info, Warning, Debug, CSV, Trace, All }
-
 
     public class LogWriter : StreamWriter
     {
@@ -52,6 +64,7 @@ namespace GameObjects
 
     public class Logger
     {
+        Tracker tracker;
 
         private BlockingCollection<LogMsg> messages;
         private Thread T;
@@ -74,19 +87,34 @@ namespace GameObjects
             }
         }
 
-        // loglevels moved to config
+        public static Tracker Tracker
+        {
+            get
+            {
+                return Instance.tracker;
+            }
+        }
 
         public Logger()
         {
             T = new Thread(WriteLoop)
             {
-                IsBackground = true,
+                IsBackground = false,
                 Name = "Logger"
             };
             messages = new BlockingCollection<LogMsg>();
             output = Console.Out;
             _trace_interceptor = new LogWriter("wtf.txt");
             T.Start();
+
+            tracker = new Tracker();
+            tracker.Configure();
+
+            string text = "\n";
+            GameConfig.loglevels.ForEach( ll => text += ll.ToString() + "\n");
+
+            Console.WriteLine("LogLevels enabled:" + text , LogLevel.Info);
+            Console.WriteLine("Log Output :" + output.ToString(), LogLevel.Info);
         }
 
         public static string LogFile { get; set; }
@@ -181,7 +209,7 @@ namespace GameObjects
                     Instance.output.WriteLine(msg.Exception.StackTrace);
                     break;
                 case LogLevel.CSV:
-                    Instance.output.WriteLine(msg.Message);
+                    Instance.output.WriteLine(msg.LightMessage);
                     break;
                 case LogLevel.Trace:
                     Instance.output.WriteLine(msg.Message);
@@ -196,6 +224,24 @@ namespace GameObjects
             messages.CompleteAdding();
             output.Dispose();
             _trace_interceptor.Dispose();
+        }
+
+        /// <summary>
+        /// use this code to investigate problems when signalR ceases to receive model updates from server
+        /// </summary>
+        /// <param name="conn"></param>
+        internal static void TraceConnection(Connection conn)
+        {
+            if (GameConfig.loglevels.Contains(LogLevel.Trace))
+            {
+                conn.TraceLevel = TraceLevels.All;
+                conn.TraceWriter = TraceInterceptor;
+                conn.Error += (e) => Log(e, LogLevel.Debug);
+            }
+            else
+            {
+                conn.TraceLevel = TraceLevels.None;
+            }
         }
     }
 }
